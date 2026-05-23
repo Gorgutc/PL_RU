@@ -5,10 +5,13 @@
     "deny": [
       "Edit(./Blueprints_lib/**)",
       "Edit(./Osiris_ref/**)",
+      "Edit(./.claude/skills/**)",
       "Write(./Blueprints_lib/**)",
       "Write(./Osiris_ref/**)",
+      "Write(./.claude/skills/**)",
       "Bash(rm:./Blueprints_lib/**)",
-      "Bash(rm:./Osiris_ref/**)"
+      "Bash(rm:./Osiris_ref/**)",
+      "Bash(rm:./.claude/skills/**)"
     ]
   },
   "hooks": {

@@ -1,0 +1,2314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OSIRIS · Global Intelligence Platform</title>
+<meta name="viewport" content="width=1440">
+<link rel="icon" type="image/png" href="../../assets/osiris-icon.png">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   OSIRIS — Color & Type Foundation
+   Egyptian Mythology × Dark Ops × Glassmorphism
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* ────────────────────────────────────────────────────────────
+     CORE PALETTE — Void & panel backgrounds
+     ──────────────────────────────────────────────────────────── */
+  --bg-void:        #04040A;   /* deepest base — full-page background    */
+  --bg-primary:     #06060C;   /* primary surface                        */
+  --bg-secondary:   #0C0E1A;   /* raised surface, panel solids           */
+  --bg-tertiary:    #121628;   /* highest-contrast inset/cell            */
+  --bg-panel:       rgba(8, 10, 20, 0.88);   /* glassmorphic panel       */
+  --bg-panel-solid: #0C0E1A;
+
+  /* ────────────────────────────────────────────────────────────
+     GOLD — Eye of Horus accent (primary brand color)
+     ──────────────────────────────────────────────────────────── */
+  --gold-primary: #D4AF37;
+  --gold-light:   #F0D060;
+  --gold-dim:     #8B7325;
+  --gold-glow:    rgba(212, 175, 55, 0.30);
+
+  /* ────────────────────────────────────────────────────────────
+     CYAN — Intel-stream accent (secondary brand color)
+     ──────────────────────────────────────────────────────────── */
+  --cyan-primary: #00E5FF;
+  --cyan-dim:     #006B7A;
+  --cyan-glow:    rgba(0, 229, 255, 0.15);
+
+  /* ────────────────────────────────────────────────────────────
+     ALERTS — Threat-level signal colors
+     ──────────────────────────────────────────────────────────── */
+  --alert-red:    #FF3D3D;     /* CRITICAL — active conflict, sanctions */
+  --alert-orange: #FF9500;     /* HIGH — elevated tension               */
+  --alert-green:  #00E676;     /* NOMINAL — stable, online              */
+  --alert-blue:   #448AFF;     /* INFO — neutral signal                 */
+
+  /* ────────────────────────────────────────────────────────────
+     CATEGORICAL — Map-layer entity colors
+     Used for plotting different intel categories on the globe.
+     ──────────────────────────────────────────────────────────── */
+  --layer-commercial: #00E5FF;   /* commercial aviation     */
+  --layer-private:    #00E676;   /* private aviation        */
+  --layer-jets:       #FF69B4;   /* private jets            */
+  --layer-military:   #FF3D3D;   /* military flights        */
+  --layer-maritime:   #00BCD4;   /* naval / shipping        */
+  --layer-satellites: #D4AF37;   /* orbital assets          */
+  --layer-cctv:       #39FF14;   /* surveillance cams       */
+  --layer-news:       #FF4081;   /* broadcast feeds         */
+  --layer-fires:      #FF6B00;   /* active hotspots         */
+  --layer-weather:    #E040FB;   /* severe weather          */
+  --layer-nuclear:    #76FF03;   /* nuclear infrastructure  */
+  --layer-cyber:      #E040FB;   /* cyber/CVE              */
+
+  /* ────────────────────────────────────────────────────────────
+     BORDERS — Always derived from gold/cyan
+     ──────────────────────────────────────────────────────────── */
+  --border-primary:   rgba(212, 175, 55, 0.15);
+  --border-secondary: rgba(212, 175, 55, 0.08);
+  --border-active:    rgba(212, 175, 55, 0.40);
+  --border-cyan:      rgba(0, 229, 255, 0.20);
+
+  /* ────────────────────────────────────────────────────────────
+     TEXT
+     ──────────────────────────────────────────────────────────── */
+  --text-primary:   #E8E6E0;   /* main body copy         */
+  --text-secondary: #9B978E;   /* secondary, helper      */
+  --text-muted:     #5C5A54;   /* tertiary, labels, off  */
+  --text-heading:   #F5F0E0;   /* slightly warmer white  */
+  --text-gold:      #D4AF37;
+  --text-cyan:      #00E5FF;
+
+  /* ────────────────────────────────────────────────────────────
+     INTERACTION — Hover, scrollbar
+     ──────────────────────────────────────────────────────────── */
+  --hover-accent:           rgba(212, 175, 55, 0.08);
+  --scrollbar-thumb:        rgba(212, 175, 55, 0.20);
+  --scrollbar-thumb-hover:  rgba(212, 175, 55, 0.40);
+
+  /* ────────────────────────────────────────────────────────────
+     FONTS
+     JetBrains Mono — HUD, labels, tabular data, all caps
+     Inter            — body, prose, descriptions
+     ──────────────────────────────────────────────────────────── */
+  --font-hud:  'JetBrains Mono', 'Courier New', monospace;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* ────────────────────────────────────────────────────────────
+     TYPE SCALE — semantic, all uppercase + tracked for HUD vibe
+     ──────────────────────────────────────────────────────────── */
+  --t-display:   36px;   /* hero numerics, splash logotype          */
+  --t-h1:        24px;   /* section header                          */
+  --t-h2:        18px;   /* panel header                            */
+  --t-h3:        14px;   /* sub-section                             */
+  --t-body:      13px;   /* prose                                   */
+  --t-body-sm:   12px;   /* compact prose                           */
+  --t-hud:       11px;   /* HUD value (data readouts)               */
+  --t-hud-sm:    10px;   /* HUD label                               */
+  --t-micro:      9px;   /* badge text, deep micro labels           */
+  --t-mini:       8px;   /* status tags, classification stamps      */
+  --t-nano:       7px;   /* tickers, edge metadata                  */
+
+  --tracking-hud:    0.15em;
+  --tracking-label:  0.20em;
+  --tracking-stamp:  0.22em;  /* CLASSIFIED-style                   */
+
+  /* ────────────────────────────────────────────────────────────
+     SPACING — small steps; HUD UI is dense
+     ──────────────────────────────────────────────────────────── */
+  --s-1:  2px;
+  --s-2:  4px;
+  --s-3:  6px;
+  --s-4:  8px;
+  --s-5:  10px;
+  --s-6:  12px;
+  --s-7:  16px;
+  --s-8:  20px;
+  --s-9:  24px;
+  --s-10: 32px;
+  --panel-gap: 12px;
+  --edge-pad:  20px;
+
+  /* ────────────────────────────────────────────────────────────
+     RADII — soft on the outside, sharp on micro elements
+     ──────────────────────────────────────────────────────────── */
+  --r-1:  4px;    /* tag, chip                  */
+  --r-2:  6px;    /* badge, button              */
+  --r-3:  8px;    /* small panel, input         */
+  --r-4:  10px;   /* card                       */
+  --r-5:  12px;   /* large panel                */
+  --r-6:  14px;   /* primary glass panel        */
+  --r-pill: 100px;
+
+  /* ────────────────────────────────────────────────────────────
+     SHADOWS / ELEVATION — depth + signature gold inner highlight
+     ──────────────────────────────────────────────────────────── */
+  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-3: 0 4px 30px rgba(0, 0, 0, 0.5);
+  --shadow-4: 0 8px 32px rgba(0, 0, 0, 0.6);
+
+  /* glassmorphic panel signature: deep drop + gold inset highlight + dark inset shadow */
+  --shadow-glass:
+    0 4px 30px rgba(0, 0, 0, 0.5),
+    0 1px 0 rgba(212, 175, 55, 0.06) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.3) inset;
+
+  --shadow-glow-gold: 0 0 20px rgba(212, 175, 55, 0.12), 0 0 60px rgba(212, 175, 55, 0.06);
+  --shadow-glow-cyan: 0 0 20px rgba(0, 229, 255, 0.10), 0 0 60px rgba(0, 229, 255, 0.05);
+  --shadow-glow-alert: 0 0 16px rgba(255, 61, 61, 0.20);
+
+  /* ────────────────────────────────────────────────────────────
+     BLUR — backdrop filter tiers
+     ──────────────────────────────────────────────────────────── */
+  --blur-sm: blur(12px) saturate(1.15);
+  --blur-md: blur(16px) saturate(1.20);
+  --blur-lg: blur(24px) saturate(1.30);
+
+  /* ────────────────────────────────────────────────────────────
+     MOTION — easing curves used across the system
+     ──────────────────────────────────────────────────────────── */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);     /* enter, slide-in   */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* button, lift      */
+  --ease-snap:   cubic-bezier(0.4, 0, 0.2, 1);      /* default transition*/
+  --dur-1: 0.15s;
+  --dur-2: 0.25s;
+  --dur-3: 0.40s;
+  --dur-4: 0.60s;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SEMANTIC ELEMENT STYLES
+   Use these directly on <h1>, <p>, <code>, .hud-label, etc.
+   ═══════════════════════════════════════════════════════════════ */
+
+html, body {
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Headings — HUD style, all caps, tracked ── */
+h1, .h1 {
+  font-family: var(--font-hud);
+  font-size: var(--t-h1);
+  font-weight: 700;
+  letter-spacing: var(--tracking-hud);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  line-height: 1.15;
+}
+
+h2, .h2 {
+  font-family: var(--font-hud);
+  font-size: var(--t-h2);
+  font-weight: 600;
+  letter-spacing: var(--tracking-hud);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+h3, .h3 {
+  font-family: var(--font-hud);
+  font-size: var(--t-h3);
+  font-weight: 600;
+  letter-spacing: var(--tracking-hud);
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+/* ── Display — splash / hero ── */
+.display {
+  font-family: var(--font-hud);
+  font-size: var(--t-display);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-heading);
+  text-shadow: 0 0 14px rgba(212, 175, 55, 0.18);
+}
+
+/* ── Body — Inter, sentence case ── */
+p, .body {
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.body-sm {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* ── HUD labels & values — JetBrains Mono ── */
+.hud-label {
+  font-family: var(--font-hud);
+  font-size: var(--t-mini);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.hud-value {
+  font-family: var(--font-hud);
+  font-size: var(--t-hud);
+  font-weight: 600;
+  color: var(--gold-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-value--cyan { color: var(--cyan-primary); }
+.hud-value--alert { color: var(--alert-red); }
+
+/* ── Classification stamps ── */
+.classified {
+  font-family: var(--font-hud);
+  font-size: var(--t-mini);
+  font-weight: 700;
+  letter-spacing: var(--tracking-stamp);
+  text-transform: uppercase;
+  color: var(--gold-primary);
+  padding: 3px 8px;
+  border: 1px solid var(--border-active);
+  border-radius: var(--r-1);
+  background: rgba(212, 175, 55, 0.05);
+}
+
+/* ── Inline code, command strings ── */
+code, .code {
+  font-family: var(--font-hud);
+  font-size: var(--t-body-sm);
+  color: var(--cyan-primary);
+  background: rgba(0, 229, 255, 0.06);
+  padding: 1px 6px;
+  border-radius: var(--r-1);
+  border: 1px solid var(--border-cyan);
+}
+
+/* ── Risk text colors ── */
+.risk-critical { color: var(--alert-red);    text-shadow: 0 0 8px rgba(255, 61, 61, 0.5); }
+.risk-high     { color: var(--alert-orange); text-shadow: 0 0 8px rgba(255, 149, 0, 0.3); }
+.risk-medium   { color: var(--gold-primary); }
+.risk-low      { color: var(--alert-green); }
+
+/* ── Scrollbar ── */
+.styled-scrollbar::-webkit-scrollbar { width: 3px; height: 3px; }
+.styled-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.styled-scrollbar::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
+.styled-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+.styled-scrollbar { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) transparent; }
+
+</style>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   OSIRIS — Component Styles
+   "Gotham Command System" — Palantir-class HUD primitives
+   Depends on colors_and_type.css for tokens.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════
+   GLASS PANELS — Primary container vocabulary
+   ═══════════════════════════════════════════════════════════════ */
+.glass-panel {
+  background: var(--bg-panel);
+  backdrop-filter: var(--blur-lg);
+  -webkit-backdrop-filter: var(--blur-lg);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--r-6);
+  box-shadow: var(--shadow-glass);
+  transition: border-color var(--dur-2) var(--ease-snap), box-shadow var(--dur-2) var(--ease-snap);
+}
+
+.glass-panel:hover {
+  border-color: rgba(212, 175, 55, 0.22);
+}
+
+.glass-panel-sm {
+  background: var(--bg-panel);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--r-4);
+}
+
+.osiris-glow { box-shadow: var(--shadow-glow-gold), var(--shadow-3); }
+.osiris-glow-cyan { box-shadow: var(--shadow-glow-cyan); }
+
+/* ═══════════════════════════════════════════════════════════════
+   GOTHAM CARD — Left-accent border, hover lift
+   ═══════════════════════════════════════════════════════════════ */
+.gotham-card {
+  position: relative;
+  padding: 18px 22px;
+  background: var(--bg-panel);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border: 1px solid var(--border-secondary);
+  border-left: 3px solid var(--gold-dim);
+  border-radius: var(--r-4);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(212, 175, 55, 0.04) inset;
+  transition: transform var(--dur-3) var(--ease-spring), box-shadow var(--dur-3) var(--ease-snap), border-color var(--dur-2) var(--ease-snap);
+}
+
+.gotham-card:hover {
+  transform: translateY(-2px);
+  border-left-color: var(--gold-primary);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 24px rgba(212, 175, 55, 0.06), 0 1px 0 rgba(212, 175, 55, 0.08) inset;
+}
+
+.gotham-card--cyan { border-left-color: var(--cyan-dim); }
+.gotham-card--cyan:hover { border-left-color: var(--cyan-primary); box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 24px rgba(0,229,255,0.05); }
+.gotham-card--alert { border-left-color: rgba(255,61,61,0.4); }
+.gotham-card--alert:hover { border-left-color: var(--alert-red); box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(255,61,61,0.06); }
+
+.gotham-card__title {
+  font-family: var(--font-hud);
+  font-size: var(--t-hud-sm);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GOTHAM TAGS — Pill badges, threat levels, classification
+   ═══════════════════════════════════════════════════════════════ */
+.gotham-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  font-family: var(--font-hud);
+  font-size: var(--t-mini);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+
+.gotham-tag--critical {
+  color: var(--alert-red);
+  background: rgba(255, 61, 61, 0.10);
+  border-color: rgba(255, 61, 61, 0.25);
+  box-shadow: 0 0 8px rgba(255, 61, 61, 0.10);
+}
+.gotham-tag--high {
+  color: var(--alert-orange);
+  background: rgba(255, 149, 0, 0.08);
+  border-color: rgba(255, 149, 0, 0.20);
+}
+.gotham-tag--medium {
+  color: var(--gold-primary);
+  background: rgba(212, 175, 55, 0.08);
+  border-color: rgba(212, 175, 55, 0.18);
+}
+.gotham-tag--low {
+  color: var(--alert-green);
+  background: rgba(0, 230, 118, 0.07);
+  border-color: rgba(0, 230, 118, 0.15);
+}
+.gotham-tag--info {
+  color: var(--cyan-primary);
+  background: rgba(0, 229, 255, 0.06);
+  border-color: var(--border-cyan);
+}
+.gotham-tag--classified {
+  color: var(--gold-primary);
+  background: rgba(212, 175, 55, 0.06);
+  border-color: rgba(212, 175, 55, 0.25);
+  letter-spacing: var(--tracking-stamp);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   THREAT BADGES — Pulsing alert-level indicators
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes threat-pulse-critical {
+  0%, 100% { box-shadow: 0 0 6px rgba(255,61,61,0.4), inset 0 0 6px rgba(255,61,61,0.1); }
+  50%      { box-shadow: 0 0 16px rgba(255,61,61,0.6), inset 0 0 10px rgba(255,61,61,0.15); }
+}
+@keyframes threat-pulse-high {
+  0%, 100% { box-shadow: 0 0 6px rgba(255,149,0,0.3); }
+  50%      { box-shadow: 0 0 14px rgba(255,149,0,0.5); }
+}
+@keyframes threat-pulse-elevated {
+  0%, 100% { box-shadow: 0 0 4px rgba(212,175,55,0.25); }
+  50%      { box-shadow: 0 0 10px rgba(212,175,55,0.4); }
+}
+
+.threat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-hud);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--r-2);
+  border: 1px solid;
+}
+.threat-badge--critical { color: var(--alert-red);    background: rgba(255,61,61,0.10);  border-color: rgba(255,61,61,0.30); animation: threat-pulse-critical 1.8s ease-in-out infinite; }
+.threat-badge--high     { color: var(--alert-orange); background: rgba(255,149,0,0.10);  border-color: rgba(255,149,0,0.25); animation: threat-pulse-high 2.2s ease-in-out infinite; }
+.threat-badge--elevated { color: var(--gold-primary); background: rgba(212,175,55,0.08); border-color: rgba(212,175,55,0.20); animation: threat-pulse-elevated 3s ease-in-out infinite; }
+.threat-badge--nominal  { color: var(--alert-green);  background: rgba(0,230,118,0.08);  border-color: rgba(0,230,118,0.20); box-shadow: 0 0 4px rgba(0,230,118,0.15); }
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS — Tactical / pressable
+   ═══════════════════════════════════════════════════════════════ */
+.btn-tactical {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-hud);
+  font-size: var(--t-hud);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--r-3);
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: transform var(--dur-1) var(--ease-spring), box-shadow var(--dur-2) var(--ease-snap), border-color var(--dur-2) var(--ease-snap), background var(--dur-2) var(--ease-snap);
+}
+.btn-tactical:hover {
+  background: rgba(212, 175, 55, 0.14);
+  border-color: var(--border-active);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.12);
+}
+.btn-tactical:active { transform: scale(0.97); }
+
+.btn-tactical--cyan {
+  background: rgba(0, 229, 255, 0.08);
+  border-color: var(--border-cyan);
+  color: var(--cyan-primary);
+}
+.btn-tactical--cyan:hover { background: rgba(0,229,255,0.14); border-color: rgba(0,229,255,0.4); box-shadow: 0 0 20px rgba(0,229,255,0.10); }
+
+.btn-tactical--ghost { background: transparent; border-color: var(--border-secondary); color: var(--text-secondary); }
+.btn-tactical--ghost:hover { border-color: var(--border-primary); color: var(--text-primary); background: var(--hover-accent); }
+
+.btn-tactical--alert { background: rgba(255,61,61,0.10); border-color: rgba(255,61,61,0.30); color: var(--alert-red); }
+.btn-tactical--alert:hover { background: rgba(255,61,61,0.16); border-color: rgba(255,61,61,0.5); box-shadow: 0 0 20px rgba(255,61,61,0.18); }
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-2);
+  border: 1px solid var(--border-secondary);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--dur-1), border-color var(--dur-1), background var(--dur-1), box-shadow var(--dur-2);
+}
+.btn-icon:hover {
+  color: var(--gold-primary);
+  border-color: var(--border-primary);
+  background: rgba(212, 175, 55, 0.06);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LAYER TOGGLE — Custom switch
+   ═══════════════════════════════════════════════════════════════ */
+.layer-toggle {
+  position: relative;
+  width: 28px;
+  height: 14px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all var(--dur-2) var(--ease-snap);
+  flex-shrink: 0;
+}
+.layer-toggle.active {
+  background: rgba(212, 175, 55, 0.25);
+  border-color: var(--gold-primary);
+}
+.layer-toggle::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: all var(--dur-2) var(--ease-snap);
+}
+.layer-toggle.active::after {
+  left: 15px;
+  background: var(--gold-primary);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INPUTS / FIELDS
+   ═══════════════════════════════════════════════════════════════ */
+.osiris-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(8, 10, 20, 0.6);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--r-3);
+  font-family: var(--font-hud);
+  font-size: var(--t-hud-sm);
+  color: var(--text-primary);
+  letter-spacing: 0.08em;
+  transition: border-color var(--dur-2), box-shadow var(--dur-2);
+}
+.osiris-input:focus-within {
+  border-color: var(--border-active);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.08);
+}
+.osiris-input input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+}
+.osiris-input input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PULSE / RADAR INDICATORS
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes pulse-ring-expand {
+  0% { transform: scale(0.5); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+@keyframes osiris-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-osiris-pulse { animation: osiris-pulse 2s ease-in-out infinite; }
+
+.pulse-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--alert-green);
+  box-shadow: 0 0 6px rgba(0, 230, 118, 0.6);
+}
+.pulse-dot::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: var(--alert-green);
+  animation: pulse-ring-expand 2s var(--ease-snap) infinite;
+}
+.pulse-dot--gold { background: var(--gold-primary); box-shadow: 0 0 6px var(--gold-glow); }
+.pulse-dot--gold::before { background: var(--gold-primary); }
+.pulse-dot--cyan { background: var(--cyan-primary); box-shadow: 0 0 6px var(--cyan-glow); }
+.pulse-dot--cyan::before { background: var(--cyan-primary); }
+.pulse-dot--alert { background: var(--alert-red); box-shadow: 0 0 6px rgba(255, 61, 61, 0.5); }
+.pulse-dot--alert::before { background: var(--alert-red); }
+
+/* ═══════════════════════════════════════════════════════════════
+   STAT COUNTER
+   ═══════════════════════════════════════════════════════════════ */
+.gotham-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.gotham-stat__value {
+  font-family: var(--font-hud);
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--text-heading);
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+  letter-spacing: -0.02em;
+}
+.gotham-stat__value--gold  { color: var(--gold-primary); }
+.gotham-stat__value--cyan  { color: var(--cyan-primary); text-shadow: 0 0 10px rgba(0,229,255,0.2); }
+.gotham-stat__value--alert { color: var(--alert-red);    text-shadow: 0 0 10px rgba(255,61,61,0.25); }
+.gotham-stat__label {
+  font-family: var(--font-hud);
+  font-size: var(--t-mini);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.gotham-stat__delta {
+  font-family: var(--font-hud);
+  font-size: var(--t-hud-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--alert-green);
+}
+.gotham-stat__delta--neg { color: var(--alert-red); }
+
+/* ═══════════════════════════════════════════════════════════════
+   DIVIDER
+   ═══════════════════════════════════════════════════════════════ */
+.gotham-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  margin: 8px 0;
+}
+.gotham-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--border-primary) 20%, var(--gold-dim) 50%, var(--border-primary) 80%, transparent 100%);
+}
+.gotham-divider__label {
+  position: relative;
+  padding: 0 12px;
+  background: var(--bg-secondary);
+  font-family: var(--font-hud);
+  font-size: var(--t-nano);
+  letter-spacing: var(--tracking-stamp);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROGRESS BAR
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes progress-glow-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+.intel-progress {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border-secondary);
+}
+.intel-progress__bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dim) 0%, var(--gold-primary) 50%, var(--gold-light) 100%);
+  box-shadow: 0 0 12px var(--gold-glow);
+  position: relative;
+  overflow: hidden;
+  transition: width var(--dur-4) var(--ease-out);
+}
+.intel-progress__bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 50%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: progress-glow-slide 2s var(--ease-snap) infinite;
+}
+.intel-progress--cyan .intel-progress__bar { background: linear-gradient(90deg, var(--cyan-dim) 0%, var(--cyan-primary) 100%); box-shadow: 0 0 12px var(--cyan-glow); }
+.intel-progress--alert .intel-progress__bar { background: linear-gradient(90deg, #6B0000 0%, var(--alert-red) 100%); box-shadow: 0 0 12px rgba(255,61,61,0.3); }
+
+/* ═══════════════════════════════════════════════════════════════
+   SCAN LINE — Sweeping CRT effect
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes scan-line-sweep {
+  0% { transform: translateY(-100%); opacity: 0; }
+  5%, 95% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+.scan-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, var(--cyan-glow) 15%, var(--cyan-primary) 50%, var(--cyan-glow) 85%, transparent 100%);
+  box-shadow: 0 0 15px rgba(0,229,255,0.4), 0 0 45px rgba(0,229,255,0.15);
+  animation: scan-line-sweep 4s var(--ease-snap) infinite;
+}
+.scan-line--gold {
+  background: linear-gradient(90deg, transparent 0%, var(--gold-glow) 15%, var(--gold-primary) 50%, var(--gold-glow) 85%, transparent 100%);
+  box-shadow: 0 0 15px rgba(212,175,55,0.4), 0 0 45px rgba(212,175,55,0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PARTICLE GRID — Animated dot-pattern background
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes particle-grid-drift {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(-1px, 3px); }
+  100% { transform: translate(0, 0); }
+}
+.particle-grid { position: relative; }
+.particle-grid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(212, 175, 55, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+  animation: particle-grid-drift 20s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.particle-grid > * { position: relative; z-index: 1; }
+
+/* ═══════════════════════════════════════════════════════════════
+   CORNER FRAMES — HUD bracket overlays
+   ═══════════════════════════════════════════════════════════════ */
+.corner-frame {
+  position: relative;
+}
+.corner-frame::before,
+.corner-frame::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  border: 1px solid var(--gold-primary);
+  opacity: 0.6;
+}
+.corner-frame::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+.corner-frame::after  { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+/* ═══════════════════════════════════════════════════════════════
+   CRT SCANLINES & VIGNETTE — Atmospheric overlays
+   ═══════════════════════════════════════════════════════════════ */
+.crt-scanlines {
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.02) 3px, rgba(255,255,255,0.02) 4px);
+}
+.vignette {
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(4,4,10,0.6) 80%, rgba(4,4,10,0.95) 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TICKER
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-ticker {
+  animation: ticker-scroll 30s linear infinite;
+  will-change: transform;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PANEL SLIDE ENTRANCE
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes slide-in-left {
+  0% { transform: translateX(-40px); opacity: 0; filter: blur(8px); }
+  100% { transform: translateX(0); opacity: 1; filter: blur(0); }
+}
+@keyframes slide-in-right {
+  0% { transform: translateX(40px); opacity: 0; filter: blur(8px); }
+  100% { transform: translateX(0); opacity: 1; filter: blur(0); }
+}
+.panel-slide-left  { animation: slide-in-left 0.5s var(--ease-out) both; }
+.panel-slide-right { animation: slide-in-right 0.5s var(--ease-out) both; }
+
+</style>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   OSIRIS · UI Kit-specific styles
+   Layout chrome on top of colors_and_type.css + components.css
+   ═══════════════════════════════════════════════════════════════ */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; overflow: hidden; }
+body {
+  background: var(--bg-void);
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  height: 100vh;
+}
+
+/* ─── App shell ─────────────────────────────────────────────── */
+.app {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 48px 1fr 26px;
+}
+
+/* ─── Command Bar ───────────────────────────────────────────── */
+.command-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: linear-gradient(180deg, rgba(12,14,26,0.96) 0%, rgba(6,6,12,0.98) 100%);
+  backdrop-filter: blur(20px) saturate(1.2);
+  border-bottom: 1px solid transparent;
+  z-index: 500;
+  font-family: var(--font-hud);
+  overflow: hidden;
+  min-width: 0;
+}
+.command-bar::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--gold-dim) 15%, var(--gold-primary) 50%, var(--gold-dim) 85%, transparent 100%);
+  opacity: 0.4;
+}
+
+.command-bar__section {
+  display: flex; align-items: center; gap: 16px;
+}
+.command-bar__center {
+  flex: 1; display: flex; justify-content: center;
+  padding: 0 24px;
+  max-width: 660px;
+}
+.command-bar__logo {
+  width: 28px; height: 28px;
+  filter: drop-shadow(0 0 8px rgba(212,175,55,0.5));
+  border-radius: 6px;
+}
+.command-bar__brand {
+  display: flex; align-items: baseline; gap: 6px;
+}
+.command-bar__hex { color: var(--gold-primary); font-size: 14px; text-shadow: 0 0 8px rgba(212,175,55,0.4); }
+.command-bar__name {
+  font-family: var(--font-hud);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--text-heading);
+}
+.command-bar__sub {
+  font-family: var(--font-hud);
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.command-bar__search {
+  flex: 1;
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  background: rgba(8,10,20,0.6);
+  border: 1px solid var(--border-secondary);
+  border-radius: 8px;
+  font-family: var(--font-hud);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.command-bar__search:hover { color: var(--text-secondary); border-color: var(--border-active); box-shadow: 0 0 14px rgba(212,175,55,0.08); }
+.command-bar__search span { flex: 1; text-overflow: ellipsis; overflow: hidden; text-align: left; }
+.command-bar__kbd {
+  font-family: var(--font-hud);
+  font-size: 8px;
+  padding: 2px 6px;
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+  color: var(--text-muted);
+}
+
+.command-bar__stat {
+  display: flex; flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  min-width: 70px;
+}
+.command-bar__zulu {
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cyan-primary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+.command-bar__throughput {
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--alert-green);
+  font-variant-numeric: tabular-nums;
+}
+
+.command-bar__divider { width: 1px; height: 24px; background: var(--border-secondary); }
+
+.command-bar__projection {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px;
+  font-family: var(--font-hud);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.command-bar__projection:hover,
+.command-bar__projection.active { color: var(--gold-primary); border-color: var(--border-active); background: rgba(212,175,55,0.06); }
+
+/* ─── Workspace ─────────────────────────────────────────────── */
+.workspace { position: relative; overflow: hidden; }
+
+/* ─── Floating panels positioning ───────────────────────────── */
+.workspace__left {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 280px;
+  z-index: 100;
+}
+.workspace__right {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 320px;
+  z-index: 100;
+}
+.workspace__bottom-right {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 320px;
+  z-index: 100;
+}
+.workspace__bottom-left {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 100;
+}
+
+/* ─── LayerPanel ────────────────────────────────────────────── */
+.layer-panel {
+  padding: 10px 10px 8px;
+}
+.layer-panel__head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.layer-panel__title {
+  font-family: var(--font-hud);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+.layer-panel__groups { display: flex; flex-direction: column; gap: 2px; }
+
+.layer-group__head {
+  display: flex; align-items: center; gap: 4px;
+}
+.layer-group__head-btn {
+  flex: 1; display: flex; align-items: center; gap: 8px;
+  padding: 4px 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.layer-group__head-btn:hover { background: rgba(255,255,255,0.03); }
+.layer-group__label {
+  flex: 1;
+  font-family: var(--font-hud);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--text-secondary);
+  text-align: left;
+}
+.layer-group__count {
+  font-family: var(--font-hud);
+  font-size: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.layer-group__toggle-all {
+  display: flex; align-items: center; justify-content: center;
+  padding: 4px;
+  background: transparent; border: none; cursor: pointer;
+  border-radius: 4px;
+}
+.layer-group__toggle-all:hover { background: rgba(255,255,255,0.05); }
+
+.layer-group__items {
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 1px solid var(--border-secondary);
+  display: flex; flex-direction: column; gap: 1px;
+}
+.layer-item {
+  width: 100%;
+  display: flex; align-items: center; gap: 9px;
+  padding: 5px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.layer-item:hover { background: rgba(255,255,255,0.02); }
+.layer-item.active {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.06);
+}
+.layer-item__dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.layer-item__label {
+  flex: 1;
+  font-family: var(--font-hud);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-align: left;
+  transition: color 0.2s;
+}
+.layer-item__count {
+  font-family: var(--font-hud);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  transition: color 0.2s;
+}
+
+/* ─── IntelFeed ─────────────────────────────────────────────── */
+.intel-feed {
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.intel-feed__head {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%;
+  padding: 11px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 14px 14px 0 0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.intel-feed__head:hover { background: var(--hover-accent); }
+.intel-feed__title {
+  font-family: var(--font-hud);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+.intel-feed__items {
+  max-height: 460px;
+  overflow-y: auto;
+  border-top: 1px solid var(--border-secondary);
+}
+.intel-feed__item {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-secondary);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.intel-feed__item:hover { background: var(--hover-accent); }
+.intel-feed__row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 4px;
+}
+.intel-feed__risk {
+  font-family: var(--font-hud);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+.intel-feed__source {
+  font-family: var(--font-hud);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.intel-feed__pin {
+  display: flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: color 0.2s, background 0.2s;
+}
+.intel-feed__pin:hover { color: var(--cyan-primary); background: rgba(0,229,255,0.06); }
+.intel-feed__time {
+  margin-left: auto;
+  font-family: var(--font-hud);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.intel-feed__title-line {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-primary);
+  font-weight: 400;
+}
+.intel-feed__assessment {
+  margin-top: 6px;
+  display: flex; align-items: flex-start; gap: 6px;
+  padding: 5px 8px;
+  background: rgba(255,61,61,0.06);
+  border: 1px solid rgba(255,61,61,0.15);
+  border-radius: 4px;
+  color: rgba(255,61,61,0.85);
+  font-family: var(--font-hud);
+  font-size: 9px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+}
+
+/* ─── MarketsPanel ─────────────────────────────────────────── */
+.markets-panel { padding: 12px 14px; }
+.markets-panel__head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+}
+.markets-panel__title {
+  font-family: var(--font-hud);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+.markets-panel__section { margin-top: 4px; }
+.markets-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+.markets-panel__cell {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 8px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+  font-family: var(--font-hud);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+.markets-panel__dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--text-muted);
+}
+.markets-panel__dot.open { background: var(--alert-green); box-shadow: 0 0 4px rgba(0,230,118,0.5); }
+.markets-panel__name { font-weight: 700; color: var(--text-primary); }
+.markets-panel__delta { margin-left: auto; font-variant-numeric: tabular-nums; }
+.markets-panel__delta.up { color: var(--alert-green); }
+.markets-panel__delta.down { color: var(--alert-red); }
+
+.markets-panel__commodities {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+}
+.markets-panel__commodity {
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border-secondary);
+  border-radius: 6px;
+}
+.markets-panel__commodity-name {
+  font-family: var(--font-hud);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+}
+.markets-panel__commodity-val {
+  font-family: var(--font-hud);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-heading);
+  font-variant-numeric: tabular-nums;
+  margin: 2px 0;
+}
+.markets-panel__commodity-delta {
+  font-family: var(--font-hud);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+.markets-panel__commodity-delta.up { color: var(--alert-green); }
+.markets-panel__commodity-delta.down { color: var(--alert-red); }
+
+/* ─── StatusTicker ─────────────────────────────────────────── */
+.status-ticker {
+  display: flex; align-items: center;
+  background: rgba(8,10,20,0.92);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border-secondary);
+  font-family: var(--font-hud);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  overflow: hidden;
+  z-index: 200;
+}
+.status-ticker__static {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 12px; height: 100%;
+  border-right: 1px solid var(--border-secondary);
+  background: rgba(12,14,26,0.85);
+}
+.status-ticker__rolling {
+  flex: 1; overflow: hidden;
+  position: relative;
+  mask-image: linear-gradient(90deg, transparent, black 4%, black 96%, transparent);
+}
+.status-ticker__inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  white-space: nowrap;
+  padding-left: 14px;
+}
+.ticker__item { display: inline-flex; align-items: center; gap: 4px; color: var(--text-secondary); }
+.ticker__dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(155,151,142,0.3); }
+.ticker__dot.open { background: var(--alert-green); box-shadow: 0 0 4px rgba(0,230,118,0.5); }
+.ticker__sep { color: var(--border-primary); padding: 0 4px; }
+.status-ticker__right {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 12px;
+  border-left: 1px solid var(--border-secondary);
+  background: rgba(12,14,26,0.85);
+  color: var(--text-muted);
+  font-size: 8px; letter-spacing: 0.16em;
+}
+
+/* ─── MapSurface ───────────────────────────────────────────── */
+.map-surface {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 38% 45%, rgba(212,175,55,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 65% 60%, rgba(0,229,255,0.05) 0%, transparent 50%),
+    var(--bg-void);
+  overflow: hidden;
+}
+.map-surface__bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+}
+.map-surface__entities {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+.entity {
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: currentColor;
+}
+.entity--flights, .entity--military, .entity--jets {
+  width: 5px; height: 5px;
+  border-radius: 1px;
+}
+.entity--satellites {
+  width: 3px; height: 3px;
+  animation: osiris-pulse 4s ease-in-out infinite;
+}
+.entity--earthquakes {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,149,0,0.2);
+  border: 1px solid currentColor;
+}
+.entity--fires {
+  width: 6px; height: 6px;
+  background: radial-gradient(circle, currentColor 0%, transparent 70%);
+}
+.entity--cctv {
+  width: 2px; height: 2px;
+  opacity: 0.7;
+}
+.entity--incident {
+  width: 14px; height: 14px;
+  border: 1.5px solid currentColor;
+  background: rgba(255,61,61,0.1);
+  border-radius: 2px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  animation: osiris-pulse 1.6s ease-in-out infinite;
+}
+
+.map-surface__coords {
+  position: absolute; bottom: 12px; left: 12px;
+  background: rgba(8,10,20,0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-secondary);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: var(--font-hud); font-size: 9px;
+  display: flex; flex-direction: column; gap: 2px;
+  letter-spacing: 0.06em;
+}
+.map-surface__coords > div { display: flex; gap: 6px; justify-content: space-between; }
+
+.map-surface__scale {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  background: rgba(8,10,20,0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-secondary);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-family: var(--font-hud);
+  display: flex; align-items: center; gap: 8px;
+}
+.map-surface__scale-bar {
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--gold-primary) 0%, var(--gold-primary) 50%, transparent 50%, transparent 100%);
+  background-size: 20px 100%;
+  border-top: 1px solid var(--gold-primary);
+  border-bottom: 1px solid var(--gold-primary);
+}
+
+/* ─── Splash ───────────────────────────────────────────────── */
+.splash {
+  position: fixed; inset: 0;
+  background: var(--bg-void);
+  background-image: radial-gradient(ellipse at center, rgba(212,175,55,0.05), transparent 60%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 24px;
+  z-index: 9999;
+  overflow: hidden;
+}
+.splash__scanline {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-primary) 30%, var(--cyan-primary) 70%, transparent);
+  box-shadow: 0 0 20px var(--gold-primary);
+  animation: splash-scanline 2.5s ease-in-out infinite;
+}
+@keyframes splash-scanline {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+.splash__rings {
+  position: relative;
+  width: 160px; height: 160px;
+  display: flex; align-items: center; justify-content: center;
+}
+.splash__icon {
+  width: 70px; height: 70px;
+  z-index: 2;
+  filter: drop-shadow(0 0 12px rgba(212,175,55,0.6));
+  border-radius: 12px;
+}
+.splash-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid transparent;
+}
+.splash-ring--outer {
+  width: 160px; height: 160px;
+  border-color: rgba(212,175,55,0.25);
+  border-top-color: var(--gold-primary);
+  animation: spin 3s linear infinite;
+}
+.splash-ring--mid {
+  width: 128px; height: 128px;
+  border-color: rgba(212,175,55,0.12);
+  border-right-color: rgba(212,175,55,0.6);
+  animation: spin-rev 5s linear infinite;
+}
+.splash-ring--inner {
+  width: 96px; height: 96px;
+  border-color: rgba(0,229,255,0.1);
+  border-bottom-color: rgba(0,229,255,0.5);
+  animation: spin 4s linear infinite;
+}
+.splash-ring--core { display: none; }
+@keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+@keyframes spin-rev { from { transform: rotate(0); } to { transform: rotate(-360deg); } }
+
+.splash__brand { text-align: center; }
+.splash__name {
+  font-family: var(--font-hud);
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: 0.20em;
+  color: var(--text-heading);
+  text-shadow: 0 0 14px rgba(212,175,55,0.25);
+}
+.splash__sub {
+  font-family: var(--font-hud);
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  color: var(--gold-primary);
+  margin-top: 6px;
+}
+.splash__progress {
+  width: 320px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.splash__phase {
+  display: flex; justify-content: space-between;
+  font-family: var(--font-hud);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+}
+.splash__bottom {
+  position: absolute; bottom: 28px;
+  display: flex; gap: 14px; align-items: center;
+}
+
+/* ─── Tooltip popovers used on map hover (sample) ───────────── */
+.map-popover {
+  position: absolute;
+  z-index: 250;
+  padding: 8px 12px;
+  background: rgba(12, 14, 26, 0.92);
+  backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 12px rgba(212,175,55,0.06);
+  font-family: var(--font-hud);
+  font-size: 10px;
+  color: var(--text-primary);
+  pointer-events: none;
+}
+
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root" data-screen-label="Osiris Dashboard"></div>
+
+  <script type="text/babel" data-presets="react">
+/* eslint-disable */
+/**
+ * OSIRIS · Icon
+ * Inline Lucide-style SVG icons. 1.6 stroke. Color = currentColor.
+ * The OSIRIS production app uses lucide-react; these are the icons we touch.
+ */
+const ICON_PATHS = {
+  search: <><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></>,
+  globe: <><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></>,
+  share: <><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></>,
+  settings: <><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></>,
+  plane: <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>,
+  satellite: <><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></>,
+  activity: <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.5.5 0 0 1-.96 0L9.24 2.18a.5.5 0 0 0-.95 0L5.93 10.54A2 2 0 0 1 4 12H2"/>,
+  shield: <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>,
+  eye: <><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></>,
+  camera: <><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></>,
+  radar: <><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 17.34 12"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/></>,
+  flame: <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>,
+  alert: <><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></>,
+  ship: <><path d="M12 10.189V14"/><path d="M12 2v3"/><path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6"/><path d="M19.38 20A11.6 11.6 0 0 0 21 14l-8.188-3.639a2 2 0 0 0-1.624 0L3 14a11.6 11.6 0 0 0 2.81 7.76"/><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1s1.2 1 2.5 1c2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></>,
+  tv: <><rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></>,
+  newspaper: <><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8z"/></>,
+  radiation: <><path d="M12 12h.01"/><path d="M7.5 4.2c-.3-.5-.9-.7-1.3-.4C3.9 5.5 2.3 8.1 2 11c-.1.5.4 1 1 1h5c0-1.5.8-2.8 2-3.4-1.1-1.9-2-3.5-2.5-4.4z"/><path d="M21 12c.6 0 1.1-.5 1-1-.3-2.9-1.8-5.5-4.1-7.1-.4-.3-1.1-.2-1.3.4-.6.9-1.5 2.5-2.6 4.3 1.2.7 2 2 2 3.4h5z"/><path d="M7.5 19.8c-.3.5-.1 1.1.4 1.3 2.6 1.2 5.6 1.2 8.2 0 .5-.2.7-.8.4-1.3-.5-.9-1.4-2.5-2.5-4.3-1.2.7-2.8.7-4 0-1.1 1.8-2 3.4-2.5 4.3z"/></>,
+  link: <><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></>,
+  chevronUp: <polyline points="18 15 12 9 6 15"/>,
+  chevronDown: <polyline points="6 9 12 15 18 9"/>,
+  toggleLeft: <><rect width="20" height="12" x="2" y="6" rx="6"/><circle cx="8" cy="12" r="2"/></>,
+  toggleRight: <><rect width="20" height="12" x="2" y="6" rx="6"/><circle cx="16" cy="12" r="2"/></>,
+  mapPin: <><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></>,
+  zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>,
+  external: <><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></>,
+  database: <><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></>,
+  x: <><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>,
+  cloudLightning: <><path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"/><path d="m13 12-3 5h4l-3 5"/></>,
+  anchor: <><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></>,
+  target: <><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></>,
+  sun: <><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></>,
+};
+
+const Icon = ({ name, size = 16, className = '', style = {} }) => {
+  const p = ICON_PATHS[name];
+  if (!p) return null;
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      style={style}
+    >
+      {p}
+    </svg>
+  );
+};
+
+window.Icon = Icon;
+
+/* eslint-disable */
+/**
+ * OSIRIS · CommandBar
+ * Top-rail navigation with brand mark, search, zulu clock, system pills.
+ * Sticks to the top of the viewport. Backdrop-blurred over the map.
+ */
+const CommandBar = ({ onSearchClick, projection, onToggleProjection }) => {
+  const [time, setTime] = React.useState(getZulu());
+
+  React.useEffect(() => {
+    const iv = setInterval(() => setTime(getZulu()), 1000);
+    return () => clearInterval(iv);
+  }, []);
+
+  return (
+    <div className="command-bar">
+      {/* Brand */}
+      <div className="command-bar__section">
+        <img src="../../assets/osiris-icon.png" className="command-bar__logo" alt="" />
+        <div className="command-bar__brand">
+          <span className="command-bar__hex">⬡</span>
+          <span className="command-bar__name">OSIRIS</span>
+          <span className="command-bar__sub">GLOBAL INTELLIGENCE</span>
+        </div>
+        <span className="classified">⬢ CLASSIFIED</span>
+      </div>
+
+      {/* Center search */}
+      <div className="command-bar__center">
+        <button className="command-bar__search" onClick={onSearchClick}>
+          <Icon name="search" size={12} />
+          <span>CMD: LOCATE — COORDINATES, CALLSIGN, OR NAME…</span>
+          <kbd className="command-bar__kbd">⌘L</kbd>
+        </button>
+      </div>
+
+      {/* Right cluster */}
+      <div className="command-bar__section">
+        <div className="command-bar__stat">
+          <span className="hud-label">ZULU</span>
+          <span className="command-bar__zulu">{time}</span>
+        </div>
+        <div className="command-bar__stat">
+          <span className="hud-label">THROUGHPUT</span>
+          <span className="command-bar__throughput">3.4 MB/s</span>
+        </div>
+        <div className="command-bar__divider" />
+        <button className={`command-bar__projection ${projection === 'globe' ? 'active' : ''}`} onClick={onToggleProjection}>
+          <Icon name="globe" size={14} />
+          <span>{projection.toUpperCase()}</span>
+        </button>
+        <button className="btn-icon" title="Share"><Icon name="share" size={14} /></button>
+        <button className="btn-icon" title="Settings"><Icon name="settings" size={14} /></button>
+      </div>
+    </div>
+  );
+};
+
+function getZulu() {
+  const d = new Date();
+  return `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}:${String(d.getUTCSeconds()).padStart(2,'0')}Z`;
+}
+
+window.CommandBar = CommandBar;
+
+/* eslint-disable */
+/**
+ * OSIRIS · LayerPanel
+ * Left rail. Grouped data-layer toggles with entity counts.
+ * Mirrors src/components/LayerPanel.tsx — five groups, ~17 layers.
+ */
+const LAYER_GROUPS = [
+  {
+    label: 'AVIATION', icon: 'plane', color: '#00E5FF',
+    layers: [
+      { key: 'flights', label: 'Commercial', icon: 'plane', color: '#00E5FF', count: 8247 },
+      { key: 'private',  label: 'Private',     icon: 'plane', color: '#00E676', count: 412 },
+      { key: 'jets',     label: 'Private Jets',icon: 'plane', color: '#FF69B4', count: 89 },
+      { key: 'military', label: 'Military',    icon: 'shield',color: '#FF3D3D', count: 23 },
+    ],
+  },
+  {
+    label: 'MARITIME & SPACE', icon: 'ship', color: '#00BCD4',
+    layers: [
+      { key: 'maritime',   label: 'Maritime / Naval', icon: 'ship',     color: '#00BCD4', count: 1340 },
+      { key: 'satellites', label: 'Satellites',       icon: 'satellite',color: '#D4AF37', count: 2118 },
+    ],
+  },
+  {
+    label: 'SURVEILLANCE', icon: 'camera', color: '#39FF14',
+    layers: [
+      { key: 'cctv',      label: 'CCTV Cameras',    icon: 'camera',    color: '#39FF14', count: 2014 },
+      { key: 'livenews',  label: 'Live News Feeds', icon: 'tv',        color: '#FF4081', count: 25 },
+      { key: 'sigint',    label: 'SIGINT News (RSS)', icon: 'newspaper', color: '#D4AF37', count: 184 },
+    ],
+  },
+  {
+    label: 'NATURAL HAZARDS', icon: 'activity', color: '#FF9500',
+    layers: [
+      { key: 'earthquakes', label: 'Earthquakes (24h)', icon: 'activity',       color: '#FF9500', count: 47 },
+      { key: 'fires',       label: 'Active Fires',      icon: 'flame',          color: '#FF6B00', count: 312 },
+      { key: 'weather',     label: 'Severe Weather',    icon: 'cloudLightning', color: '#E040FB', count: 9 },
+    ],
+  },
+  {
+    label: 'THREATS & INFRA', icon: 'alert', color: '#FF3D3D',
+    layers: [
+      { key: 'nuclear',   label: 'Nuclear Facilities', icon: 'radiation', color: '#76FF03', count: 442 },
+      { key: 'incidents', label: 'Global Incidents',   icon: 'alert',     color: '#FF3D3D', count: 38 },
+      { key: 'jamming',   label: 'GPS Jamming',        icon: 'radar',     color: '#FF4444', count: 4 },
+    ],
+  },
+];
+
+const LayerPanel = ({ activeLayers, onToggle, onToggleGroup, expandedGroups, onExpand }) => {
+  const allLayers = LAYER_GROUPS.flatMap(g => g.layers);
+  const activeCount = Object.values(activeLayers).filter(Boolean).length;
+  const totalEntities = allLayers.reduce((s, l) => s + (activeLayers[l.key] ? l.count : 0), 0);
+
+  return (
+    <div className="glass-panel layer-panel">
+      {/* Header */}
+      <div className="layer-panel__head">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className="pulse-dot pulse-dot--gold" style={{ width: 7, height: 7 }} />
+          <span className="layer-panel__title">DATA LAYERS</span>
+        </div>
+        <div style={{ display: 'flex', gap: 5 }}>
+          <span className={`gotham-tag gotham-tag--${activeCount > 10 ? 'critical' : activeCount > 5 ? 'high' : 'low'}`} style={{ padding: '1px 6px', fontSize: 7 }}>
+            {activeCount}/{allLayers.length}
+          </span>
+          <span className="gotham-tag gotham-tag--info" style={{ padding: '1px 5px', fontSize: 7 }}>
+            {totalEntities.toLocaleString()} ENT
+          </span>
+        </div>
+      </div>
+
+      {/* Groups */}
+      <div className="layer-panel__groups">
+        {LAYER_GROUPS.map(group => {
+          const expanded = expandedGroups[group.label];
+          const groupActive = group.layers.filter(l => activeLayers[l.key]).length;
+          const allActive = groupActive === group.layers.length;
+          return (
+            <div key={group.label} className="layer-group">
+              <div className="layer-group__head">
+                <button className="layer-group__head-btn" onClick={() => onExpand(group.label)}>
+                  <Icon name={group.icon} size={12} style={{ color: group.color, flexShrink: 0 }} />
+                  <span className="layer-group__label">{group.label}</span>
+                  <span className="layer-group__count" style={{ color: groupActive > 0 ? group.color : 'var(--text-muted)' }}>
+                    {groupActive}/{group.layers.length}
+                  </span>
+                  <Icon name={expanded ? 'chevronUp' : 'chevronDown'} size={12} style={{ color: 'var(--text-muted)' }} />
+                </button>
+                <button
+                  className="layer-group__toggle-all"
+                  onClick={() => onToggleGroup(group)}
+                  title={allActive ? 'Disable all' : 'Enable all'}
+                >
+                  <Icon name={allActive ? 'toggleRight' : 'toggleLeft'} size={14} style={{ color: allActive ? group.color : 'var(--text-muted)' }} />
+                </button>
+              </div>
+
+              {expanded && (
+                <div className="layer-group__items">
+                  {group.layers.map(layer => {
+                    const isActive = activeLayers[layer.key];
+                    return (
+                      <button
+                        key={layer.key}
+                        className={`layer-item ${isActive ? 'active' : ''}`}
+                        onClick={() => onToggle(layer.key)}
+                      >
+                        <span
+                          className="layer-item__dot"
+                          style={{
+                            background: layer.color,
+                            boxShadow: isActive ? `0 0 6px ${layer.color}99` : 'none',
+                            opacity: isActive ? 1 : 0.3,
+                          }}
+                        />
+                        <Icon
+                          name={layer.icon}
+                          size={13}
+                          style={{ color: isActive ? layer.color : 'var(--text-muted)', flexShrink: 0 }}
+                        />
+                        <span className="layer-item__label" style={{ color: isActive ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                          {layer.label}
+                        </span>
+                        <span className="layer-item__count" style={{ color: isActive ? layer.color : 'var(--text-muted)' }}>
+                          {layer.count.toLocaleString()}
+                        </span>
+                        <span className={`layer-toggle ${isActive ? 'active' : ''}`} />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+window.LayerPanel = LayerPanel;
+window.LAYER_GROUPS = LAYER_GROUPS;
+
+/* eslint-disable */
+/**
+ * OSIRIS · IntelFeed
+ * Right rail. SIGINT-style news feed with risk badges & time-ago.
+ */
+const FEED_ITEMS = [
+  { risk: 9, source: 'REUTERS',    coords: [48.3, 35.5], minsAgo: 2,  title: 'Drone strike reported near Kramatorsk; secondary explosions confirmed by 3 SIGINT channels.', assessment: 'High-confidence ELINT correlation with seismic micro-event at 09:22Z.' },
+  { risk: 7, source: 'AL JAZEERA', coords: [33.5, 36.3], minsAgo: 14, title: 'IDF tankers cross northern Lebanese border crossing; UN monitor en-route.' },
+  { risk: 8, source: 'NHK WORLD',  coords: [38.9, 121.6], minsAgo: 31, title: 'PLAN naval exercise resumes off Bohai Sea; 4 destroyers, 1 frigate broadcasting AIS.' },
+  { risk: 5, source: 'BBC NEWS',   coords: [50.1, 8.7],   minsAgo: 47, title: 'EU emergency council convenes Friday; energy sanctions package under review.' },
+  { risk: 6, source: 'AFP',        coords: [-15.7, 28.3], minsAgo: 62, title: 'Copperbelt mine workers strike enters day 12; logistics route to Lobito impacted.' },
+  { risk: 4, source: 'KYODO',      coords: [35.6, 139.7], minsAgo: 78, title: 'GPS-jamming anomaly reported by 7 commercial flights over East China Sea.' },
+  { risk: 3, source: 'TASS',       coords: [55.7, 37.6], minsAgo: 124, title: 'Cyber-firm Kaspersky flags new APT cluster targeting energy infrastructure.' },
+];
+
+function getRiskLevel(score) {
+  if (score >= 8) return { label: 'CRITICAL', cls: 'critical' };
+  if (score >= 6) return { label: 'HIGH',     cls: 'high' };
+  if (score >= 4) return { label: 'ELEVATED', cls: 'elevated' };
+  return                  { label: 'LOW',      cls: 'low' };
+}
+function timeAgo(mins) {
+  if (mins < 60) return `${mins}m AGO`;
+  return `${Math.floor(mins/60)}h ${mins%60}m AGO`;
+}
+
+const IntelFeed = () => {
+  const [expanded, setExpanded] = React.useState(true);
+  return (
+    <div className="glass-panel intel-feed">
+      <button className="intel-feed__head" onClick={() => setExpanded(e => !e)}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Icon name="newspaper" size={14} style={{ color: 'var(--gold-primary)' }} />
+          <span className="intel-feed__title">SIGINT FEED</span>
+          <span className="gotham-tag gotham-tag--info" style={{ padding: '1px 5px', fontSize: 7 }}>{FEED_ITEMS.length}</span>
+          {FEED_ITEMS.some(i => i.risk >= 8) && (
+            <span className="gotham-tag gotham-tag--critical" style={{ padding: '1px 4px', fontSize: 7 }}>ALERTS</span>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span className="pulse-dot" style={{ width: 6, height: 6 }} />
+          <Icon name={expanded ? 'chevronUp' : 'chevronDown'} size={12} style={{ color: 'var(--text-muted)' }} />
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="intel-feed__items styled-scrollbar">
+          {FEED_ITEMS.map((item, i) => {
+            const r = getRiskLevel(item.risk);
+            return (
+              <div className="intel-feed__item" key={i}>
+                <div className="intel-feed__row">
+                  <span className={`intel-feed__risk risk-${r.cls === 'elevated' ? 'medium' : r.cls === 'low' ? 'low' : r.cls === 'high' ? 'high' : 'critical'}`}>
+                    {r.label}
+                  </span>
+                  <span className="intel-feed__source">{item.source}</span>
+                  <button className="intel-feed__pin" title="Locate"><Icon name="mapPin" size={10} /></button>
+                  <span className="intel-feed__time">{timeAgo(item.minsAgo)}</span>
+                </div>
+                <h4 className="intel-feed__title-line">{item.title}</h4>
+                {item.assessment && (
+                  <div className="intel-feed__assessment">
+                    <Icon name="zap" size={10} style={{ flexShrink: 0, marginTop: 2 }} />
+                    <span>{item.assessment}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+window.IntelFeed = IntelFeed;
+
+/* eslint-disable */
+/**
+ * OSIRIS · MarketsPanel
+ * Bottom-right exchange + commodity readouts.
+ */
+const EXCHANGES = [
+  { name: 'NYSE', open: true,  delta: '+0.42%' },
+  { name: 'LSE',  open: true,  delta: '+0.18%' },
+  { name: 'TSE',  open: false, delta: '−0.11%' },
+  { name: 'HKG',  open: false, delta: '+0.61%' },
+  { name: 'SSE',  open: false, delta: '−0.08%' },
+  { name: 'XETRA',open: true,  delta: '+0.27%' },
+];
+
+const COMMODITIES = [
+  { name: 'BRENT',  val: '88.42', delta: '+1.24', up: true },
+  { name: 'WTI',    val: '82.15', delta: '+0.98', up: true },
+  { name: 'GOLD',   val: '2,418', delta: '+12.3', up: true },
+  { name: 'NATGAS', val: '2.81',  delta: '−0.04', up: false },
+];
+
+const MarketsPanel = () => {
+  return (
+    <div className="glass-panel markets-panel">
+      <div className="markets-panel__head">
+        <Icon name="activity" size={14} style={{ color: 'var(--gold-primary)' }} />
+        <span className="markets-panel__title">MARKETS</span>
+        <span className="gotham-tag gotham-tag--low" style={{ padding: '1px 6px', fontSize: 7, marginLeft: 'auto' }}>
+          3 OPEN
+        </span>
+      </div>
+
+      <div className="markets-panel__section">
+        <div className="gotham-divider"><span className="gotham-divider__label">Exchanges</span></div>
+        <div className="markets-panel__grid">
+          {EXCHANGES.map(ex => (
+            <div className="markets-panel__cell" key={ex.name}>
+              <span className={`markets-panel__dot ${ex.open ? 'open' : ''}`} />
+              <span className="markets-panel__name">{ex.name}</span>
+              <span className={`markets-panel__delta ${ex.delta.startsWith('+') ? 'up' : 'down'}`}>{ex.delta}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="markets-panel__section">
+        <div className="gotham-divider"><span className="gotham-divider__label">Commodities</span></div>
+        <div className="markets-panel__commodities">
+          {COMMODITIES.map(c => (
+            <div className="markets-panel__commodity" key={c.name}>
+              <div className="markets-panel__commodity-name">{c.name}</div>
+              <div className="markets-panel__commodity-val">{c.val}</div>
+              <div className={`markets-panel__commodity-delta ${c.up ? 'up' : 'down'}`}>
+                {c.up ? '▲' : '▼'} {c.delta}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+window.MarketsPanel = MarketsPanel;
+
+/* eslint-disable */
+/**
+ * OSIRIS · StatusTicker
+ * Bottom rail. Country-risk markers + CVE count, rolling marquee.
+ */
+const TICKER_DATA = {
+  exchanges: [
+    { name: 'NYSE',  open: true },
+    { name: 'LSE',   open: true },
+    { name: 'XETRA', open: true },
+    { name: 'TSE',   open: false },
+    { name: 'HKG',   open: false },
+  ],
+  risks: [
+    { code: 'UA', score: 87, level: 'CRITICAL' },
+    { code: 'SY', score: 71, level: 'HIGH' },
+    { code: 'TW', score: 54, level: 'ELEVATED' },
+    { code: 'KP', score: 68, level: 'HIGH' },
+    { code: 'YE', score: 79, level: 'CRITICAL' },
+    { code: 'CH', score: 8,  level: 'LOW' },
+  ],
+  cves: 128,
+};
+
+function flag(code) {
+  try {
+    return String.fromCodePoint(...code.toUpperCase().split('').map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+  } catch { return code; }
+}
+function riskColor(level) {
+  return level === 'CRITICAL' ? '#FF3D3D'
+       : level === 'HIGH'     ? '#FF9500'
+       : level === 'ELEVATED' ? '#D4AF37'
+       :                        '#00E676';
+}
+
+const StatusTicker = () => {
+  const openCount = TICKER_DATA.exchanges.filter(e => e.open).length;
+  const content = (
+    <>
+      {TICKER_DATA.exchanges.map(ex => (
+        <span className="ticker__item" key={ex.name}>
+          <span className={`ticker__dot ${ex.open ? 'open' : ''}`} />
+          <span style={{ color: ex.open ? 'var(--text-primary)' : 'rgba(155,151,142,0.45)' }}>{ex.name}</span>
+        </span>
+      ))}
+      <span className="ticker__sep">|</span>
+      {TICKER_DATA.risks.map(r => (
+        <span className="ticker__item" key={r.code}>
+          <span style={{ fontSize: 11 }}>{flag(r.code)}</span>
+          <span style={{ color: riskColor(r.level), fontWeight: 700 }}>{r.score}</span>
+        </span>
+      ))}
+      <span className="ticker__sep">|</span>
+      <span className="ticker__item">
+        <span style={{ color: '#E040FB' }}>CYBER</span>
+        <span>{TICKER_DATA.cves} CVEs</span>
+      </span>
+      <span className="ticker__sep">|</span>
+      <span className="ticker__item">
+        <span style={{ color: 'var(--cyan-primary)' }}>SAT</span>
+        <span>2,118 / 2,150</span>
+      </span>
+      <span className="ticker__sep">|</span>
+      <span className="ticker__item">
+        <span style={{ color: 'var(--gold-primary)' }}>RECON</span>
+        <span>14 SWEEPS ACTIVE</span>
+      </span>
+    </>
+  );
+  return (
+    <div className="status-ticker">
+      <div className="status-ticker__static">
+        <span style={{ color: 'var(--text-muted)' }}>MKT</span>
+        <span style={{ color: 'var(--gold-primary)', fontWeight: 700 }}>{openCount}/{TICKER_DATA.exchanges.length}</span>
+      </div>
+      <div className="status-ticker__rolling">
+        <div className="status-ticker__inner animate-ticker">
+          {content}
+          {content}
+        </div>
+      </div>
+      <div className="status-ticker__right">
+        <span className="pulse-dot" style={{ width: 6, height: 6 }} />
+        <span>OSIRIS · v6.2 · UPTIME 04:21:18</span>
+      </div>
+    </div>
+  );
+};
+
+window.StatusTicker = StatusTicker;
+
+/* eslint-disable */
+/**
+ * OSIRIS · Splash
+ * Boot sequence — counter-rotating gold rings + scan-line + progress.
+ * Shows for ~2.5s on first paint.
+ */
+const Splash = ({ onDismiss }) => {
+  const [progress, setProgress] = React.useState(0);
+  const [phase, setPhase] = React.useState('BOOTING KERNEL');
+
+  React.useEffect(() => {
+    const phases = [
+      'BOOTING KERNEL',
+      'AUTHENTICATING SOURCE FEEDS',
+      'GEOLOCATING ENTITIES',
+      'STREAM ONLINE',
+    ];
+    let p = 0;
+    const iv = setInterval(() => {
+      p += 5;
+      setProgress(Math.min(p, 100));
+      setPhase(phases[Math.min(Math.floor(p/25), phases.length-1)]);
+      if (p >= 100) {
+        clearInterval(iv);
+        setTimeout(onDismiss, 300);
+      }
+    }, 80);
+    return () => clearInterval(iv);
+  }, []);
+
+  return (
+    <div className="splash">
+      <div className="splash__scanline"></div>
+      <div className="splash__rings">
+        <div className="splash-ring splash-ring--outer"></div>
+        <div className="splash-ring splash-ring--mid"></div>
+        <div className="splash-ring splash-ring--inner"></div>
+        <div className="splash-ring splash-ring--core"></div>
+        <img src="../../assets/osiris-icon.png" className="splash__icon" alt="" />
+      </div>
+      <div className="splash__brand">
+        <div className="splash__name"><span style={{ color: 'var(--gold-primary)' }}>⬡</span>OSIRIS</div>
+        <div className="splash__sub">GLOBAL INTELLIGENCE PLATFORM · v6.2</div>
+      </div>
+      <div className="splash__progress">
+        <div className="intel-progress">
+          <div className="intel-progress__bar" style={{ width: `${progress}%` }} />
+        </div>
+        <div className="splash__phase">
+          <span>{phase}</span>
+          <span style={{ color: 'var(--gold-primary)' }}>{progress.toString().padStart(3,'0')}%</span>
+        </div>
+      </div>
+      <div className="splash__bottom">
+        <span className="classified">⬢ CLASSIFIED</span>
+        <span style={{ color: 'var(--text-muted)', letterSpacing: '0.18em', fontSize: 9 }}>
+          AUTHORIZED OPERATOR ACCESS · SESSION {Math.floor(Math.random()*9000+1000)}-{Math.floor(Math.random()*9000+1000)}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+window.Splash = Splash;
+
+/* eslint-disable */
+/**
+ * OSIRIS · MapSurface
+ * Stylised globe + plotted entities. SVG mock; the production app
+ * uses MapLibre GL with WebGL-rendered points.
+ *
+ * - background: dark globe rim + grid
+ * - plotted entities: jittered dots by category, color follows --layer-*
+ * - hovering an entity surfaces a callsign popover
+ * - flight paths drawn as faint great-circle arcs
+ */
+const ENTITIES = [
+  // Aviation
+  ...Array.from({ length: 60 }, (_, i) => ({ type: 'flights',  x: 6 + Math.random()*88, y: 12 + Math.random()*76, label: `FLT${1100+i}` })),
+  ...Array.from({ length: 12 }, (_, i) => ({ type: 'military', x: 5 + Math.random()*90, y: 12 + Math.random()*76, label: `MIL${430+i}` })),
+  ...Array.from({ length: 8  }, (_, i) => ({ type: 'jets',     x: 5 + Math.random()*90, y: 12 + Math.random()*76, label: `JET${i+1}` })),
+  // Maritime + satellites
+  ...Array.from({ length: 18 }, (_, i) => ({ type: 'maritime', x: 5 + Math.random()*90, y: 30 + Math.random()*58, label: `MV-${i+1}` })),
+  ...Array.from({ length: 22 }, (_, i) => ({ type: 'satellites',x: 5 + Math.random()*90, y: 6 + Math.random()*88, label: `SAT-${i+10}` })),
+  // Quakes + fires
+  ...Array.from({ length: 14 }, (_, i) => ({ type: 'earthquakes', x: 6 + Math.random()*88, y: 18 + Math.random()*70, label: `M${(2 + Math.random()*4).toFixed(1)}` })),
+  ...Array.from({ length: 10 }, (_, i) => ({ type: 'fires',       x: 6 + Math.random()*88, y: 18 + Math.random()*70, label: 'HOT' })),
+  // CCTV
+  ...Array.from({ length: 35 }, (_, i) => ({ type: 'cctv',     x: 4 + Math.random()*92, y: 16 + Math.random()*72, label: `CAM-${i}` })),
+  // Conflict markers (incidents)
+  { type: 'incident', x: 56, y: 38, label: 'UKR — Active' },
+  { type: 'incident', x: 60, y: 50, label: 'SYR — Hot' },
+  { type: 'incident', x: 76, y: 56, label: 'PRK DMZ' },
+  { type: 'incident', x: 82, y: 44, label: 'TWN strait' },
+];
+
+const COLOR_MAP = {
+  flights: '#00E5FF',
+  military: '#FF3D3D',
+  jets: '#FF69B4',
+  maritime: '#00BCD4',
+  satellites: '#D4AF37',
+  earthquakes: '#FF9500',
+  fires: '#FF6B00',
+  cctv: '#39FF14',
+  incident: '#FF3D3D',
+};
+
+const MapSurface = ({ activeLayers, focus }) => {
+  const visible = ENTITIES.filter(e => {
+    if (e.type === 'incident') return activeLayers.incidents;
+    return activeLayers[e.type];
+  });
+
+  return (
+    <div className="map-surface">
+      {/* base globe / grid */}
+      <svg className="map-surface__bg" viewBox="0 0 100 60" preserveAspectRatio="none">
+        <defs>
+          <radialGradient id="globe-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stopColor="#0A1228" stopOpacity="0.9"/>
+            <stop offset="60%" stopColor="#06060C" stopOpacity="0.0"/>
+          </radialGradient>
+          <pattern id="map-grid" x="0" y="0" width="5" height="5" patternUnits="userSpaceOnUse">
+            <path d="M 5 0 L 0 0 0 5" fill="none" stroke="rgba(212,175,55,0.06)" strokeWidth="0.08"/>
+          </pattern>
+          <radialGradient id="orb" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stopColor="rgba(212,175,55,0.04)"/>
+            <stop offset="80%" stopColor="rgba(0,229,255,0.02)"/>
+            <stop offset="100%" stopColor="rgba(4,4,10,0)"/>
+          </radialGradient>
+        </defs>
+        <rect width="100" height="60" fill="url(#orb)"/>
+        <rect width="100" height="60" fill="url(#map-grid)"/>
+        {/* meridian arcs */}
+        {[20,40,60,80].map(x => (
+          <ellipse key={x} cx={x} cy="30" rx="22" ry="28" fill="none" stroke="rgba(212,175,55,0.04)" strokeWidth="0.1"/>
+        ))}
+        {/* equator */}
+        <line x1="0" y1="30" x2="100" y2="30" stroke="rgba(0,229,255,0.06)" strokeWidth="0.1" strokeDasharray="0.6,0.6"/>
+        {/* faint continent silhouettes */}
+        <path d="M 18 18 L 28 16 L 35 22 L 33 30 L 25 32 L 18 28 Z" fill="rgba(212,175,55,0.04)" stroke="rgba(212,175,55,0.12)" strokeWidth="0.1"/>
+        <path d="M 42 14 L 60 12 L 70 20 L 72 32 L 62 36 L 54 32 L 46 22 Z" fill="rgba(212,175,55,0.04)" stroke="rgba(212,175,55,0.12)" strokeWidth="0.1"/>
+        <path d="M 36 36 L 44 38 L 46 50 L 38 52 L 32 44 Z" fill="rgba(212,175,55,0.04)" stroke="rgba(212,175,55,0.12)" strokeWidth="0.1"/>
+        <path d="M 72 34 L 80 32 L 86 40 L 82 48 L 74 46 Z" fill="rgba(212,175,55,0.04)" stroke="rgba(212,175,55,0.12)" strokeWidth="0.1"/>
+
+        {/* great-circle flight paths */}
+        {activeLayers.flights && Array.from({length: 8}).map((_,i) => (
+          <path
+            key={i}
+            d={`M ${10+i*9} ${20+Math.sin(i)*8} Q ${50+i*4} ${10+Math.cos(i)*6}, ${85-i*5} ${30+Math.sin(i*2)*10}`}
+            fill="none"
+            stroke="rgba(0,229,255,0.18)"
+            strokeWidth="0.08"
+            strokeDasharray="0.5,0.5"
+          />
+        ))}
+      </svg>
+
+      {/* entities */}
+      <div className="map-surface__entities">
+        {visible.map((e, i) => (
+          <span
+            key={i}
+            className={`entity entity--${e.type}`}
+            style={{
+              left: `${e.x}%`,
+              top:  `${e.y}%`,
+              color: COLOR_MAP[e.type],
+              boxShadow: `0 0 ${e.type === 'incident' ? 12 : 5}px ${COLOR_MAP[e.type]}`,
+            }}
+            title={e.label}
+          />
+        ))}
+      </div>
+
+      {/* hover ring + corner brackets */}
+      {focus && (
+        <div className="map-surface__focus" style={{ left: `${focus.x}%`, top: `${focus.y}%` }}>
+          <div className="map-surface__focus-ring" />
+          <div className="map-surface__focus-label">
+            <span className="hud-label">TARGET</span>
+            <span className="hud-value">{focus.label}</span>
+          </div>
+        </div>
+      )}
+
+      {/* scan sweep */}
+      <div className="scan-line scan-line--gold" style={{ animationDuration: '6s', opacity: 0.6 }} />
+
+      {/* vignette */}
+      <div className="vignette" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />
+
+      {/* coords HUD bottom-left */}
+      <div className="map-surface__coords">
+        <div><span className="hud-label">LAT</span> <span className="hud-value">48.8566° N</span></div>
+        <div><span className="hud-label">LON</span> <span className="hud-value">002.3522° E</span></div>
+        <div><span className="hud-label">ZOOM</span> <span className="hud-value">2.4</span></div>
+      </div>
+
+      {/* scale bar top-right */}
+      <div className="map-surface__scale">
+        <div className="hud-label">SCALE</div>
+        <div className="map-surface__scale-bar" />
+        <div className="hud-value">~ 500 km</div>
+      </div>
+    </div>
+  );
+};
+
+window.MapSurface = MapSurface;
+
+/* eslint-disable */
+/**
+ * OSIRIS · App — the dashboard root
+ * Composes CommandBar + MapSurface + LayerPanel + IntelFeed + MarketsPanel
+ * + StatusTicker. Renders Splash on first paint.
+ */
+const { useState, useEffect } = React;
+
+const DEFAULT_LAYERS = {
+  flights: true, private: false, jets: false, military: true,
+  maritime: false, satellites: true,
+  cctv: false, livenews: false, sigint: true,
+  earthquakes: true, fires: false, weather: false,
+  nuclear: false, incidents: true, jamming: false,
+};
+
+const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
+  const [activeLayers, setActiveLayers] = useState(DEFAULT_LAYERS);
+  const [expandedGroups, setExpandedGroups] = useState({
+    AVIATION: true, 'MARITIME & SPACE': true, SURVEILLANCE: false,
+    'NATURAL HAZARDS': true, 'THREATS & INFRA': true,
+  });
+  const [projection, setProjection] = useState('globe');
+
+  const toggleLayer = (key) => setActiveLayers(p => ({ ...p, [key]: !p[key] }));
+  const toggleGroup = (group) => {
+    const allActive = group.layers.every(l => activeLayers[l.key]);
+    setActiveLayers(p => {
+      const next = { ...p };
+      group.layers.forEach(l => { next[l.key] = !allActive; });
+      return next;
+    });
+  };
+  const expandGroup = (label) => setExpandedGroups(p => ({ ...p, [label]: !p[label] }));
+
+  return (
+    <div className="app">
+      {showSplash && <Splash onDismiss={() => setShowSplash(false)} />}
+
+      <CommandBar
+        projection={projection}
+        onToggleProjection={() => setProjection(p => p === 'globe' ? 'mercator' : 'globe')}
+        onSearchClick={() => {}}
+      />
+
+      <div className="workspace">
+        <MapSurface activeLayers={activeLayers} />
+
+        <div className="workspace__left">
+          <LayerPanel
+            activeLayers={activeLayers}
+            onToggle={toggleLayer}
+            onToggleGroup={toggleGroup}
+            expandedGroups={expandedGroups}
+            onExpand={expandGroup}
+          />
+        </div>
+
+        <div className="workspace__right">
+          <IntelFeed />
+        </div>
+
+        <div className="workspace__bottom-right">
+          <MarketsPanel />
+        </div>
+      </div>
+
+      <StatusTicker />
+    </div>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+
+  </script>
+</body>
+</html>

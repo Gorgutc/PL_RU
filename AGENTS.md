@@ -22,7 +22,9 @@ pnpm ship         # full quality gate: format + lint + stylelint + typecheck + t
 
 - `Blueprints_lib/` — Palantir Blueprint monorepo. Read-only reference for component APIs and tokens. Start with `Blueprints_lib/llms.txt` for the curated index.
 - `Osiris_ref/` — Next.js 16 OSINT dashboard. Read-only reference for layout patterns and motion. Uses plain CSS, **not** SCSS modules or Blueprint — translate, don't copy.
-- Never edit, move, or delete anything inside either folder. The Claude hook `scripts/verify-reference.js` will flag drift; `.claude/settings.json` denies writes at the harness level.
+- `.claude/skills/osiris-design/` — OSIRIS brand vocabulary (void black, gold + cyan, glass panels, HUD typography). Read-only design system. Read its `SKILL.md` + `README.md`.
+- `.claude/skills/blueprint-design/` — Palantir Blueprint design system (4px grid, native font stack, 4 intents, 5-step elevation, two ready UI kits). Read-only design system.
+- Never edit, move, or delete anything inside these folders. The Claude hook `scripts/verify-reference.js` flags drift; `.claude/settings.json` denies writes at the harness level.
 
 ## What NOT to do
 
@@ -32,7 +34,9 @@ pnpm ship         # full quality gate: format + lint + stylelint + typecheck + t
 - Don't import Blueprint internals (e.g. `@blueprintjs/core/lib/esm/...`). Use only the package root.
 - Don't use `localStorage` / `sessionStorage`.
 - Don't read or commit anything listed in `DO_NOT_PUSH.md`.
-- Don't write to `Blueprints_lib/` or `Osiris_ref/` — these are read-only references.
+- Don't write to any read-only reference folder (`Blueprints_lib/`, `Osiris_ref/`, `.claude/skills/**`).
+- Don't use Lucide icons even though `osiris-design` recommends them — Blueprint icons via `<Icon icon="..." />` only.
+- Don't `@import` Google Fonts from a CDN inside `src/`. If a webfont is required, load via `next/font`.
 
 ## When in doubt
 

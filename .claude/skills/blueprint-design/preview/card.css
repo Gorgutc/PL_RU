@@ -1,0 +1,68 @@
+/* Shared frame for preview cards — they're tiny self-contained HTML specimens
+   loaded into the Design System tab. Each is sized ~700px wide. */
+@import url("../colors_and_type.css");
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font-family: var(--bp-font-sans);
+  color: var(--bp-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.card {
+  box-sizing: border-box;
+  padding: 20px 24px;
+  background: var(--bp-app-bg-secondary);
+  color: var(--bp-text);
+  font-size: var(--bp-font-size);
+  line-height: var(--bp-line-height);
+  min-height: 100%;
+}
+
+.card.dark {
+  background: var(--bp-dark-gray1);
+  color: var(--bp-light-gray5);
+}
+
+.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.row + .row { margin-top: 8px; }
+.cluster { display: flex; gap: 12px; flex-wrap: wrap; align-items: stretch; }
+.label-mono {
+  font-family: var(--bp-font-mono);
+  font-size: 11px;
+  color: var(--bp-text-muted);
+  letter-spacing: 0.01em;
+}
+
+/* swatch primitives */
+.sw {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(17,20,24,.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 6px 8px;
+  font-family: var(--bp-font-mono);
+  font-size: 10px;
+  line-height: 1;
+}
+.sw .name { font-weight: 600; opacity: .9; }
+.sw .hex  { opacity: .65; margin-top: 3px; }
+.sw.dark-text { color: var(--bp-dark-gray1); }
+.sw.light-text { color: var(--bp-light-gray5); }
+
+.ramp { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.ramp .sw { width: auto; height: 64px; }
+
+.col-label {
+  font-family: var(--bp-font-mono);
+  font-size: 10px;
+  color: var(--bp-text-muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
