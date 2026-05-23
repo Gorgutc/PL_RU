@@ -1,0 +1,35 @@
+{
+    "name": "@blueprintjs/eslint-plugin",
+    "version": "6.1.24",
+    "description": "ESLint rules for use with @blueprintjs packages",
+    "main": "lib/index.js",
+    "scripts": {
+        "clean": "rm -rf lib",
+        "compile": "tsc -p src/",
+        "lint": "es-lint",
+        "lint-fix": "es-lint --fix",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "@typescript-eslint/utils": "^8.56.1",
+        "tslib": "catalog:"
+    },
+    "peerDependencies": {
+        "eslint": "^8.57 || ^9.0.0"
+    },
+    "devDependencies": {
+        "@blueprintjs/node-build-scripts": "workspace:^",
+        "@types/dedent": "~0.7.2",
+        "@typescript-eslint/rule-tester": "^8.56.1",
+        "dedent": "^1.5.1",
+        "vitest": "catalog:",
+        "typescript": "~5.9.3"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:palantir/blueprint.git",
+        "directory": "packages/eslint-plugin"
+    },
+    "author": "Palantir Technologies",
+    "license": "Apache-2.0"
+}

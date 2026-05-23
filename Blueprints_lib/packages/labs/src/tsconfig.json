@@ -1,0 +1,9 @@
+{
+    "extends": "../../../config/tsconfig.web",
+    "compilerOptions": {
+        "outDir": "../lib/esm",
+        "skipLibCheck": true // Avoiding type conflicts with node_modules
+    },
+    "include": ["**/*.ts", "**/*.tsx", "vitest-env.d.ts"],
+    "exclude": ["**/*.stories.ts", "**/*.stories.tsx"]
+}
