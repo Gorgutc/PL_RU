@@ -31,6 +31,14 @@ Open <http://localhost:3000>.
 
 > **Why the Playwright step?** Playwright is a devDependency, but its browser binaries are downloaded separately. Skip it and `pnpm verify` / `pnpm test:e2e` will fail with `Executable doesn't exist`. The `pnpm verify:static` script skips runtime tests if you don't want to install Chromium.
 
+> **Cloud environments / blocked CDN.** If `cdn.playwright.dev` is not reachable (e.g. Claude Code on the web behind an egress allowlist), `playwright install chromium` fails with `Host not in allowlist`. The starter therefore pins Playwright to `1.56.1`, the version whose `browsers.json` requests Chromium revision `1194` — the revision the Claude Code web harness pre-installs at `/opt/pw-browsers/chromium-1194`. Run verify with the browsers path env var:
+>
+> ```bash
+> PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers pnpm verify
+> ```
+>
+> When bumping Playwright, keep the version aligned with the Chromium revision available on disk — look inside `playwright-core/browsers.json` of the candidate version.
+
 ## Common commands
 
 ```bash
