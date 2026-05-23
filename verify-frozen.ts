@@ -259,6 +259,35 @@ async function testRuntime() {
       consoleErrors.length === 0,
       consoleErrors.slice(0, 3).join(' | '),
     );
+
+    // B6: catch drift between the manual mirror in layout.tsx (themeColor) and
+    // the source of truth ($color-bg in _tokens.scss). Parsing SCSS with a
+    // regex is fine here: tokens are declared one per line in a flat file and
+    // the rule only needs the first occurrence. `expandHexShorthand` normalises
+    // 3-/4-digit forms (#abc, #abcd) to 6-/8-digit so #000 still compares equal
+    // to #000000 — CSS treats them identically.
+    const expandHexShorthand = (h: string): string => {
+      const s = h.replace(/^#/, '');
+      if (s.length === 3 || s.length === 4) {
+        return '#' + s.split('').map((c) => c + c).join('');
+      }
+      return h;
+    };
+    const themeContent =
+      themeCount >= 1
+        ? await page.locator('meta[name="theme-color"]').first().getAttribute('content')
+        : null;
+    const tokensTxt = await readFile(path.join(SRC, 'styles', '_tokens.scss'), 'utf8');
+    const colorBgMatch = tokensTxt.match(/^\$color-bg:\s*(#[0-9a-fA-F]{3,8})\b/m);
+    const expectedBg = colorBgMatch ? expandHexShorthand(colorBgMatch[1].toLowerCase()) : null;
+    const actualBg = themeContent !== null ? expandHexShorthand(themeContent.toLowerCase()) : null;
+    const metaDetail =
+      themeContent === null ? '(missing)' : themeContent === '' ? '(empty)' : themeContent;
+    record(
+      'B6: <meta theme-color> content matches $color-bg in _tokens.scss',
+      expectedBg !== null && actualBg !== null && expectedBg === actualBg,
+      `meta=${metaDetail} tokens=${expectedBg ?? '(no $color-bg match)'}`,
+    );
   });
 }
 
