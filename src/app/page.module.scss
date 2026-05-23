@@ -1,0 +1,26 @@
+@use '../styles/tokens' as t;
+
+// Full-bleed dashboard area; clears the fixed header.
+.page {
+  max-width: none;
+  padding-top: calc(#{t.$header-height} + #{t.$space-5});
+}
+
+.placeholder {
+  display: grid;
+  place-items: center;
+  gap: t.$space-3;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.num {
+  font-size: clamp(4rem, 12vw, 12rem);
+  font-weight: 800;
+  line-height: 1;
+  color: t.$color-accent;
+}
+
+.heading {
+  margin: 0;
+}

@@ -7,7 +7,7 @@
   background: t.$color-surface;
   border: 0.0625rem solid t.$color-border;
 
-  @include m.media-up(md) {
+  @include m.media-up(lg) {
     padding: t.$space-6;
   }
 }

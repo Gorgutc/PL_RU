@@ -7,10 +7,16 @@ $color-surface: #14181d;
 $color-border: #2a3038;
 $color-text: #e6e8eb;
 $color-text-muted: #9098a1;
-$color-accent: #5e9eff;
-$color-accent-hover: #7eb3ff;
+$color-accent: #2970ff;
+$color-accent-hover: #4d85ff;
 $color-danger: #e25c5c;
 $color-success: #4caf7d;
+
+// ─── Header / chrome (PraiOS spec) ───────────────────────────────────────────
+$color-header-bg: #0c1316; // header surface (distinct from $color-bg → keeps B6)
+$color-stroke: #e9eaeb; // bright spec stroke; use low-alpha as a hairline
+$color-stroke-button: #515556; // outline of header action buttons
+$color-icon-text: #efefef; // header icon + text color
 
 // ─── Spacing (4 px grid expressed in rem) ────────────────────────────────────
 $space-1: 0.25rem;
@@ -28,12 +34,18 @@ $font-mono: 'JetBrains Mono', ui-monospace, sfmono-regular, monospace;
 
 $fs-body: 1rem;
 $fs-small: 0.875rem;
+$fs-nav: clamp(0.8125rem, 0.74rem + 0.2vw, 0.95rem); // header tab / button labels (fluid)
 $fs-h1: clamp(2rem, 4vw, 3rem);
 $fs-h2: clamp(1.5rem, 3vw, 2.25rem);
 $fs-h3: clamp(1.25rem, 2.5vw, 1.5rem);
 
 // ─── Layout ──────────────────────────────────────────────────────────────────
 $container-max: 80rem;
+
+// Header geometry — fluid (resin) between 1240→4K locks; ≈48px base at 1240.
+$header-height: clamp(3rem, 1.9rem + 2vw, 4.5rem);
+$logo-width: clamp(7.75rem, 5.7rem + 2.6vw, 11rem); // ≈124px → grows on large screens
+$logo-height: clamp(2.125rem, 1.55rem + 0.72vw, 3rem); // ≈34px → keeps ~3.65:1
 
 // ─── Radii / shadows ─────────────────────────────────────────────────────────
 $radius-sm: 0.25rem;

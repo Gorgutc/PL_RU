@@ -26,7 +26,7 @@ You are the spec guardian.
 - **A7** Blueprint imports come from `@blueprintjs/core` / `@blueprintjs/icons` package root only
 - **A8** no `px` for `font-size` in SCSS
 - Component co-location: `<Name>.tsx` next to `<Name>.module.scss`
-- Mobile-first media queries via `@include m.media-up(...)`
+- Desktop-first media queries via `@include m.media-up(lg|xl|xxl|uhd)` (per CLAUDE.md #9; base 1240, fluid `clamp()` between locks 1440/1920/2560/3840)
 - All `<img>` have `alt` (or use `next/image`)
 - TypeScript strict — no `any` in new code (warn, don't fail)
 

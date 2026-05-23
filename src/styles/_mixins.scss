@@ -1,25 +1,27 @@
-// Mobile-first breakpoints. Use as: @include media-up(md) { ... }
+// Desktop-first breakpoints (app range 1240→4K). Base = 1240px has NO media query;
+// layout is fluid via clamp() between these locks. Use as: @include media-up(xl) { ... }
 
-$bp-sm: 23.4375rem; // 375 px
-$bp-md: 48rem; // 768 px
-$bp-lg: 64rem; // 1024 px
-$bp-xl: 80rem; // 1280 px
+$bp-base: 77.5rem; // 1240 px — min desktop width (base, no media query)
+$bp-lg: 90rem; // 1440 px
+$bp-xl: 120rem; // 1920 px
+$bp-xxl: 160rem; // 2560 px
+$bp-uhd: 240rem; // 3840 px (4K)
 
 @mixin media-up($size) {
-  @if $size == sm {
-    @media (min-width: $bp-sm) {
-      @content;
-    }
-  } @else if $size == md {
-    @media (min-width: $bp-md) {
-      @content;
-    }
-  } @else if $size == lg {
+  @if $size == lg {
     @media (min-width: $bp-lg) {
       @content;
     }
   } @else if $size == xl {
     @media (min-width: $bp-xl) {
+      @content;
+    }
+  } @else if $size == xxl {
+    @media (min-width: $bp-xxl) {
+      @content;
+    }
+  } @else if $size == uhd {
+    @media (min-width: $bp-uhd) {
       @content;
     }
   } @else {

@@ -1,15 +1,29 @@
-import { ExampleCard } from '@/components/ExampleCard/ExampleCard';
+'use client';
+
+import { useState } from 'react';
+import { Card } from '@blueprintjs/core';
+import { Header, HEADER_TABS, type TabId } from '@/components/Header/Header';
+import styles from './page.module.scss';
 
 export default function Page() {
+  const [activeTab, setActiveTab] = useState<TabId>('map');
+  const pageNumber = HEADER_TABS.findIndex((tab) => tab.id === activeTab) + 1;
+  const pageLabel = HEADER_TABS.find((tab) => tab.id === activeTab)?.label ?? '';
+
   return (
-    <main>
-      <h1>TS Frontend Starter</h1>
-      <p>Next.js 16 + React 19 + Blueprint + SCSS modules. Replace this page with your app.</p>
-      <ExampleCard
-        title="Hello from Blueprint"
-        body="This card uses a Blueprint Card + Button, wrapped in a SCSS module. Edit src/components/ExampleCard/ to see how the pattern works."
-        ctaLabel="Get started"
-      />
-    </main>
+    <>
+      <Header activeTab={activeTab} onTabChange={setActiveTab} />
+      <main className={styles.page}>
+        <Card className={styles.placeholder}>
+          <span className={styles.num} aria-hidden="true">
+            {pageNumber}
+          </span>
+          <h1 className={styles.heading}>
+            Страница {pageNumber} · {pageLabel}
+          </h1>
+          <p>Заглушка контента — переключение разделов работает.</p>
+        </Card>
+      </main>
+    </>
   );
 }

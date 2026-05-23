@@ -34,7 +34,7 @@ Each rule that maps to a `verify-frozen.ts` test is tagged `(verify: <id>)`.
 6. Blueprint usage: import only from `@blueprintjs/core` / `@blueprintjs/icons` package roots `(verify: A7)`. Never from internal paths (`@blueprintjs/core/lib/esm/...`).
 7. No `localStorage` / `sessionStorage` in `src/` `(verify: A6)`. State via React state, URL, or server.
 8. No `prefers-color-scheme` for theme. Dark mode is set via `<html class="bp6-dark">` in `layout.tsx`.
-9. Mobile-first SCSS: 375 → 768 → 1024 → 1280. Use `@include m.media-up(md)` from `_mixins.scss`.
+9. Desktop-first SCSS — app range **1240 → 4K**. Base = 1240px (no media query); fluid `clamp()` between locks at **1440 → 1920 → 2560 → 3840**. Use `@include m.media-up(lg|xl|xxl|uhd)` from `_mixins.scss` for reflow / pinned values. Root `font-size` stays fixed (Blueprint is px-based — global rem-scaling would desync it).
 10. All `<img>` need `alt`. Use `next/image` for any image in the bundle. No `px` for `font-size` — `rem` / `clamp` only `(verify: A8)`.
 
 ## Reference folders (READ-ONLY)

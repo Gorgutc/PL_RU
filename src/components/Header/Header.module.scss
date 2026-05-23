@@ -1,0 +1,95 @@
+@use '../../styles/tokens' as t;
+@use '../../styles/mixins' as m;
+
+// Fixed top bar (Blueprint Navbar shell). Theme-sensitive props are scoped under
+// .bp6-dark so they win over Blueprint's dark navbar rules (equal specificity,
+// later source order).
+.header {
+  height: t.$header-height;
+  min-height: t.$header-height;
+  padding: 0;
+}
+
+// 3-zone grid: brand | tabs (true-centered) | actions. The surface (bg + hairline)
+// is painted on .inner — it fully covers Blueprint's dark-navbar background, so we
+// avoid a specificity fight and the :global override the dark rule would require.
+.inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: t.$space-4;
+  height: 100%;
+  padding-inline: t.$space-4;
+  background-color: t.$color-header-bg;
+  border-bottom: 0.0625rem solid rgba(t.$color-stroke, 0.08);
+
+  @include m.media-up(xl) {
+    padding-inline: t.$space-6;
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: t.$space-3;
+  justify-self: start;
+  min-width: 0;
+}
+
+// Placeholder wordmark — swapped for the real 124×34 SVG logo later.
+.logo {
+  display: inline-flex;
+  align-items: center;
+  width: t.$logo-width;
+  height: t.$logo-height;
+  font-weight: 700;
+  font-size: clamp(1.05rem, 0.85rem + 0.6vw, 1.5rem);
+  letter-spacing: 0.01em;
+  color: t.$color-icon-text;
+  white-space: nowrap;
+}
+
+.title {
+  font-size: t.$fs-nav;
+  color: t.$color-text-muted;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: t.$space-1;
+  justify-self: center;
+}
+
+.tab {
+  font-size: t.$fs-nav;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: t.$space-2;
+  justify-self: end;
+}
+
+// Action buttons: minimal Blueprint button + the spec stroke. Blueprint sets no
+// button border outside forced-colors mode, so a single-class rule wins here.
+.actionBtn {
+  font-size: t.$fs-nav;
+  border: 0.0625rem solid t.$color-stroke-button;
+  white-space: nowrap;
+}
+
+.statusDot {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: t.$space-2;
+  border-radius: 50%;
+  background-color: t.$color-success;
+}
