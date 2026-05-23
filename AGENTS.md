@@ -18,6 +18,12 @@ pnpm verify       # architecture regression
 pnpm ship         # full quality gate: format + lint + stylelint + typecheck + test + verify
 ```
 
+## Reference folders (READ-ONLY)
+
+- `Blueprints_lib/` — Palantir Blueprint monorepo. Read-only reference for component APIs and tokens. Start with `Blueprints_lib/llms.txt` for the curated index.
+- `Osiris_ref/` — Next.js 16 OSINT dashboard. Read-only reference for layout patterns and motion. Uses plain CSS, **not** SCSS modules or Blueprint — translate, don't copy.
+- Never edit, move, or delete anything inside either folder. The Claude hook `scripts/verify-reference.js` will flag drift; `.claude/settings.json` denies writes at the harness level.
+
 ## What NOT to do
 
 - Don't add Tailwind even if a code suggestion mentions it.
@@ -26,6 +32,7 @@ pnpm ship         # full quality gate: format + lint + stylelint + typecheck + t
 - Don't import Blueprint internals (e.g. `@blueprintjs/core/lib/esm/...`). Use only the package root.
 - Don't use `localStorage` / `sessionStorage`.
 - Don't read or commit anything listed in `DO_NOT_PUSH.md`.
+- Don't write to `Blueprints_lib/` or `Osiris_ref/` — these are read-only references.
 
 ## When in doubt
 
