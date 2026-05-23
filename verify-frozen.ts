@@ -99,13 +99,20 @@ async function testTokensExist() {
 }
 
 async function testNoInlineHex() {
-  // Two files are explicitly allowed to contain hex values: _tokens.scss
-  // (the source of truth) and blueprint-overrides.scss (bridges tokens into
-  // Blueprint CSS variables). Everything else under src/ that defines styles
-  // must reach those tokens via @use.
+  // Files explicitly allowed to contain hex values:
+  //   _tokens.scss              — the source of truth for raw values.
+  //   blueprint-overrides.scss  — bridges tokens into Blueprint CSS variables.
+  //   src/app/layout.tsx        — exports `viewport.themeColor`, a string
+  //                               literal consumed by Next as a <meta> tag.
+  //                               It is TS, not SCSS, and structurally cannot
+  //                               `@use` SCSS tokens; the color is mirrored
+  //                               manually from `$color-bg` in _tokens.scss.
+  // Everything else under src/ that defines styles must reach those tokens
+  // via @use.
   const ALLOW = new Set([
     path.join('src', 'styles', '_tokens.scss'),
     path.join('src', 'styles', 'blueprint-overrides.scss'),
+    path.join('src', 'app', 'layout.tsx'),
   ]);
   const files = await walk(SRC);
   const offenders: string[] = [];
@@ -118,7 +125,7 @@ async function testNoInlineHex() {
     if (hex) offenders.push(`${rel} (${hex.length})`);
   }
   record(
-    'A5: no inline hex outside _tokens.scss / blueprint-overrides.scss',
+    'A5: no inline hex outside _tokens.scss / blueprint-overrides.scss / layout.tsx',
     offenders.length === 0,
     offenders.length ? offenders.join('; ') : undefined,
   );
@@ -251,6 +258,35 @@ async function testRuntime() {
       'B5: no console errors on load',
       consoleErrors.length === 0,
       consoleErrors.slice(0, 3).join(' | '),
+    );
+
+    // B6: catch drift between the manual mirror in layout.tsx (themeColor) and
+    // the source of truth ($color-bg in _tokens.scss). Parsing SCSS with a
+    // regex is fine here: tokens are declared one per line in a flat file and
+    // the rule only needs the first occurrence. `expandHexShorthand` normalises
+    // 3-/4-digit forms (#abc, #abcd) to 6-/8-digit so #000 still compares equal
+    // to #000000 — CSS treats them identically.
+    const expandHexShorthand = (h: string): string => {
+      const s = h.replace(/^#/, '');
+      if (s.length === 3 || s.length === 4) {
+        return '#' + s.split('').map((c) => c + c).join('');
+      }
+      return h;
+    };
+    const themeContent =
+      themeCount >= 1
+        ? await page.locator('meta[name="theme-color"]').first().getAttribute('content')
+        : null;
+    const tokensTxt = await readFile(path.join(SRC, 'styles', '_tokens.scss'), 'utf8');
+    const colorBgMatch = tokensTxt.match(/^\$color-bg:\s*(#[0-9a-fA-F]{3,8})\b/m);
+    const expectedBg = colorBgMatch ? expandHexShorthand(colorBgMatch[1].toLowerCase()) : null;
+    const actualBg = themeContent !== null ? expandHexShorthand(themeContent.toLowerCase()) : null;
+    const metaDetail =
+      themeContent === null ? '(missing)' : themeContent === '' ? '(empty)' : themeContent;
+    record(
+      'B6: <meta theme-color> content matches $color-bg in _tokens.scss',
+      expectedBg !== null && actualBg !== null && expectedBg === actualBg,
+      `meta=${metaDetail} tokens=${expectedBg ?? '(no $color-bg match)'}`,
     );
   });
 }

@@ -35,6 +35,19 @@ Each rule that maps to a `verify-frozen.ts` test is tagged `(verify: <id>)`.
 9. Mobile-first SCSS: 375 → 768 → 1024 → 1280. Use `@include m.media-up(md)` from `_mixins.scss`.
 10. All `<img>` need `alt`. Use `next/image` for any image in the bundle. No `px` for `font-size` — `rem` / `clamp` only `(verify: A8)`.
 
+## Reference folders (READ-ONLY)
+
+Two reference folders live at the project root:
+
+- `Blueprints_lib/` — Palantir Blueprint monorepo. **Use for**: looking up component APIs (`packages/core`, `packages/icons`), token names (`packages/colors`), the curated index in `Blueprints_lib/llms.txt`. **Before generating any component block, check whether Blueprint already exposes an equivalent**; if it does, import it from `@blueprintjs/core` / `@blueprintjs/icons` rather than rolling your own.
+- `Osiris_ref/` — Next.js 16 OSINT dashboard. **Use for**: layout patterns, motion / animation choices, HUD-style information density, keyboard-shortcut UX. **Note**: Osiris uses plain CSS, not SCSS modules, and does **not** use Blueprint — so copy *structure and intent*, not stylesheets or class names. Translate every borrowed pattern into our tokens + Blueprint + SCSS modules stack.
+
+**Hard rules**:
+1. Both folders are **READ-ONLY**. Never `Edit`, `Write`, `rm`, or `mv` anything inside them. `.claude/settings.json` enforces this via `permissions.deny`.
+2. Before generating a new component, run a quick check: does Blueprint already have it? does Osiris have a similar pattern worth adapting? If yes, cite the file you looked at in your intent block.
+3. Reference-folder paths in chat / commits / docs use the on-disk layout: `./Blueprints_lib/...`, `./Osiris_ref/...`.
+4. Drift is caught by the `Stop` hook (`scripts/verify-reference.js`). If it reports FAIL, revert with `git checkout -- Blueprints_lib Osiris_ref` before moving on.
+
 ## Workflow
 
 For any change to `src/**`, `next.config.ts`, `tsconfig.json`, `playwright.config.ts`, `verify-frozen.ts`, or `package.json`:
@@ -90,7 +103,13 @@ When in doubt, **state the intent**. Cost of one extra round-trip is far below c
 │   ├── unit/            # vitest
 │   └── e2e/             # playwright
 ├── verify-frozen.ts     # architecture regression
+├── scripts/
+│   ├── sync-refs.sh         # SessionStart: verify refs present, record baseline
+│   └── verify-reference.js  # Stop: assert refs untouched (git status + sha)
+├── Blueprints_lib/      # READ-ONLY — Palantir Blueprint monorepo (reference)
+├── Osiris_ref/          # READ-ONLY — Next.js 16 OSINT dashboard (reference)
 ├── .claude/
+│   ├── settings.json    # additionalDirectories, deny rules for refs, hooks
 │   ├── agents/          # ts-spec-guardian, ts-quality-gate, ts-context-keeper
 │   ├── commands/        # /ship
 │   └── skill-*.md       # methodology guides

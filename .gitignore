@@ -42,3 +42,6 @@ test-results/
 next-env.d.ts
 
 *.tsbuildinfo
+
+# Per-session baseline written by scripts/sync-refs.sh
+.claude/.refs-baseline/

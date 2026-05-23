@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "additionalDirectories": ["./Blueprints_lib", "./Osiris_ref"],
+  "permissions": {
+    "deny": [
+      "Edit(./Blueprints_lib/**)",
+      "Edit(./Osiris_ref/**)",
+      "Write(./Blueprints_lib/**)",
+      "Write(./Osiris_ref/**)",
+      "Bash(rm:./Blueprints_lib/**)",
+      "Bash(rm:./Osiris_ref/**)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ./scripts/sync-refs.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./scripts/verify-reference.js"
+          }
+        ]
+      }
+    ]
+  }
+}
