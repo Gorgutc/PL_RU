@@ -1,0 +1,223 @@
+/* ============================================================================
+   Blueprint Design System — Colors & Type
+   Source: github.com/palantir/blueprint  (packages/colors, packages/core/src/common)
+   This file mirrors the public Sass API as CSS custom properties so that any
+   HTML artifact in this project can opt into the Blueprint look with a single
+   <link> tag.
+   ============================================================================ */
+
+/* ---------- Type ---------- */
+/* Blueprint deliberately uses the OS system font stack — no webfont.
+   The stack is part of why apps built on Blueprint feel native on every OS. */
+
+:root {
+  --bp-font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  --bp-font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+
+  /* Base font sizes (Blueprint is built on a 4px spacing unit; body = 14px) */
+  --bp-font-size:        14px;
+  --bp-font-size-small:  12px;
+  --bp-font-size-large:  16px;
+  --bp-line-height:      1.28581;
+
+  /* Heading scale (px font-size / px line-height) */
+  --bp-h1-size: 36px;  --bp-h1-leading: 40px;
+  --bp-h2-size: 28px;  --bp-h2-leading: 32px;
+  --bp-h3-size: 22px;  --bp-h3-leading: 25px;
+  --bp-h4-size: 18px;  --bp-h4-leading: 21px;
+  --bp-h5-size: 16px;  --bp-h5-leading: 19px;
+  --bp-h6-size: 14px;  --bp-h6-leading: 16px;
+}
+
+/* ---------- Grayscale ---------- */
+:root {
+  --bp-black:        #111418;
+
+  --bp-dark-gray1:   #1c2127;
+  --bp-dark-gray2:   #252a31;
+  --bp-dark-gray3:   #2f343c;
+  --bp-dark-gray4:   #383e47;
+  --bp-dark-gray5:   #404854;
+
+  --bp-gray1:        #5f6b7c;
+  --bp-gray2:        #738091;
+  --bp-gray3:        #8f99a8;
+  --bp-gray4:        #abb3bf;
+  --bp-gray5:        #c5cbd3;
+
+  --bp-light-gray1:  #d3d8de;
+  --bp-light-gray2:  #dce0e5;
+  --bp-light-gray3:  #e5e8eb;
+  --bp-light-gray4:  #edeff2;
+  --bp-light-gray5:  #f6f7f9;
+
+  --bp-white:        #ffffff;
+}
+
+/* ---------- Core colors (intent palette uses *3) ---------- */
+:root {
+  --bp-blue1: #184a90; --bp-blue2: #215db0; --bp-blue3: #2d72d2; --bp-blue4: #4c90f0; --bp-blue5: #8abbff;
+  --bp-green1: #165a36; --bp-green2: #1c6e42; --bp-green3: #238551; --bp-green4: #32a467; --bp-green5: #72ca9b;
+  --bp-orange1: #77450d; --bp-orange2: #935610; --bp-orange3: #c87619; --bp-orange4: #ec9a3c; --bp-orange5: #fbb360;
+  --bp-red1: #8e292c; --bp-red2: #ac2f33; --bp-red3: #cd4246; --bp-red4: #e76a6e; --bp-red5: #fa999c;
+}
+
+/* ---------- Extended colors ---------- */
+:root {
+  --bp-vermilion1: #96290d; --bp-vermilion2: #b83211; --bp-vermilion3: #d33d17; --bp-vermilion4: #eb6847; --bp-vermilion5: #ff9980;
+  --bp-rose1: #a82255; --bp-rose2: #c22762; --bp-rose3: #db2c6f; --bp-rose4: #f5498b; --bp-rose5: #ff66a1;
+  --bp-violet1: #5c255c; --bp-violet2: #7c327c; --bp-violet3: #9d3f9d; --bp-violet4: #bd6bbd; --bp-violet5: #d69fd6;
+  --bp-indigo1: #5642a6; --bp-indigo2: #634dbf; --bp-indigo3: #7961db; --bp-indigo4: #9881f3; --bp-indigo5: #bdadff;
+  --bp-cerulean1: #0c5174; --bp-cerulean2: #0f6894; --bp-cerulean3: #147eb3; --bp-cerulean4: #3fa6da; --bp-cerulean5: #68c1ee;
+  --bp-turquoise1: #004d46; --bp-turquoise2: #007067; --bp-turquoise3: #00a396; --bp-turquoise4: #13c9ba; --bp-turquoise5: #7ae1d8;
+  --bp-forest1: #1d7324; --bp-forest2: #238c2c; --bp-forest3: #29a634; --bp-forest4: #43bf4d; --bp-forest5: #62d96b;
+  --bp-lime1: #43501b; --bp-lime2: #5a701a; --bp-lime3: #8eb125; --bp-lime4: #b6d94c; --bp-lime5: #d4f17e;
+  --bp-gold1: #5c4405; --bp-gold2: #866103; --bp-gold3: #d1980b; --bp-gold4: #f0b726; --bp-gold5: #fbd065;
+  --bp-sepia1: #5e4123; --bp-sepia2: #7a542e; --bp-sepia3: #946638; --bp-sepia4: #af855a; --bp-sepia5: #d0b090;
+}
+
+/* ---------- Semantic aliases — LIGHT theme (default) ---------- */
+:root {
+  /* Intents */
+  --bp-intent-primary: var(--bp-blue3);
+  --bp-intent-success: var(--bp-green3);
+  --bp-intent-warning: var(--bp-orange3);
+  --bp-intent-danger:  var(--bp-red3);
+
+  /* Surfaces */
+  --bp-app-bg:           var(--bp-light-gray5);   /* page */
+  --bp-app-bg-secondary: var(--bp-white);         /* cards on page */
+  --bp-app-bg-elevated:  var(--bp-light-gray4);   /* lifted card */
+
+  /* Text */
+  --bp-text:          var(--bp-dark-gray1);
+  --bp-text-muted:    var(--bp-gray1);
+  --bp-text-disabled: rgba(95, 107, 124, 0.6);
+  --bp-heading:       var(--bp-dark-gray1);
+  --bp-link:          var(--bp-blue2);
+
+  /* Lines & dividers */
+  --bp-divider:        rgba(17, 20, 24, 0.15);
+  --bp-divider-muted:  rgba(17, 20, 24, 0.10);
+
+  /* Focus */
+  --bp-focus-ring:     rgba(33, 93, 176, 0.752); /* blue2 @ 0.752 */
+  --bp-outline:        rgba(45, 114, 210, 0.6);  /* blue3 @ 0.6 */
+
+  /* Code */
+  --bp-code-text: var(--bp-text-muted);
+  --bp-code-bg:   rgba(255, 255, 255, 0.7);
+
+  /* Spacing — 4px-based scale */
+  --bp-space:    4px;
+  --bp-space-1:  4px;
+  --bp-space-2:  8px;
+  --bp-space-3:  12px;
+  --bp-space-4:  16px;
+  --bp-space-5:  20px;
+  --bp-space-6:  24px;
+  --bp-space-8:  32px;
+  --bp-space-10: 40px;
+  --bp-space-12: 48px;
+
+  /* Radius */
+  --bp-radius: 4px;
+
+  /* Heights */
+  --bp-button-h:         30px;  /* spacing * 7.5 */
+  --bp-button-h-small:   24px;
+  --bp-button-h-smaller: 20px;
+  --bp-button-h-large:   40px;
+  --bp-input-h:          30px;
+  --bp-input-h-small:    24px;
+  --bp-input-h-large:    40px;
+  --bp-navbar-h:         50px;
+
+  /* Light-theme elevations */
+  --bp-elevation-0: 0 0 0 1px rgba(17,20,24,.15), 0 0 5px 0 rgba(0,0,0,.02);
+  --bp-elevation-1: 0 0 0 1px rgba(17,20,24,.10), 0 1px 3px 0 rgba(0,0,0,.10), 0 1px 2px -1px rgba(0,0,0,.10);
+  --bp-elevation-2: 0 0 0 1px rgba(17,20,24,.10), 0 4px 6px -4px rgba(0,0,0,.10), 0 10px 15px -3px rgba(0,0,0,.10);
+  --bp-elevation-3: 0 0 0 1px rgba(17,20,24,.10), 0 20px 25px -5px rgba(0,0,0,.10), 0 10px 15px -3px rgba(0,0,0,.10);
+  --bp-elevation-4: 0 0 0 1px rgba(17,20,24,.10), 0 25px 50px -12px rgba(0,0,0,.30);
+  --bp-input-shadow: inset 0 0 0 1px rgba(17,20,24,.20), inset 0 1px 1px rgba(17,20,24,.30);
+
+  /* Motion */
+  --bp-ease:        cubic-bezier(0.4, 1, 0.75, 0.9);
+  --bp-ease-bounce: cubic-bezier(0.54, 1.12, 0.38, 1.11);
+  --bp-duration:    100ms;
+}
+
+/* ---------- Semantic aliases — DARK theme (overrides on .bp6-dark) ---------- */
+.bp6-dark,
+[data-bp-color-scheme="dark"] {
+  --bp-app-bg:           var(--bp-dark-gray1);
+  --bp-app-bg-secondary: var(--bp-dark-gray1);   /* dark surface */
+  --bp-app-bg-elevated:  var(--bp-dark-gray3);
+
+  --bp-text:          var(--bp-light-gray5);
+  --bp-text-muted:    var(--bp-gray4);
+  --bp-text-disabled: rgba(171, 179, 191, 0.6);
+  --bp-heading:       var(--bp-light-gray5);
+  --bp-link:          var(--bp-blue5);
+
+  --bp-divider:        rgba(17, 20, 24, 0.4);
+  --bp-divider-muted:  rgba(255, 255, 255, 0.10);
+
+  --bp-focus-ring:     rgba(138, 187, 255, 0.752); /* blue5 @ 0.752 */
+
+  --bp-code-text: var(--bp-gray4);
+  --bp-code-bg:   rgba(17, 20, 24, 0.3);
+
+  --bp-elevation-0: inset 0 0 0 1px rgba(255,255,255,.20), 0 0 10px 0 rgba(0,0,0,.20);
+  --bp-elevation-1: inset 0 0 0 1px rgba(255,255,255,.20), 0 1px 10px 0 rgba(0,0,0,.20), inset 0 .5px 0 0 rgba(255,255,255,.08);
+  --bp-elevation-2: inset 0 0 0 1px rgba(255,255,255,.20), 0 4px 6px -4px rgba(0,0,0,.5), inset 0 .5px 0 0 rgba(255,255,255,.08), 0 10px 30px -5px rgba(0,0,0,.5);
+  --bp-elevation-3: inset 0 0 0 1px rgba(255,255,255,.20), 0 20px 25px -5px rgba(0,0,0,.3), inset 0 .5px 0 0 rgba(255,255,255,.08), 0 10px 30px -5px rgba(0,0,0,.3);
+  --bp-elevation-4: inset 0 0 0 1px rgba(255,255,255,.20), 0 25px 60px -12px rgba(0,0,0,.85), inset 0 .5px 0 0 rgba(255,255,255,.08);
+  --bp-input-shadow: inset 0 0 0 1px rgba(255,255,255,.20), inset 0 -1px 1px 0 rgba(255,255,255,.30);
+}
+
+/* ---------- Base typography reset (opt-in by adding class="bp6" to html/body) ---------- */
+.bp6 {
+  font-family: var(--bp-font-sans);
+  font-size:   var(--bp-font-size);
+  line-height: var(--bp-line-height);
+  color:       var(--bp-text);
+  background:  var(--bp-app-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.bp6 h1, .bp6 .bp6-heading.h1 { font-size: var(--bp-h1-size); line-height: var(--bp-h1-leading); }
+.bp6 h2, .bp6 .bp6-heading.h2 { font-size: var(--bp-h2-size); line-height: var(--bp-h2-leading); }
+.bp6 h3, .bp6 .bp6-heading.h3 { font-size: var(--bp-h3-size); line-height: var(--bp-h3-leading); }
+.bp6 h4, .bp6 .bp6-heading.h4 { font-size: var(--bp-h4-size); line-height: var(--bp-h4-leading); }
+.bp6 h5, .bp6 .bp6-heading.h5 { font-size: var(--bp-h5-size); line-height: var(--bp-h5-leading); }
+.bp6 h6, .bp6 .bp6-heading.h6 { font-size: var(--bp-h6-size); line-height: var(--bp-h6-leading); }
+.bp6 h1,.bp6 h2,.bp6 h3,.bp6 h4,.bp6 h5,.bp6 h6 {
+  color: var(--bp-heading);
+  font-weight: 600;
+  margin: 0 0 var(--bp-space-3);
+}
+
+.bp6 .bp6-text-muted    { color: var(--bp-text-muted); }
+.bp6 .bp6-text-disabled { color: var(--bp-text-disabled); }
+.bp6 .bp6-text-large    { font-size: var(--bp-font-size-large); }
+.bp6 .bp6-text-small    { font-size: var(--bp-font-size-small); }
+.bp6 .bp6-monospace-text{ font-family: var(--bp-font-mono); }
+.bp6 a { color: var(--bp-link); text-decoration: none; }
+.bp6 a:hover { text-decoration: underline; }
+
+.bp6 .bp6-code,
+.bp6 code {
+  font-family: var(--bp-font-mono);
+  font-size: 12px;
+  background: var(--bp-code-bg);
+  color: var(--bp-code-text);
+  box-shadow: inset 0 0 0 1px rgba(17,20,24,.2);
+  border-radius: var(--bp-radius);
+  padding: 2px 4px;
+}

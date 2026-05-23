@@ -2,28 +2,47 @@
 /**
  * verify-reference.js — Stop hook for the TS frontend starter.
  *
- * Asserts that the read-only reference folders (Blueprints_lib, Osiris_ref)
- * were NOT modified during the session. Two checks per folder:
+ * Asserts that read-only reference folders were NOT modified during the
+ * session. Two checks per folder:
  *   1. git status (porcelain) — catches any tracked-file edits / new files
  *      / deletions inside the folder.
  *   2. baseline sha — compares the current find-manifest hash to the one
  *      written by sync-refs.sh at session start. Catches edits that
  *      somehow bypass git (unlikely, but the baseline is cheap).
  *
- * Exit 0 if clean. Exit 1 with a remediation hint if drift detected.
+ * Two kinds of refs are protected:
+ *   - top-level reference clones:        Blueprints_lib, Osiris_ref
+ *   - design-system agent skills:        .claude/skills/<name>/   (auto-discovered)
  *
+ * Adding a new skill is zero-config: drop it under .claude/skills/ and
+ * this script picks it up on the next Stop hook.
+ *
+ * Exit 0 if clean. Exit 1 with a remediation hint if drift detected.
  * Plain Node ESM — no dependencies, runnable even before `pnpm install`.
  */
 
 import { execSync } from 'node:child_process';
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { readdirSync } from 'node:fs';
 import path from 'node:path';
 
 const ROOT = process.cwd();
-const REFS = ['Blueprints_lib', 'Osiris_ref'];
 const STATE_DIR = path.join(ROOT, '.claude', '.refs-baseline');
+
+// Static top-level refs.
+const STATIC_REFS = ['Blueprints_lib', 'Osiris_ref'];
+
+// Auto-discover .claude/skills/<name>/ dirs.
+function discoverSkillRefs() {
+  const skillsDir = path.join(ROOT, '.claude', 'skills');
+  if (!existsSync(skillsDir)) return [];
+  return readdirSync(skillsDir, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => path.join('.claude', 'skills', e.name))
+    .sort();
+}
+
+const REFS = [...STATIC_REFS, ...discoverSkillRefs()];
 
 const results = [];
 function record(name, pass, detail) {
@@ -59,20 +78,32 @@ function manifestHash(absDir) {
   return createHash('sha256').update(rels.join('\n') + '\n').digest('hex');
 }
 
+// Path slashes are turned into dashes to keep state files in a flat dir.
+function stateName(ref) {
+  return ref.replace(/\//g, '-');
+}
+
 function checkGitClean(ref) {
   try {
     const out = execSync(`git status --porcelain -- ${ref}`, {
       cwd: ROOT,
       encoding: 'utf8',
     });
-    if (out.trim() === '') {
+    // Filter out untracked-only entries (`?? path`): a freshly-installed ref
+    // before its first commit is legitimately untracked, and any *content*
+    // drift inside (new or modified files) is caught by the baseline sha
+    // check below. We only flag tracked-file changes here (M / A / D / R / C / U).
+    const drift = out
+      .split('\n')
+      .filter((line) => line.trim() !== '' && !line.startsWith('??'));
+    if (drift.length === 0) {
       record(`git-clean:${ref}`, true);
       return true;
     }
     record(
       `git-clean:${ref}`,
       false,
-      `tracked changes detected:\n${out.trim()}\n  remediate: git checkout -- ${ref}`,
+      `tracked changes detected:\n${drift.join('\n')}\n  remediate: git checkout -- ${ref}`,
     );
     return false;
   } catch (e) {
@@ -82,7 +113,7 @@ function checkGitClean(ref) {
 }
 
 function checkBaseline(ref) {
-  const baselinePath = path.join(STATE_DIR, `${ref}.sha256`);
+  const baselinePath = path.join(STATE_DIR, `${stateName(ref)}.sha256`);
   if (!existsSync(baselinePath)) {
     // No baseline → SessionStart hook never ran. Don't fail; warn.
     record(

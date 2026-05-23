@@ -17,8 +17,10 @@ Expected: `SUMMARY: <n>/<n> PASS, 0 FAIL`. Update `verify-frozen.ts` when adding
 ## Authority order on conflicts
 
 ```
-verify-frozen.ts  >  user message in chat  >  CLAUDE.md  >  AGENTS.md  >  .claude/skill-*.md
+verify-frozen.ts  >  user message in chat  >  CLAUDE.md  >  AGENTS.md  >  .claude/skill-*.md  ≈  .claude/skills/**/SKILL.md
 ```
+
+`.claude/skill-*.md` (methodology guides) and `.claude/skills/<name>/SKILL.md` (design-system agent skills) sit at the bottom and lose every conflict with anything above. They are *resources*, not laws.
 
 ## Frozen rules (top 10)
 
@@ -47,6 +49,29 @@ Two reference folders live at the project root:
 2. Before generating a new component, run a quick check: does Blueprint already have it? does Osiris have a similar pattern worth adapting? If yes, cite the file you looked at in your intent block.
 3. Reference-folder paths in chat / commits / docs use the on-disk layout: `./Blueprints_lib/...`, `./Osiris_ref/...`.
 4. Drift is caught by the `Stop` hook (`scripts/verify-reference.js`). If it reports FAIL, revert with `git checkout -- Blueprints_lib Osiris_ref` before moving on.
+
+## Design system skills (READ-ONLY)
+
+Two **Agent Skills** live under `.claude/skills/`, installed from curated design-system ZIPs:
+
+- `.claude/skills/osiris-design/` — OSIRIS Design System. *"Egyptian Mythology × Dark Ops × Glassmorphism"*. Brand atmosphere: void-black backgrounds (`#04040A`), gold (`#D4AF37`) + cyan (`#00E5FF`) accents, glass-panel surfaces with `backdrop-filter`, HUD-style uppercase-tracked typography, alert severity ramp (red/orange/gold/green/blue), pulse / scan-line motion. Invoke via `/osiris-design`. Best for: dashboard chrome, status panels, threat indicators, command bars.
+- `.claude/skills/blueprint-design/` — Blueprint Design System (Palantir). Desktop-density vocabulary: 4px grid, 14px body, 30px controls, native-OS font stack, 4-intent palette, 5-step elevation, 100ms easing. Two fully-built UI kits (`foundry-console`, `gotham-intel`) recreate Palantir-style apps end-to-end. Invoke via `/blueprint-design`. Best for: layout fundamentals, density discipline, component composition, intent-driven color.
+
+**How they coexist with the frozen rules** — pick atmosphere from the skills, implementation from our stack:
+
+| Skill says | We do |
+|---|---|
+| OSIRIS: «use Lucide icons» | **Blueprint icons** via `<Icon icon="..." />` from `@blueprintjs/icons`. The Blueprint skill's `assets/icons/` provides the equivalent vocabulary; the OSIRIS skill's `Icon.jsx` is a Lucide curation we ignore. |
+| OSIRIS: `@import url('fonts.googleapis.com/...')` | If we adopt JetBrains Mono / Inter, load via `next/font` in `layout.tsx`. **No `@import` from CDN in `src/`** — bundle locally. |
+| OSIRIS: 50+ inline hex in `colors_and_type.css` | **Translate selectively into `src/styles/_tokens.scss`** as `$color-*` vars. Direct `<link>` to the skill's CSS would import inline hex into the project, violating A5. The skill CSS is a *reference*, not a stylesheet we ship. |
+| Blueprint: «system font stack, never substitute a Google Font» | Acceptable to have Inter / JetBrains Mono in `$font-sans` / `$font-mono` if the design explicitly calls for them, but the fallback chain MUST include `system-ui, -apple-system, sans-serif`. Don't strip the native stack. |
+| OSIRIS: `backdrop-filter: blur(24px) saturate(1.3)` | Allowed as a stylistic choice when the design calls for it. Apply only to dedicated `*-panel` / `*-overlay` classes, never to root or page-wide containers. |
+
+**Hard rules**:
+1. Both skill folders are **READ-ONLY** (same as `Blueprints_lib/` / `Osiris_ref/`). `.claude/settings.json` denies writes; the `Stop` hook (`scripts/verify-reference.js`) catches drift.
+2. Skills are *resources*, not laws. Any conflict between a skill and CLAUDE.md or `verify-frozen.ts` is resolved by the authority order — CLAUDE.md wins.
+3. When borrowing from a skill, cite the file in your `### Intent:` block: e.g. `osiris-design/preview/stat-counters.html` or `blueprint-design/ui_kits/foundry-console/Sidebar.jsx`.
+4. Adding a new skill is zero-config: drop its folder under `.claude/skills/` and `sync-refs.sh` / `verify-reference.js` auto-discover it.
 
 ## Workflow
 
@@ -112,7 +137,10 @@ When in doubt, **state the intent**. Cost of one extra round-trip is far below c
 │   ├── settings.json    # additionalDirectories, deny rules for refs, hooks
 │   ├── agents/          # ts-spec-guardian, ts-quality-gate, ts-context-keeper
 │   ├── commands/        # /ship
-│   └── skill-*.md       # methodology guides
+│   ├── skill-*.md       # methodology guides (legacy single-file skills)
+│   └── skills/          # READ-ONLY — design-system agent skills
+│       ├── osiris-design/      # /osiris-design — OSIRIS brand vocabulary
+│       └── blueprint-design/   # /blueprint-design — Palantir Blueprint design system
 ├── package.json
 ├── tsconfig.json
 ├── next.config.ts
