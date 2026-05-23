@@ -1,0 +1,33 @@
+// Mobile-first breakpoints. Use as: @include media-up(md) { ... }
+
+$bp-sm: 23.4375rem; // 375 px
+$bp-md: 48rem; // 768 px
+$bp-lg: 64rem; // 1024 px
+$bp-xl: 80rem; // 1280 px
+
+@mixin media-up($size) {
+  @if $size == sm {
+    @media (min-width: $bp-sm) {
+      @content;
+    }
+  } @else if $size == md {
+    @media (min-width: $bp-md) {
+      @content;
+    }
+  } @else if $size == lg {
+    @media (min-width: $bp-lg) {
+      @content;
+    }
+  } @else if $size == xl {
+    @media (min-width: $bp-xl) {
+      @content;
+    }
+  } @else {
+    @error "Unknown breakpoint: #{$size}";
+  }
+}
+
+@mixin focus-ring {
+  outline: 0.125rem solid var(--focus-ring, currentcolor);
+  outline-offset: 0.125rem;
+}
