@@ -99,13 +99,20 @@ async function testTokensExist() {
 }
 
 async function testNoInlineHex() {
-  // Two files are explicitly allowed to contain hex values: _tokens.scss
-  // (the source of truth) and blueprint-overrides.scss (bridges tokens into
-  // Blueprint CSS variables). Everything else under src/ that defines styles
-  // must reach those tokens via @use.
+  // Files explicitly allowed to contain hex values:
+  //   _tokens.scss              — the source of truth for raw values.
+  //   blueprint-overrides.scss  — bridges tokens into Blueprint CSS variables.
+  //   src/app/layout.tsx        — exports `viewport.themeColor`, a string
+  //                               literal consumed by Next as a <meta> tag.
+  //                               It is TS, not SCSS, and structurally cannot
+  //                               `@use` SCSS tokens; the color is mirrored
+  //                               manually from `$color-bg` in _tokens.scss.
+  // Everything else under src/ that defines styles must reach those tokens
+  // via @use.
   const ALLOW = new Set([
     path.join('src', 'styles', '_tokens.scss'),
     path.join('src', 'styles', 'blueprint-overrides.scss'),
+    path.join('src', 'app', 'layout.tsx'),
   ]);
   const files = await walk(SRC);
   const offenders: string[] = [];
@@ -118,7 +125,7 @@ async function testNoInlineHex() {
     if (hex) offenders.push(`${rel} (${hex.length})`);
   }
   record(
-    'A5: no inline hex outside _tokens.scss / blueprint-overrides.scss',
+    'A5: no inline hex outside _tokens.scss / blueprint-overrides.scss / layout.tsx',
     offenders.length === 0,
     offenders.length ? offenders.join('; ') : undefined,
   );
