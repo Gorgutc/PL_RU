@@ -15,8 +15,12 @@ $color-success: #4caf7d;
 // ─── Header / chrome (PraiOS spec) ───────────────────────────────────────────
 $color-header-bg: #0c1316; // header surface (distinct from $color-bg → keeps B6)
 $color-stroke: #e9eaeb; // bright spec stroke; use low-alpha as a hairline
-$color-stroke-button: #515556; // outline of header action buttons
-$color-icon-text: #efefef; // header icon + text color
+$color-stroke-button: #515556; // outline of neutral header buttons
+$color-icon-text: #efefef; // header icon + text (≈ white)
+$color-icon-secondary: #535862; // inactive tab icon
+$color-tab-stroke: rgb(17 20 24 / 15%); // segmented-tab divider (inset)
+$color-data-fg: #1c6e42; // "Данные" green (text + icon)
+$color-data-stroke: rgb(28 110 66 / 50%); // "Данные" green outline
 
 // ─── Spacing (4 px grid expressed in rem) ────────────────────────────────────
 $space-1: 0.25rem;
@@ -37,7 +41,7 @@ $font-sans:
 $font-mono: 'JetBrains Mono', ui-monospace, sfmono-regular, monospace;
 $fs-body: 1rem;
 $fs-small: 0.875rem;
-$fs-nav: clamp(0.8125rem, 0.74rem + 0.2vw, 0.95rem); // header tab / button labels (fluid)
+$fs-nav: 0.75rem; // segmented-tab label (12px, per Figma)
 $fs-h1: clamp(2rem, 4vw, 3rem);
 $fs-h2: clamp(1.5rem, 3vw, 2.25rem);
 $fs-h3: clamp(1.25rem, 2.5vw, 1.5rem);
@@ -45,12 +49,12 @@ $fs-h3: clamp(1.25rem, 2.5vw, 1.5rem);
 // ─── Layout ──────────────────────────────────────────────────────────────────
 $container-max: 80rem;
 
-// Header geometry — fluid (resin) between 1240→4K locks; ≈48px base at 1240.
-$header-height: clamp(3rem, 1.9rem + 2vw, 4.5rem);
-$logo-width: clamp(7.75rem, 5.7rem + 2.6vw, 11rem); // ≈124px → grows on large screens
-$logo-height: clamp(2.125rem, 1.55rem + 0.72vw, 3rem); // ≈34px → keeps ~3.65:1
+// Header geometry — 48px bar (Figma), barely fluid to stay crisp up to 4K.
+$header-height: clamp(3rem, 2.85rem + 0.25vw, 3.25rem); // ≈48px → ≈52px @4K
+$logo-orb-size: 1.375rem; // 22px placeholder orb glyph
 
 // ─── Radii / shadows ─────────────────────────────────────────────────────────
+$radius-xs: 0.1875rem; // 3px — header action buttons
 $radius-sm: 0.25rem;
 $radius-md: 0.5rem;
 $radius-lg: 0.75rem;

@@ -1,6 +1,6 @@
 'use client';
 
-import { Navbar, Button, type IconName } from '@blueprintjs/core';
+import { Icon, type IconName } from '@blueprintjs/core';
 import styles from './Header.module.scss';
 
 export type TabId = 'map' | 'bar' | 'tmi' | 'sat' | 'kick' | 'stats';
@@ -23,10 +23,15 @@ type HeaderProps = {
 
 export function Header({ activeTab, onTabChange }: HeaderProps) {
   return (
-    <Navbar fixedToTop role="banner" className={styles.header}>
+    <header className={styles.header}>
       <div className={styles.inner}>
         <div className={styles.brand}>
-          <span className={styles.logo}>PraiOS</span>
+          <span className={styles.logo} aria-hidden="true">
+            <span className={styles.logoRing}>
+              <span className={styles.logoDot} />
+            </span>
+            <span className={styles.wordmark}>PraiOS</span>
+          </span>
           <span className={styles.title}>Центр управления лодками</span>
         </div>
 
@@ -34,35 +39,38 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           {HEADER_TABS.map((tab) => {
             const isActive = tab.id === activeTab;
             return (
-              <Button
+              <button
                 key={tab.id}
-                className={styles.tab}
-                variant={isActive ? 'solid' : 'minimal'}
-                intent={isActive ? 'primary' : undefined}
-                icon={tab.icon}
-                text={tab.label}
+                type="button"
+                className={isActive ? `${styles.tab} ${styles.tabActive}` : styles.tab}
                 aria-current={isActive ? 'true' : undefined}
                 onClick={() => onTabChange(tab.id)}
-              />
+              >
+                <Icon className={styles.tabIcon} icon={tab.icon} size={16} />
+                <span>{tab.label}</span>
+              </button>
             );
           })}
         </nav>
 
         <div className={styles.actions}>
-          <Button className={styles.actionBtn} variant="minimal" icon="data-connection">
-            <span className={styles.statusDot} aria-hidden="true" />
-            Данные
-          </Button>
-          <Button
-            className={styles.actionBtn}
-            variant="minimal"
-            icon="database"
-            text="База данных"
-          />
-          <Button className={styles.actionBtn} variant="minimal" icon="user" text="Аккаунт" />
-          <Button variant="minimal" icon="notifications" aria-label="Уведомления" />
+          <button type="button" className={`${styles.actionBtn} ${styles.actionBtnData}`}>
+            <Icon className={styles.actionIcon} icon="full-circle" size={16} />
+            <span>Данные</span>
+          </button>
+          <button type="button" className={styles.actionBtn}>
+            <Icon className={styles.actionIcon} icon="database" size={16} />
+            <span>База данных</span>
+          </button>
+          <button type="button" className={styles.actionBtn}>
+            <Icon className={styles.actionIcon} icon="user" size={16} />
+            <span>Аккаунт</span>
+          </button>
+          <button type="button" className={styles.bell} aria-label="Уведомления">
+            <Icon icon="notifications" size={16} />
+          </button>
         </div>
       </div>
-    </Navbar>
+    </header>
   );
 }
