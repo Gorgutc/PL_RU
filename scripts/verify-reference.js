@@ -75,7 +75,9 @@ function manifestHash(absDir) {
       return `./${path.relative(absDir, f)} ${s.size}`;
     })
     .sort();
-  return createHash('sha256').update(rels.join('\n') + '\n').digest('hex');
+  return createHash('sha256')
+    .update(rels.join('\n') + '\n')
+    .digest('hex');
 }
 
 // Path slashes are turned into dashes to keep state files in a flat dir.
@@ -93,9 +95,7 @@ function checkGitClean(ref) {
     // before its first commit is legitimately untracked, and any *content*
     // drift inside (new or modified files) is caught by the baseline sha
     // check below. We only flag tracked-file changes here (M / A / D / R / C / U).
-    const drift = out
-      .split('\n')
-      .filter((line) => line.trim() !== '' && !line.startsWith('??'));
+    const drift = out.split('\n').filter((line) => line.trim() !== '' && !line.startsWith('??'));
     if (drift.length === 0) {
       record(`git-clean:${ref}`, true);
       return true;
@@ -116,11 +116,7 @@ function checkBaseline(ref) {
   const baselinePath = path.join(STATE_DIR, `${stateName(ref)}.sha256`);
   if (!existsSync(baselinePath)) {
     // No baseline → SessionStart hook never ran. Don't fail; warn.
-    record(
-      `baseline:${ref}`,
-      true,
-      `no baseline file (SessionStart hook did not run) — skipped`,
-    );
+    record(`baseline:${ref}`, true, `no baseline file (SessionStart hook did not run) — skipped`);
     return true;
   }
   const expected = readFileSync(baselinePath, 'utf8').trim();

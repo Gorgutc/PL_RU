@@ -1,0 +1,15 @@
+# Generated / vendored / lockfiles
+node_modules/
+.next/
+out/
+build/
+coverage/
+playwright-report/
+test-results/
+pnpm-lock.yaml
+next-env.d.ts
+
+# Read-only reference material + Claude Code harness — not our app code to format
+Osiris_ref/
+Blueprints_lib/
+.claude/

@@ -29,9 +29,12 @@ $space-7: 3rem;
 $space-8: 4rem;
 
 // ─── Typography ──────────────────────────────────────────────────────────────
-$font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+$font-sans:
+  'Inter',
+  system-ui,
+  -apple-system,
+  sans-serif;
 $font-mono: 'JetBrains Mono', ui-monospace, sfmono-regular, monospace;
-
 $fs-body: 1rem;
 $fs-small: 0.875rem;
 $fs-nav: clamp(0.8125rem, 0.74rem + 0.2vw, 0.95rem); // header tab / button labels (fluid)

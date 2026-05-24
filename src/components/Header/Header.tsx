@@ -60,11 +60,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
             text="База данных"
           />
           <Button className={styles.actionBtn} variant="minimal" icon="user" text="Аккаунт" />
-          <Button
-            variant="minimal"
-            icon="notifications"
-            aria-label="Уведомления"
-          />
+          <Button variant="minimal" icon="notifications" aria-label="Уведомления" />
         </div>
       </div>
     </Navbar>

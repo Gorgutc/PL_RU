@@ -29,12 +29,7 @@ const ROOT = process.cwd();
 const SRC = path.join(ROOT, 'src');
 
 async function walk(dir: string, out: string[] = []): Promise<string[]> {
-  let entries: Awaited<ReturnType<typeof readdir>>;
-  try {
-    entries = await readdir(dir, { withFileTypes: true });
-  } catch {
-    return out;
-  }
+  const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
   for (const e of entries) {
     const p = path.join(dir, e.name);
     if (e.isDirectory()) await walk(p, out);
@@ -269,7 +264,13 @@ async function testRuntime() {
     const expandHexShorthand = (h: string): string => {
       const s = h.replace(/^#/, '');
       if (s.length === 3 || s.length === 4) {
-        return '#' + s.split('').map((c) => c + c).join('');
+        return (
+          '#' +
+          s
+            .split('')
+            .map((c) => c + c)
+            .join('')
+        );
       }
       return h;
     };
