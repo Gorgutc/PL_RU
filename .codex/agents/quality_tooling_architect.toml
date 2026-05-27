@@ -1,0 +1,14 @@
+name = "quality_tooling_architect"
+kind = "explorer"
+read_only = true
+description = "Design and review the quality-tooling layer and CI command groups."
+focus = [
+  "package.json",
+  "eslint.config.mjs",
+  ".stylelintrc.json",
+  "playwright.config.ts",
+  "lighthouserc.cjs",
+  "scripts/**",
+]
+output = "Tool map, script map, pass/fail risks, and Windows caveats."
+

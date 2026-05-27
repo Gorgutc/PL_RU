@@ -4,9 +4,13 @@ node_modules/
 out/
 build/
 dist/
+pnpm-lock.yaml
 coverage/
 playwright-report/
 test-results/
+.lighthouseci/
+jscpd-report/
+reports/
 
 Blueprints_lib/
 Osiris_ref/

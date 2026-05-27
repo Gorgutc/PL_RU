@@ -1,0 +1,35 @@
+# Convenience mirror for Codex sessions working in PL_RU.
+# Canonical authority remains:
+# verify-frozen.ts > current user request > AGENTS.md > plugins/pl-ru-codex/skills/**
+
+[project]
+name = "PL_RU"
+repository = "Gorgutc/PL_RU"
+branch_prefix = "codex/"
+package_manager = "pnpm"
+node = "22"
+
+[workflow]
+bootstrap_doc = "docs/agent/bootstrap.md"
+orchestration_doc = "docs/agent/orchestration.md"
+ship_command = "pnpm codex:ship"
+verify_command = "pnpm verify"
+
+[quality]
+fast = "pnpm quality:fast"
+deep = "pnpm quality:deep"
+all = "pnpm quality:all"
+
+[limits]
+read_only_audit_agents = 6
+worker_agents_require_disjoint_write_scopes = true
+production_cleanup_requires_separate_pr = true
+
+[read_only_references]
+paths = [
+  "Blueprints_lib/",
+  "Osiris_ref/",
+  "plugins/pl-ru-codex/skills/blueprint-design/",
+  "plugins/pl-ru-codex/skills/osiris-design/",
+]
+

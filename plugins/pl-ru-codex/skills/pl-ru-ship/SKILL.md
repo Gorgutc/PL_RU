@@ -15,6 +15,10 @@ Use this for finished PL_RU work before pushing to GitHub.
 4. Check `DO_NOT_PUSH.md` before staging.
 5. Stage only intended files, commit with a concise message, push the branch, and open a draft PR.
 
+`pnpm codex:ship` is the full local gate. It includes reference checks, quality
+checks, browser/a11y checks, production dependency audit, and the frozen
+verifier.
+
 ## GitHub Defaults
 
 - Repository: `Gorgutc/PL_RU`.

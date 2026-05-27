@@ -1,100 +1,130 @@
-# TS Frontend Starter
+# PL_RU Frontend Starter
 
-Production-ready scaffold for **Next.js 16 + React 19 + TypeScript 5 strict + SCSS modules + Blueprint** dashboard / data-heavy apps.
+Production-ready scaffold for Next.js 16, React 19, TypeScript strict, SCSS
+modules, and Blueprint dashboard or data-heavy apps.
 
-## What's inside
+## What's Inside
 
-- Next.js 16 App Router with React 19 and TypeScript 5 strict
-- SCSS modules + design tokens system (no Tailwind, no CSS-in-JS)
-- Blueprint v6 (`@blueprintjs/core`, `@blueprintjs/icons`) preconfigured
-- framer-motion 12 for animations (optional, on standby)
-- ESLint 9 + Prettier + Stylelint preconfigured
-- Vitest (unit) + Playwright (e2e) test runners
-- `verify-frozen.ts` architecture regression script
-- AI agent guardrails: `CLAUDE.md`, `AGENTS.md`, `.claude/` agents and skills
-- `DO_NOT_PUSH.md` checklist of files that must never be committed
+- Next.js 16 App Router with React 19 and TypeScript 5 strict.
+- SCSS modules plus a token system in `src/styles/_tokens.scss`.
+- Blueprint v6 through `@blueprintjs/core` and `@blueprintjs/icons`.
+- ESLint, Prettier, Stylelint, Vitest, Playwright, and `verify-frozen.ts`.
+- Expanded quality tooling: HTMLHint, Markdownlint, CSpell, dependency-cruiser,
+  Knip, JSCPD, axe, Pa11y, Lighthouse CI, and Lefthook.
+- Codex-native guardrails in `AGENTS.md`, `docs/agent/`, `.codex/`, and
+  `plugins/pl-ru-codex/`.
+- `DO_NOT_PUSH.md` checklist for files that must never be committed.
 
 ## Prerequisites
 
-- Node ≥ 22 (LTS) — run `node -v` to check
-- pnpm ≥ 9 — `npm install -g pnpm@latest` if missing
-
-## First run
+- Node 22.18 or newer.
+- pnpm 9 or newer.
 
 ```bash
 pnpm install
-pnpm exec playwright install chromium   # one-time, for `pnpm verify` and `pnpm test:e2e`
+pnpm exec playwright install chromium
+```
+
+## First Run
+
+```bash
 pnpm dev
 ```
 
 Open <http://localhost:3000>.
 
-> **Why the Playwright step?** Playwright is a devDependency, but its browser binaries are downloaded separately. Skip it and `pnpm verify` / `pnpm test:e2e` will fail with `Executable doesn't exist`. The `pnpm verify:static` script skips runtime tests if you don't want to install Chromium.
+Playwright browser binaries are downloaded separately from package install. If
+Chromium is missing, `pnpm verify`, `pnpm test:e2e`, and browser quality checks
+will fail until `pnpm exec playwright install chromium` succeeds.
 
-> **Cloud environments / blocked CDN.** If `cdn.playwright.dev` is not reachable (e.g. Claude Code on the web behind an egress allowlist), `playwright install chromium` fails with `Host not in allowlist`. The starter therefore pins Playwright to `1.56.1`, the version whose `browsers.json` requests Chromium revision `1194` — the revision the Claude Code web harness pre-installs at `/opt/pw-browsers/chromium-1194`. Run verify with the browsers path env var:
->
-> ```bash
-> PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers pnpm verify
-> ```
->
-> When bumping Playwright, keep the version aligned with the Chromium revision available on disk — look inside `playwright-core/browsers.json` of the candidate version.
-
-## Common commands
+## Common Commands
 
 ```bash
-pnpm dev          # dev server
-pnpm build        # production build
-pnpm start        # serve the production build
-pnpm lint         # ESLint
-pnpm stylelint    # SCSS lint
-pnpm typecheck    # tsc --noEmit
-pnpm test         # vitest unit tests
-pnpm test:e2e     # playwright e2e
-pnpm verify       # frozen-rules regression (boots dev server)
-pnpm verify:static # frozen-rules regression, static checks only
-pnpm ship         # format-check + lint + stylelint + typecheck + test + verify
+pnpm dev              # dev server
+pnpm build            # production build
+pnpm start            # serve production build
+pnpm verify:static    # frozen static rules only
+pnpm verify           # frozen rules plus runtime checks
+pnpm quality:fast     # format, lint, typecheck, unit, static frozen, plugin verify
+pnpm quality:deep     # fast gate plus audit/browser/a11y checks
+pnpm quality:all      # full local gate including audit, Lighthouse, refs
+pnpm codex:ship       # required before commit/push
+pnpm hooks:install    # optional local Lefthook install
 ```
 
-## Directory map
+## Directory Map
 
-```
+```text
 src/
-  app/              Next.js App Router (layout, pages, global SCSS)
-  components/       one folder per component, co-located *.module.scss
-  styles/           _tokens.scss + _mixins.scss + blueprint-overrides.scss
-  lib/              utils, hooks, server actions
+  app/              Next.js App Router layout, pages, and global SCSS
+  components/       one folder per component with colocated *.module.scss
+  styles/           _tokens.scss, _mixins.scss, and Blueprint overrides
 tests/
-  unit/             vitest
-  e2e/              playwright
+  unit/             Vitest
+  e2e/              Playwright smoke tests
+  quality/          axe/browser quality tests
+docs/agent/         Codex bootstrap, orchestration, verification, ADR docs
+.codex/             repo-local orchestration mirror and hook runbooks
+.agents/            local plugin marketplace metadata
+plugins/pl-ru-codex/ repo-local Codex skills
 verify-frozen.ts    architecture regression
-.claude/            AI agent guardrails (subagents + slash command + skills)
-CLAUDE.md           rules for Claude Code
-AGENTS.md           rules for other AI agents
-DO_NOT_PUSH.md      checklist of secrets / locals / artifacts to never push
+DO_NOT_PUSH.md      files and artifacts that must never be committed
 ```
 
-## Customising the starter
+## Codex Workflow
 
-1. Rename `package.json#name` to your project.
-2. Edit `src/styles/_tokens.scss` — this is the only place colors / spacing / type are allowed.
-3. Edit `src/app/layout.tsx` metadata (title, description, theme-color).
-4. Add your first feature under `src/components/<Name>/`.
-5. Add a frozen rule? Update `verify-frozen.ts` and `CLAUDE.md` at the same time.
+`AGENTS.md` is the canonical instruction entrypoint. The authority order is:
 
-## Blueprint vs. React 19 compatibility note
+```text
+verify-frozen.ts > current user request > AGENTS.md > plugins/pl-ru-codex/skills/** > design references
+```
 
-Blueprint v6's published peer-dependency range still lists React 18 even though runtime React 19 support has landed. The starter pins React 19 and adds a `pnpm.peerDependencyRules.allowedVersions` override in `package.json` so `pnpm install` completes without erroring on the mismatch. If you see peer warnings (not errors), they are expected — track the Blueprint v6 changelog for an official peer-dep bump and remove the override when it lands.
+For substantial work, start with `$pl-ru-session-bootstrap`. For broad audits,
+instruction changes, or tooling changes, use `$pl-ru-audit-orchestrator` and
+the read-only roles documented in `docs/agent/orchestration.md`.
 
-The `verify-frozen.ts` runtime tests pin to `.bp6-*` selectors but accept `.bp5-*` as a fallback so the suite stays usable while you migrate.
+Use `codex/*` branches. Finished changes must pass `pnpm codex:ship`, then be
+pushed to GitHub with a draft PR against `main` unless the user requests a
+different flow.
 
-## Next 16 gotchas worth knowing
+`CLAUDE.md` is a legacy pointer only.
 
-- `params` and `searchParams` in dynamic route handlers and pages are now **Promises** — `await` them.
-- `next/image` no longer accepts the legacy `layout` prop variants; use `fill` / `width+height`.
-- `unstable_after` is GA and renamed to `after` — import from `next/server`.
-- `next lint` was removed in Next 15; this starter calls `eslint .` directly.
-- React 19 Server Components are the default in App Router. Components using state, refs, browser APIs, or third-party libraries that rely on hooks (Blueprint, framer-motion) must opt in with `'use client'` at the top of the file. The `ExampleCard.tsx` in this starter is already marked.
+## Quality Layers
+
+- `quality:fast` is the regular edit loop.
+- `quality:deep` is for audits, refactors, instruction changes, and larger
+  feature work.
+- `quality:all` is the full gate before large PRs or releases.
+- `codex:ship` wraps the full gate and remains mandatory before commit/push.
+
+Browser-based checks can fail in restricted Windows sandboxes with Chromium
+spawn errors. Rerun the same command outside the sandbox or with approved
+escalation rather than weakening the check.
+
+## Architecture Notes
+
+- Do not add Tailwind, CSS-in-JS, styled-components, npm lockfiles, or yarn
+  lockfiles.
+- Dark mode is explicit via `<html className="bp6-dark">`.
+- Use Blueprint primitives and package-root imports for production UI.
+- Blueprint CSS imports in `src/app/layout.tsx` are the allowed stylesheet
+  exception to the package-root import rule.
+- Raw style values belong in `src/styles/_tokens.scss`; component SCSS consumes
+  them through relative `@use` imports.
+- Bundled images need alt text and should use `next/image` when appropriate.
+
+## Reference Folders
+
+These folders are read-only:
+
+- `Blueprints_lib/`
+- `Osiris_ref/`
+- `plugins/pl-ru-codex/skills/blueprint-design/`
+- `plugins/pl-ru-codex/skills/osiris-design/`
+
+Run `pnpm refs:sync` only when you need to use reference folders. Run
+`pnpm refs:verify` before claiming they are untouched.
 
 ## License
 
-MIT (or whichever you choose) — set in your own repo.
+Set the license for your own project before release.

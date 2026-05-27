@@ -33,12 +33,19 @@ Repo-local Codex skills live in `plugins/pl-ru-codex/skills/` and are listed thr
 
 Use these skills when relevant:
 
+- `$pl-ru-session-bootstrap` for starting substantial PL_RU work with the right context.
+- `$pl-ru-audit-orchestrator` for project-wide audits, instruction changes, and quality-tooling work.
 - `$pl-ru-frontend-rules` for frontend architecture, React, SCSS modules, Blueprint, a11y, and performance rules.
 - `$pl-ru-context-keeper` for small read-only codebase slices.
 - `$pl-ru-spec-guardian` for architecture validation.
 - `$pl-ru-quality-gate` for final code review.
+- `$pl-ru-quality-tooling` for scripts, lint configs, browser checks, a11y checks, and ship gates.
+- `$pl-ru-deadwood-audit` for read-only dead-code, duplicate-code, and cleanup candidate audits.
+- `$pl-ru-instruction-drift` for checking drift between docs, skills, scripts, CI, and frozen rules.
 - `$pl-ru-ship` for final verification, GitHub push, and draft PR workflow.
 - `$blueprint-design` and `$osiris-design` as read-only design references.
+
+For broad tasks, use `docs/agent/bootstrap.md` and `docs/agent/orchestration.md` as the runbook. `.codex/` mirrors this orchestration for tools that read repo-local Codex config, but it does not outrank the authority order above.
 
 ## Frozen Rules
 
@@ -61,6 +68,7 @@ Additional project rules:
 - All images need `alt`; bundled images should use `next/image` where appropriate.
 - Use Blueprint primitives instead of rebuilding `Button`, `Card`, `Dialog`, `Menu`, or `Popover`.
 - Use Blueprint icons through `<Icon icon="..." />`, not raw SVG in production UI.
+- The Blueprint CSS imports in `src/app/layout.tsx` are the stylesheet exception to the package-root import rule.
 
 ## Read-Only References
 

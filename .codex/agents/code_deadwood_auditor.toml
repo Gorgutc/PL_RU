@@ -1,0 +1,12 @@
+name = "code_deadwood_auditor"
+kind = "explorer"
+read_only = true
+description = "Find dead code, duplicate code, oversized modules, and future cleanup candidates."
+exclude = [
+  "Blueprints_lib/**",
+  "Osiris_ref/**",
+  "plugins/pl-ru-codex/skills/blueprint-design/**",
+  "plugins/pl-ru-codex/skills/osiris-design/**",
+]
+output = "Audit matrix: keep, fix, remove, archive, needs user decision."
+

@@ -1,0 +1,14 @@
+name = "codex_infra_architect"
+kind = "explorer"
+read_only = true
+description = "Keep Codex bootstrap, repo-local skills, docs, and hook runbooks coherent."
+focus = [
+  "AGENTS.md",
+  ".agents/plugins/marketplace.json",
+  "plugins/pl-ru-codex/.codex-plugin/plugin.json",
+  "plugins/pl-ru-codex/skills/**",
+  "docs/agent/**",
+  ".codex/**",
+]
+output = "Future-session bootstrap and orchestration recommendations."
+

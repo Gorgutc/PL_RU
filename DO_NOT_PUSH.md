@@ -18,6 +18,8 @@ Files in this list must never be committed or pushed.
 
 - `.next/`, `out/`, `dist/`, `build/`
 - `coverage/`, `playwright-report/`, `test-results/`
+- `.lighthouseci/`, `jscpd-report/`, `reports/`
+- `.codex-refs-baseline/`, `.claude/.refs-baseline/`
 - `*.log`
 - `*.tsbuildinfo`
 

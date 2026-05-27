@@ -32,6 +32,9 @@ yarn-error.log*
 coverage/
 playwright-report/
 test-results/
+.lighthouseci/
+jscpd-report/
+reports/
 .vitest-cache/
 
 .idea/
