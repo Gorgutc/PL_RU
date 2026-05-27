@@ -11,6 +11,7 @@ test-results/
 .lighthouseci/
 jscpd-report/
 reports/
+/codex_*.md
 
 Blueprints_lib/
 Osiris_ref/

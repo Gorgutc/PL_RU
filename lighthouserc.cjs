@@ -1,3 +1,7 @@
+const remoteDebuggingPort = process.env.LHCI_REMOTE_DEBUGGING_PORT
+  ? Number(process.env.LHCI_REMOTE_DEBUGGING_PORT)
+  : undefined;
+
 module.exports = {
   ci: {
     collect: {
@@ -7,6 +11,7 @@ module.exports = {
       numberOfRuns: 3,
       settings: {
         chromeFlags: '--headless=new --no-sandbox',
+        ...(remoteDebuggingPort ? { port: remoteDebuggingPort } : {}),
       },
     },
     assert: {

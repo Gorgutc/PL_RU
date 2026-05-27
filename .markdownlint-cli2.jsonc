@@ -9,6 +9,7 @@
   },
   "globs": [
     "**/*.md",
+    "!codex_*.md",
     "!node_modules/**",
     "!Blueprints_lib/**",
     "!Osiris_ref/**",

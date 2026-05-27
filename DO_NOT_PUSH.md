@@ -12,6 +12,7 @@ Files in this list must never be committed or pushed.
 
 - `*.local` anywhere
 - `scratch/`, `notes.private.md`, `*.scratch.*`
+- Root-level `codex_*.md` work logs and briefs
 - Editor scratchpads
 
 ## Large binaries / build artifacts
