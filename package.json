@@ -24,7 +24,10 @@
     "test:e2e": "playwright test",
     "verify": "tsx verify-frozen.ts",
     "verify:static": "tsx verify-frozen.ts --static",
-    "ship": "pnpm format:check && pnpm lint && pnpm stylelint && pnpm typecheck && pnpm test && pnpm verify"
+    "ship": "pnpm codex:ship",
+    "refs:sync": "node scripts/sync-refs.mjs",
+    "refs:verify": "node scripts/verify-reference.js",
+    "codex:ship": "pnpm refs:sync && pnpm format:check && pnpm lint && pnpm stylelint && pnpm typecheck && pnpm test && pnpm verify && pnpm refs:verify"
   },
   "dependencies": {
     "@blueprintjs/core": "^6.0.0",

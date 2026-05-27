@@ -1,0 +1,23 @@
+{
+  "name": "pl-ru-codex",
+  "version": "0.1.0",
+  "description": "Repo-local Codex skills and workflow guardrails for PL_RU.",
+  "author": {
+    "name": "Gorgutc"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "PL_RU Codex",
+    "shortDescription": "PL_RU repo skills and guardrails",
+    "longDescription": "Repo-local Codex plugin that migrates the former Claude Code skills, agents, and ship workflow into Codex-native skills for the PL_RU frontend starter.",
+    "developerName": "Gorgutc",
+    "category": "Productivity",
+    "capabilities": ["Code", "Review", "Workflow"],
+    "defaultPrompt": [
+      "Use $pl-ru-ship to prepare this PL_RU change for PR.",
+      "Use $pl-ru-spec-guardian to check architecture rules.",
+      "Use $pl-ru-frontend-rules before editing UI code."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

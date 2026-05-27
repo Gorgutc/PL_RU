@@ -1,0 +1,20 @@
+{
+  "name": "pl-ru-local",
+  "interface": {
+    "displayName": "PL_RU Local"
+  },
+  "plugins": [
+    {
+      "name": "pl-ru-codex",
+      "source": {
+        "source": "local",
+        "path": "./plugins/pl-ru-codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

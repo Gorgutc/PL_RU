@@ -1,11 +1,9 @@
 // Blueprint runtime overrides.
-//
 // Blueprint v6 exposes runtime theme values via CSS custom properties on the
 // `.bp6-*` scope. Override them here AFTER importing blueprint.css in layout
 // so the cascade wins. For SCSS-variable overrides (compile-time), you would
 // need to recompile Blueprint sources — not supported in this starter, which
 // imports the pre-built CSS.
-//
 // Docs: https://blueprintjs.com/docs/#core/variables
 
 @use './tokens' as t;

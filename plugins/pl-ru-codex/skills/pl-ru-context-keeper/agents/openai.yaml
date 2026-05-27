@@ -1,0 +1,6 @@
+interface:
+  display_name: 'PL_RU Context Keeper'
+  short_description: 'Read-only codebase slices'
+  default_prompt: 'Use $pl-ru-context-keeper to inspect the smallest relevant PL_RU file slices.'
+policy:
+  allow_implicit_invocation: true

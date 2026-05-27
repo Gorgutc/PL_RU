@@ -1,6 +1,7 @@
 # Skill: A11y + Performance
 
 ## A11y baseline
+
 - Every `<img>` has `alt`. Decorative: `alt=""`. Meaningful: descriptive text.
 - Every interactive control has an accessible name: visible text, `aria-label`, or `aria-labelledby`.
 - Focus ring on every interactive control: never remove `:focus-visible` outline without replacing it (see `@mixin focus-ring` in `_mixins.scss`).
@@ -11,6 +12,7 @@
 - Modals trap focus and restore on close — Blueprint `Dialog` handles this; custom overlays do not.
 
 ## Performance baseline
+
 - Use `next/image` for any image > 100 px in either dimension. Always specify `width` and `height`.
 - Lazy-load below the fold: `loading="lazy"`, `decoding="async"` (or `next/image` defaults).
 - Hydration budget: keep Server Components by default; `'use client'` only where state / events / refs / browser APIs are needed.
@@ -19,6 +21,7 @@
 - Fonts: preload the woff2 of the primary face if it's render-blocking; otherwise let the browser fetch on demand.
 
 ## What the quality-gate flags
+
 - Missing `alt` → 🟥 block.
 - Missing `aria-label` on icon-only button → 🟥 block.
 - Focus ring removed without replacement → 🟥 block.

@@ -1,0 +1,34 @@
+---
+name: pl-ru-quality-gate
+description: Use as the final PL_RU code-quality review for TypeScript, React, SCSS modules, Blueprint UI, accessibility, and performance before delivery or PR.
+---
+
+# PL_RU Quality Gate
+
+Review the implemented diff. Do not edit files unless the user asks to apply the fixes. Apply `$pl-ru-frontend-rules` and inspect the changed code for runtime bugs, broken UX, accessibility problems, type holes, and performance traps.
+
+Severity:
+
+- block: bug, security issue, broken UX, accessibility violation, runtime error
+- fix-before-merge: code smell, missing type, missing alt text, missing accessible name, suboptimal selector
+- nit: style, naming, or comment issue
+
+Output shape:
+
+```text
+quality-gate: PASS
+```
+
+or:
+
+```text
+quality-gate: 2 findings
+
+block (1)
+- src/components/Foo/Foo.tsx:12: icon-only Button is missing aria-label.
+
+fix-before-merge (1)
+- src/app/page.tsx:8: bundled image should use next/image with dimensions.
+```
+
+This skill replaces the former Claude agent `.claude/agents/ts-quality-gate.md`.

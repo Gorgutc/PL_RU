@@ -1,0 +1,6 @@
+interface:
+  display_name: "OSIRIS Design"
+  short_description: "Dark ops dashboard design reference"
+  default_prompt: "Use $osiris-design to design an OSIRIS-style intelligence surface."
+policy:
+  allow_implicit_invocation: true
