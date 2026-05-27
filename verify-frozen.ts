@@ -12,8 +12,9 @@
 
 import { chromium, type Page } from 'playwright';
 import { readdir, readFile, stat } from 'node:fs/promises';
+import type { Dirent } from 'node:fs';
 import path from 'node:path';
-import { spawn, type ChildProcess } from 'node:child_process';
+import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
 
 type TestResult = { name: string; pass: boolean; detail?: string };
 const results: TestResult[] = [];
@@ -21,15 +22,15 @@ const results: TestResult[] = [];
 function record(name: string, pass: boolean, detail?: string) {
   results.push({ name, pass, detail });
   const tag = pass ? 'PASS' : 'FAIL';
-  // eslint-disable-next-line no-console
   console.log(`[${tag}] ${name}${detail ? ' — ' + detail : ''}`);
 }
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, 'src');
+const NEXT_BIN = path.join(ROOT, 'node_modules', 'next', 'dist', 'bin', 'next');
 
 async function walk(dir: string, out: string[] = []): Promise<string[]> {
-  let entries: Awaited<ReturnType<typeof readdir>>;
+  let entries: Dirent<string>[];
   try {
     entries = await readdir(dir, { withFileTypes: true });
   } catch {
@@ -203,18 +204,20 @@ async function waitForUrl(url: string, timeoutMs: number) {
 
 async function withDevServer(fn: (page: Page, baseURL: string) => Promise<void>) {
   const PORT = '3100';
-  // `detached: true` puts pnpm and its Next child in their own process group,
-  // so a single `process.kill(-pgid, signal)` cleans both up. Without this,
-  // SIGTERM to pnpm does not always propagate to the Next dev server and the
-  // port leaks between verify runs.
-  const server: ChildProcess = spawn('pnpm', ['dev', '--port', PORT], {
+  // On POSIX, `detached: true` puts the Next process in its own process group
+  // so a single negative-PID kill cleans it up. Windows uses taskkill /t.
+  const server: ChildProcess = spawn(process.execPath, [NEXT_BIN, 'dev', '--port', PORT], {
     cwd: ROOT,
     stdio: ['ignore', 'pipe', 'pipe'],
     env: { ...process.env, PORT },
-    detached: true,
+    detached: process.platform !== 'win32',
   });
   const baseURL = `http://localhost:${PORT}`;
   try {
+    await new Promise<void>((resolve, reject) => {
+      server.once('spawn', resolve);
+      server.once('error', reject);
+    });
     await waitForUrl(baseURL, 90_000);
     const browser = await chromium.launch();
     try {
@@ -226,7 +229,11 @@ async function withDevServer(fn: (page: Page, baseURL: string) => Promise<void>)
   } finally {
     if (server.pid) {
       try {
-        process.kill(-server.pid, 'SIGTERM');
+        if (process.platform === 'win32') {
+          execFileSync('taskkill', ['/pid', String(server.pid), '/t', '/f'], { stdio: 'ignore' });
+        } else {
+          process.kill(-server.pid, 'SIGTERM');
+        }
       } catch {
         /* group already gone */
       }
@@ -269,7 +276,13 @@ async function testRuntime() {
     const expandHexShorthand = (h: string): string => {
       const s = h.replace(/^#/, '');
       if (s.length === 3 || s.length === 4) {
-        return '#' + s.split('').map((c) => c + c).join('');
+        return (
+          '#' +
+          s
+            .split('')
+            .map((c) => c + c)
+            .join('')
+        );
       }
       return h;
     };
@@ -294,7 +307,6 @@ async function testRuntime() {
 // ─── main ────────────────────────────────────────────────────────────────────
 
 async function main() {
-  // eslint-disable-next-line no-console
   console.log('=== verify-frozen.ts ===\n');
 
   await testNoTailwind();
@@ -313,19 +325,16 @@ async function main() {
       record('runtime: dev server', false, (e as Error).message);
     }
   } else {
-    // eslint-disable-next-line no-console
     console.log('[SKIP] runtime tests (--static)');
   }
 
   const pass = results.filter((r) => r.pass).length;
   const fail = results.length - pass;
-  // eslint-disable-next-line no-console
   console.log(`\nSUMMARY: ${pass}/${results.length} PASS, ${fail} FAIL`);
   process.exit(fail === 0 ? 0 : 1);
 }
 
 main().catch((e) => {
-  // eslint-disable-next-line no-console
   console.error(e);
   process.exit(2);
 });

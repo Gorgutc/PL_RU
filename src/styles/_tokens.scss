@@ -23,9 +23,12 @@ $space-7: 3rem;
 $space-8: 4rem;
 
 // ─── Typography ──────────────────────────────────────────────────────────────
-$font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+$font-sans:
+  'Inter',
+  system-ui,
+  -apple-system,
+  sans-serif;
 $font-mono: 'JetBrains Mono', ui-monospace, sfmono-regular, monospace;
-
 $fs-body: 1rem;
 $fs-small: 0.875rem;
 $fs-h1: clamp(2rem, 4vw, 3rem);

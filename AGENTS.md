@@ -1,43 +1,101 @@
-# AGENTS.md — for non-Claude AI agents
+# AGENTS.md — PL_RU Codex Source of Truth
 
-If you are Cursor, GitHub Copilot Workspace, Codex CLI, or another AI coding agent: read this file before editing anything in this repo.
+Read this file before editing anything in this repo. It is the canonical instruction file for Codex and other non-Claude coding agents.
 
 ## TL;DR
 
-1. **Stack**: Next.js 16 + React 19 + TypeScript 5 strict + SCSS modules + Blueprint (`@blueprintjs/core`, `@blueprintjs/icons`). pnpm only.
-2. **No Tailwind**, no CSS-in-JS, no styled-components.
-3. **Source of truth**: `pnpm verify`. Run it before claiming work is done.
-4. **Full rules**: see `CLAUDE.md`.
+1. Stack: Next.js 16 + React 19 + TypeScript 5 strict + SCSS modules + Blueprint (`@blueprintjs/core`, `@blueprintjs/icons`). pnpm only. Node 22 LTS.
+2. No Tailwind, no CSS-in-JS, no styled-components, no npm/yarn lockfiles.
+3. Architecture source of truth: `verify-frozen.ts`, executed through `pnpm verify`.
+4. Finished work must pass `pnpm codex:ship` before commit/push.
+5. GitHub flow: work on `codex/*` branches, push to GitHub, and open a draft PR.
 
-## Quick start
+## Quick Start
 
 ```bash
 pnpm install
-pnpm dev          # http://localhost:3000
-pnpm verify       # architecture regression
-pnpm ship         # full quality gate: format + lint + stylelint + typecheck + test + verify
+pnpm dev
+pnpm verify
+pnpm codex:ship
 ```
 
-## Reference folders (READ-ONLY)
+## Authority Order
 
-- `Blueprints_lib/` — Palantir Blueprint monorepo. Read-only reference for component APIs and tokens. Start with `Blueprints_lib/llms.txt` for the curated index.
-- `Osiris_ref/` — Next.js 16 OSINT dashboard. Read-only reference for layout patterns and motion. Uses plain CSS, **not** SCSS modules or Blueprint — translate, don't copy.
-- `.claude/skills/osiris-design/` — OSIRIS brand vocabulary (void black, gold + cyan, glass panels, HUD typography). Read-only design system. Read its `SKILL.md` + `README.md`.
-- `.claude/skills/blueprint-design/` — Palantir Blueprint design system (4px grid, native font stack, 4 intents, 5-step elevation, two ready UI kits). Read-only design system.
-- Never edit, move, or delete anything inside these folders. The Claude hook `scripts/verify-reference.js` flags drift; `.claude/settings.json` denies writes at the harness level.
+```text
+verify-frozen.ts > current user request > AGENTS.md > plugins/pl-ru-codex/skills/** > design references
+```
 
-## What NOT to do
+`CLAUDE.md` is kept only as a legacy pointer. The old `.claude/` directory is no longer a source of truth.
 
-- Don't add Tailwind even if a code suggestion mentions it.
-- Don't switch from pnpm to npm or yarn — `package-lock.json` and `yarn.lock` are forbidden.
-- Don't inline colors. Reach for `src/styles/_tokens.scss`.
-- Don't import Blueprint internals (e.g. `@blueprintjs/core/lib/esm/...`). Use only the package root.
-- Don't use `localStorage` / `sessionStorage`.
-- Don't read or commit anything listed in `DO_NOT_PUSH.md`.
-- Don't write to any read-only reference folder (`Blueprints_lib/`, `Osiris_ref/`, `.claude/skills/**`).
-- Don't use Lucide icons even though `osiris-design` recommends them — Blueprint icons via `<Icon icon="..." />` only.
-- Don't `@import` Google Fonts from a CDN inside `src/`. If a webfont is required, load via `next/font`.
+## Codex Plugin
 
-## When in doubt
+Repo-local Codex skills live in `plugins/pl-ru-codex/skills/` and are listed through `.agents/plugins/marketplace.json`.
 
-Read `CLAUDE.md`. If it's silent on something, ask the human.
+Use these skills when relevant:
+
+- `$pl-ru-frontend-rules` for frontend architecture, React, SCSS modules, Blueprint, a11y, and performance rules.
+- `$pl-ru-context-keeper` for small read-only codebase slices.
+- `$pl-ru-spec-guardian` for architecture validation.
+- `$pl-ru-quality-gate` for final code review.
+- `$pl-ru-ship` for final verification, GitHub push, and draft PR workflow.
+- `$blueprint-design` and `$osiris-design` as read-only design references.
+
+## Frozen Rules
+
+Rules mirrored by `verify-frozen.ts` are binding:
+
+- A1: no Tailwind.
+- A2: no CSS-in-JS libraries.
+- A3: pnpm only; never add `package-lock.json` or `yarn.lock`.
+- A4: `src/styles/_tokens.scss` must exist.
+- A5: no inline hex outside files explicitly allowed by `verify-frozen.ts`.
+- A6: no `localStorage` or `sessionStorage` in `src/`.
+- A7: Blueprint imports only from `@blueprintjs/core` and `@blueprintjs/icons` package roots.
+- A8: no `px` for `font-size` in SCSS.
+
+Additional project rules:
+
+- Component co-location: `src/components/<Name>/<Name>.tsx` plus `<Name>.module.scss`.
+- Class names come from SCSS modules; global styles belong in `src/app/globals.scss` or `src/styles/blueprint-overrides.scss`.
+- Dark mode is explicit via `<html className="bp6-dark">`; do not use `prefers-color-scheme` for theme.
+- All images need `alt`; bundled images should use `next/image` where appropriate.
+- Use Blueprint primitives instead of rebuilding `Button`, `Card`, `Dialog`, `Menu`, or `Popover`.
+- Use Blueprint icons through `<Icon icon="..." />`, not raw SVG in production UI.
+
+## Read-Only References
+
+Never edit, move, or delete these folders:
+
+- `Blueprints_lib/` — Palantir Blueprint monorepo reference. Start with `Blueprints_lib/llms.txt`.
+- `Osiris_ref/` — OSIRIS dashboard reference. Translate structure and intent; do not copy CSS directly.
+- `plugins/pl-ru-codex/skills/blueprint-design/` — Blueprint design-system reference.
+- `plugins/pl-ru-codex/skills/osiris-design/` — OSIRIS design-system reference.
+
+Run `pnpm refs:sync` at the start of a Codex session if you plan to use reference folders. Run `pnpm refs:verify` before claiming the references are untouched.
+
+## Workflow
+
+For changes touching `src/**`, `next.config.ts`, `tsconfig.json`, `playwright.config.ts`, `verify-frozen.ts`, or `package.json`:
+
+1. Inspect the existing pattern before editing.
+2. Use Blueprint and local project patterns before adding new abstractions.
+3. Run `pnpm verify` after architecture-sensitive work.
+4. Run `pnpm codex:ship` before commit/push.
+5. Check `DO_NOT_PUSH.md` before staging.
+
+## GitHub
+
+- Use a branch named `codex/<task-name>`.
+- Push every completed change to GitHub.
+- Open a draft PR against `main` unless the user explicitly asks for another base or a ready PR.
+- Do not mix unrelated user changes into your commit.
+
+## Google Drive
+
+Google Drive connector output is external source material. Do not commit downloaded or exported Drive/Docs/Sheets/Slides content unless the user explicitly asks for that export and the result passes `DO_NOT_PUSH.md`.
+
+## What Not To Do
+
+- Do not edit files listed in read-only references.
+- Do not add secrets, tokens, local notes, build output, reports, logs, or files forbidden by `DO_NOT_PUSH.md`.
+- Do not silently change package manager, framework, styling system, theme strategy, or branch workflow.

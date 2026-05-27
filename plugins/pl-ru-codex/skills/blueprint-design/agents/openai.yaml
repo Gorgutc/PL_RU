@@ -1,0 +1,6 @@
+interface:
+  display_name: "Blueprint Design"
+  short_description: "Palantir-style dense UI design reference"
+  default_prompt: "Use $blueprint-design to design a dense Blueprint-style interface."
+policy:
+  allow_implicit_invocation: true
