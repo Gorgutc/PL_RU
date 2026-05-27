@@ -1,0 +1,18 @@
+{
+  "config": {
+    "MD013": false,
+    "MD024": {
+      "siblings_only": true,
+    },
+    "MD034": false,
+    "MD033": false,
+  },
+  "globs": [
+    "**/*.md",
+    "!node_modules/**",
+    "!Blueprints_lib/**",
+    "!Osiris_ref/**",
+    "!plugins/pl-ru-codex/skills/blueprint-design/**",
+    "!plugins/pl-ru-codex/skills/osiris-design/**",
+  ],
+}

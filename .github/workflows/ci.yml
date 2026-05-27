@@ -8,14 +8,12 @@ on:
 jobs:
   ship:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
 
-      # pnpm version is taken from package.json "packageManager". Do NOT also
-      # set `version:` here — pnpm/action-setup@v4 errors on a double-specified
-      # version (ERR_PNPM_BAD_PM_VERSION). Still runs on Node 20 until pnpm
-      # ships a Node 24 build; bump the major when one is available.
+      # pnpm version is taken from package.json "packageManager". Do not also
+      # set `version:` here; pnpm/action-setup errors on double specification.
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v5
@@ -29,26 +27,5 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Format check
-        run: pnpm format:check
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Stylelint
-        run: pnpm stylelint
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Unit tests
-        run: pnpm test
-
-      - name: Build
-        run: pnpm build
-
-      - name: Verify frozen rules
-        run: pnpm verify
-
-      - name: E2E tests
-        run: pnpm test:e2e
+      - name: Quality gate
+        run: pnpm quality:all

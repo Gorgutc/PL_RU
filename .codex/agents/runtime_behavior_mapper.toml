@@ -1,0 +1,14 @@
+name = "runtime_behavior_mapper"
+kind = "explorer"
+read_only = true
+description = "Map Next, React, Blueprint, Playwright, and frozen runtime invariants."
+focus = [
+  "src/app/layout.tsx",
+  "src/app/page.tsx",
+  "src/components/**",
+  "verify-frozen.ts",
+  "playwright.config.ts",
+  "tests/**",
+]
+output = "Runtime invariants, checks to preserve, and browser/a11y risks."
+

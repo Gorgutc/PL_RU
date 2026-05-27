@@ -7,6 +7,27 @@ const config = [
   ...nextTypescript,
   eslintConfigPrettier,
   {
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
+    },
+  },
+  {
+    files: ['src/**/*.{ts,tsx,js,jsx}'],
+    rules: {
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'localStorage',
+          message: 'Use server/state patterns; PL_RU forbids localStorage in src/.',
+        },
+        {
+          name: 'sessionStorage',
+          message: 'Use server/state patterns; PL_RU forbids sessionStorage in src/.',
+        },
+      ],
+    },
+  },
+  {
     rules: {
       'react/no-unescaped-entities': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],

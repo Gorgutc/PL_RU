@@ -1,0 +1,15 @@
+name = "instruction_drift_auditor"
+kind = "explorer"
+read_only = true
+description = "Find drift between instructions, skills, docs, scripts, CI, and frozen rules."
+focus = [
+  "AGENTS.md",
+  "README.md",
+  "CLAUDE.md",
+  "plugins/pl-ru-codex/**",
+  ".agents/**",
+  ".codex/**",
+  "docs/agent/**",
+]
+output = "Instruction drift report with concrete update targets."
+

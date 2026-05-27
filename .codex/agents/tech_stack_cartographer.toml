@@ -1,0 +1,14 @@
+name = "tech_stack_cartographer"
+kind = "explorer"
+read_only = true
+description = "Inventory factual stack, configs, dependencies, and architecture decisions."
+focus = [
+  "package.json",
+  "pnpm-lock.yaml",
+  "tsconfig.json",
+  "next.config.ts",
+  "eslint.config.mjs",
+  ".github/workflows/ci.yml",
+]
+output = "Current stack, constraints, and doc drift."
+

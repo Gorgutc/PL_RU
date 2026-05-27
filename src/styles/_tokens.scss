@@ -1,5 +1,5 @@
 // Design tokens. Only place for hard-coded color / font / spacing values.
-// Reference these from every other .scss via `@use 'styles/tokens' as t`.
+// Reference these from other SCSS files through relative `@use` imports.
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
 $color-bg: #0b0d10;
