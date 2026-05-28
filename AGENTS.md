@@ -62,7 +62,7 @@ Rules mirrored by `verify-frozen.ts` are binding:
 - A7: Blueprint imports only from `@blueprintjs/core` and `@blueprintjs/icons` package roots.
 - A8: no `px` for `font-size` in SCSS.
 - A9: Codex Memories stay enabled and documented for future-session handoff.
-- A10: Header responsive-tabs and action-button contracts stay frozen.
+- A10: Header responsive-tabs, action-button, and dropdown contracts stay frozen.
 - A11: quality-tooling dedupe/shared-config contracts stay frozen.
 
 Additional project rules:
@@ -94,6 +94,13 @@ Use `AGENTS.md` and Memories together:
   commands, workflow, and frozen decisions.
 - Memories are the dynamic working notes Codex generates automatically from
   completed sessions: project facts, decisions, patterns, and handoff context.
+- At the start of every PL_RU session, do a quick Memories pass before deep
+  repo work: use the provided memory summary, search `~/.codex/memories/MEMORY.md`
+  for PL_RU/task keywords, then open only the 1-2 directly relevant rollout
+  summaries or skill notes.
+- If the user explicitly asks to update Memories, write one small note under
+  `~/.codex/memories/extensions/ad_hoc/notes/`. Never edit generated memory
+  files directly, and never commit user-level memory files to this repo.
 
 At the end of every completed task, include a concise final summary of what was
 changed, what decisions were made or preserved, what checks passed, and what
@@ -108,12 +115,18 @@ unless the current user request explicitly asks to change a specific frozen
 decision. Add new functionality by extending or reusing the current contract;
 do not silently rewrite existing behavior.
 
-Header decisions from the responsive-tabs iteration are frozen. In particular,
-the Header layout, tab states, responsive tab widths, Figma colors, lack of
-base-tab outlines, and the current action-button visual contract are not to be
-changed unless explicitly requested. If the Header action buttons need to
-appear elsewhere, extract or reuse the same visual contract instead of creating
-a near-duplicate component.
+When an approved task creates or changes a durable contract, update
+`docs/agent/frozen-decisions.md` and the minimal matching guard in
+`verify-frozen.ts` in the same change. Keep the guard focused on behavior and
+public contracts, not placeholder implementation names that should remain easy
+to replace later.
+
+Header decisions from the responsive-tabs and dropdown iterations are frozen. In
+particular, the Header layout, tab states, responsive tab widths, Figma colors,
+lack of base-tab outlines, action-button state contract, and account /
+notification dropdown contract are not to be changed unless explicitly
+requested. If the Header action buttons need to appear elsewhere, extract or
+reuse the same visual contract instead of creating a near-duplicate component.
 
 ## Read-Only References
 

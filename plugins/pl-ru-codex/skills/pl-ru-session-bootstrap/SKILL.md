@@ -11,13 +11,16 @@ instruction changes, quality-tooling changes, or GitHub delivery.
 ## Steps
 
 1. Read `AGENTS.md`.
-2. Check `git status --short --branch`.
-3. Confirm the source of truth order:
+2. Do a quick Memories pass before deep repo work: use the provided memory
+   summary, search `~/.codex/memories/MEMORY.md` for PL_RU/task keywords, and
+   open only the directly relevant rollout summaries or skill notes.
+3. Check `git status --short --branch`.
+4. Confirm the source of truth order:
    `verify-frozen.ts > current user request > AGENTS.md > plugins/pl-ru-codex/skills/**`.
-4. If the task touches UI or source code, use `$pl-ru-frontend-rules`.
-5. If the task is broad, use `$pl-ru-audit-orchestrator`.
-6. Treat `.codex/` and `docs/agent/` as runbooks, not higher authority.
-7. Do not edit read-only reference folders.
+5. If the task touches UI or source code, use `$pl-ru-frontend-rules`.
+6. If the task is broad, use `$pl-ru-audit-orchestrator`.
+7. Treat `.codex/` and `docs/agent/` as runbooks, not higher authority.
+8. Do not edit read-only reference folders.
 
 ## Output
 

@@ -20,8 +20,11 @@ and `verify-frozen.ts`. Do not edit files when using this as a review skill.
   - Figma active/hover colors;
   - no persistent base-tab outline;
   - keyboard focus remains visible.
-- Header action buttons keep the current visual contract or are extracted for
-  reuse without visual drift.
+- Header action buttons keep the current visual contract, including dropdown
+  active states for `Аккаунт` and `Уведомления`, or are extracted for reuse
+  without visual drift.
+- Header profile and notification dropdowns keep their documented Blueprint
+  Popover/Menu contract unless the current user request explicitly changes it.
 - Codex memory rules remain documented and repo mirror keeps
   `[features] memories = true`.
 - `verify-frozen.ts` keeps static guards for these decisions.

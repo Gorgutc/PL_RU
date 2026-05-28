@@ -67,6 +67,9 @@ test.describe('PraiOS header', () => {
     await expect(header.getByRole('button', { name: 'Аккаунт' })).toBeVisible();
     await expect(header.getByRole('button', { name: 'Уведомления' })).toBeVisible();
     await expect(header.getByRole('button', { name: 'Данные' })).toBeDisabled();
+    await expect(header.getByRole('button', { name: 'База данных' })).toBeDisabled();
+    await expect(header.getByRole('button', { name: 'Аккаунт' })).toBeEnabled();
+    await expect(header.getByRole('button', { name: 'Уведомления' })).toBeEnabled();
 
     expect(errors).toEqual([]);
   });
@@ -165,5 +168,84 @@ test.describe('PraiOS header', () => {
     await expect(hoverTab.locator('.bp6-icon')).toHaveCSS('color', 'rgb(255, 255, 255)');
     await expect(hoverTab.locator('.bp6-button-text')).toHaveCSS('color', 'rgb(255, 255, 255)');
     await expect(hoverTab).toHaveCSS('box-shadow', 'none');
+  });
+
+  test('opens account dropdown from the account action button', async ({ page }) => {
+    const header = await openHeader(page, 1920);
+    const accountButton = header.getByRole('button', { name: 'Аккаунт' });
+
+    await expect(accountButton).toHaveAttribute('aria-expanded', 'false');
+    await accountButton.hover();
+    await expect(accountButton).toHaveCSS('border-color', 'rgb(132, 173, 255)');
+
+    await accountButton.click();
+
+    await expect(accountButton).toHaveAttribute('aria-expanded', 'true');
+    await expect(accountButton).toHaveCSS('background-color', 'rgb(41, 112, 255)');
+    await expect(page.getByRole('menu', { name: 'Блок профиля' })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'Изменить профиль' })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'Выйти из аккаунта' })).toBeVisible();
+
+    await page.keyboard.press('Escape');
+
+    await expect(accountButton).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.getByRole('menu', { name: 'Блок профиля' })).toBeHidden();
+  });
+
+  test('opens notification dropdown and filters placeholder notifications', async ({ page }) => {
+    const header = await openHeader(page, 1920);
+    const notificationsButton = header.getByRole('button', { name: 'Уведомления' });
+
+    await expect(notificationsButton).toHaveAttribute('aria-expanded', 'false');
+
+    await notificationsButton.click();
+
+    const panel = page.getByRole('dialog', { name: 'All notifications' });
+    await expect(notificationsButton).toHaveAttribute('aria-expanded', 'true');
+    await expect(notificationsButton).toHaveCSS('background-color', 'rgb(41, 112, 255)');
+    await expect(panel).toBeVisible();
+    await expect(page.getByRole('button', { name: 'All', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await expect(page.getByRole('button', { name: 'Unread (11)' })).toBeVisible();
+    await expect(panel.getByText('Telemetry window updated')).toBeVisible();
+
+    await page.getByRole('button', { name: 'AI Info' }).click();
+
+    await expect(page.getByRole('button', { name: 'AI Info' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await expect(panel.getByText('AI risk scan completed')).toBeVisible();
+    await expect(panel.getByText('Telemetry window updated')).toBeHidden();
+
+    await page.getByRole('button', { name: 'Mark all as read' }).click();
+    await page.getByRole('button', { name: 'Unread (0)' }).click();
+
+    await expect(panel.getByText('No notifications')).toBeVisible();
+
+    await page.keyboard.press('Escape');
+
+    await expect(notificationsButton).toHaveAttribute('aria-expanded', 'false');
+    await expect(panel).toBeHidden();
+  });
+
+  test('keeps account and notification popovers mutually exclusive', async ({ page }) => {
+    const header = await openHeader(page, 1920);
+    const accountButton = header.getByRole('button', { name: 'Аккаунт' });
+    const notificationsButton = header.getByRole('button', { name: 'Уведомления' });
+
+    await accountButton.click();
+
+    await expect(accountButton).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.getByRole('menu', { name: 'Блок профиля' })).toBeVisible();
+
+    await notificationsButton.click();
+
+    await expect(accountButton).toHaveAttribute('aria-expanded', 'false');
+    await expect(notificationsButton).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.getByRole('menu', { name: 'Блок профиля' })).toBeHidden();
+    await expect(page.getByRole('dialog', { name: 'All notifications' })).toBeVisible();
   });
 });

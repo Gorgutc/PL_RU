@@ -34,9 +34,23 @@ mirrors the highest-risk checks so drift is caught by `pnpm verify`.
 ## Header Action Buttons
 
 - `Данные`, `База данных`, `Аккаунт`, and `Уведомления` keep the current
-  Blueprint outlined-button visual contract from the Header iteration.
-- Their height stays `30px`, radius stays `3px`, text size stays `14px`, and
-  disabled opacity stays visually stable.
+  Blueprint outlined-button visual contract from the Header iterations.
+- Their height stays `30px`, radius stays `3px`, text size stays `14px`, rest
+  text stays `#d3d3d3`, hover uses `#84adff`, and open/active dropdown actions
+  use `#2970ff` with white foreground.
+- `Данные` and `База данных` keep their current non-functional/disabled
+  behavior until a dedicated task adds their click behavior; this iteration only
+  prepares the shared visual state contract for them.
+- `Аккаунт` opens a Blueprint Popover/Menu profile dropdown with
+  `Изменить профиль` and `Выйти из аккаунта`. Profile menu items have rest and
+  hover states, but no selected/active item state.
+- `Уведомления` opens a Blueprint Popover notification panel with default
+  `All` filtering, `AI Info` and dynamic unread filtering, `Mark all as read`,
+  `Last 7 days` and `Older` sections, and static placeholder data until a real
+  notification source is added.
+- Header action dropdown panels use `#171d20` surface, `#727677` border,
+  `2px` radius, and stay anchored to their trigger buttons.
+- Disabled opacity stays visually stable.
 - These buttons are candidates for reuse outside Header. If another screen needs
   the same visual language, extract or reuse the current contract instead of
   duplicating a similar component with drift-prone styles.

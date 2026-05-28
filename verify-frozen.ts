@@ -226,6 +226,11 @@ async function testCodexMemoryContract() {
   const config = await readFile(path.join(ROOT, '.codex', 'config.toml'), 'utf8');
   const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
   const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+  const bootstrap = await readFile(path.join(ROOT, 'docs', 'agent', 'bootstrap.md'), 'utf8');
+  const bootstrapSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-session-bootstrap', 'SKILL.md'),
+    'utf8',
+  );
   const missing: string[] = [];
 
   if (!hasTomlSetting(config, 'features', 'memories', 'true')) {
@@ -235,7 +240,19 @@ async function testCodexMemoryContract() {
   if (!agents.includes('At the end of every completed task')) {
     missing.push('AGENTS.md completed-task memory handoff rule');
   }
+  if (!agents.includes('At the start of every PL_RU session, do a quick Memories pass')) {
+    missing.push('AGENTS.md startup Memories pass rule');
+  }
+  if (!agents.includes('extensions/ad_hoc/notes/')) {
+    missing.push('AGENTS.md explicit user-request memory update path');
+  }
   if (!frozen.includes('## Session Memory')) missing.push('frozen-decisions Session Memory');
+  if (!bootstrap.includes('Do a quick Memories pass')) {
+    missing.push('docs/agent/bootstrap.md Memories pass step');
+  }
+  if (!bootstrapSkill.includes('Do a quick Memories pass')) {
+    missing.push('pl-ru-session-bootstrap Memories pass step');
+  }
 
   record(
     'A9: Codex Memories enabled and documented',
@@ -258,6 +275,10 @@ async function testFrozenHeaderContract() {
     ['$color-header-tab-hover', '#528bff'],
     ['$color-header-action-text', '#d3d3d3'],
     ['$color-header-data', '#1c6e42'],
+    ['$color-header-action-hover', '#84adff'],
+    ['$color-header-dropdown-bg', '#171d20'],
+    ['$color-header-dropdown-border', '#727677'],
+    ['$color-header-dropdown-filter-bg', '#33434b'],
     ['$header-height', '3rem'],
     ['$header-edge-padding', '0.5rem'],
     ['$header-side-width', '20.625rem'],
@@ -266,9 +287,11 @@ async function testFrozenHeaderContract() {
     ['$header-tab-lead-width', '9.625rem'],
     ['$header-expanded-breakpoint', '120rem'],
     ['$header-action-height', '1.875rem'],
+    ['$fs-header-filter', '0.625rem'],
     ['$radius-xs', '0.1875rem'],
   ]);
   const failures: string[] = [];
+  const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
 
   for (const [token, expected] of expectedTokens) {
     const actual = getScssTokenValue(tokens, token);
@@ -283,11 +306,25 @@ async function testFrozenHeaderContract() {
       'tabs?: readonly HeaderTab[];',
       'className?: string;',
       'data-testid="praios-header-tabs"',
+      "type HeaderActionMenu = 'account' | 'notifications';",
+      'PopupKind.MENU',
+      'PopupKind.DIALOG',
+      "useState<NotificationFilterId>('all')",
       'aria-label={tab.title}',
       'text="Данные"',
       'text="База данных"',
       'text="Аккаунт"',
       'aria-label="Уведомления"',
+      'role="group"',
+      'aria-expanded={isAccountOpen}',
+      'aria-expanded={isNotificationsOpen}',
+      'text="Изменить профиль"',
+      'text="Выйти из аккаунта"',
+      "label: 'AI Info'",
+      "label: 'Unread'",
+      'Mark all as read',
+      'role="dialog"',
+      'onMarkAllRead',
     ]).map((snippet) => `Header.tsx missing ${snippet}`),
   );
 
@@ -296,19 +333,37 @@ async function testFrozenHeaderContract() {
       'width: t.$header-tab-compact-width;',
       'background: t.$color-header-tab-hover !important;',
       'background: t.$color-header-tab-active !important;',
+      '.actionButtonDatabase',
       'display: none;',
       '@media (min-width: t.$header-expanded-breakpoint)',
       'width: t.$header-tab-width;',
       'width: t.$header-tab-lead-width;',
       'height: t.$header-action-height;',
       'border-radius: t.$radius-xs;',
+      'border-color: t.$color-header-action-hover;',
+      'background: t.$color-header-tab-active !important;',
       'opacity: 1 !important;',
+      '.accountMenu',
+      '.notificationsPanel',
+      'background: t.$color-header-dropdown-bg;',
+      '.notificationFilterActive',
+      '.notificationRowUnread',
       'outline: 0.125rem solid t.$color-header-text-on-color;',
     ]).map((snippet) => `Header.module.scss missing ${snippet}`),
   );
 
+  failures.push(
+    ...missingSnippets(frozen, [
+      'hover uses `#84adff`',
+      '`Аккаунт` opens a Blueprint Popover/Menu profile dropdown',
+      '`Уведомления` opens a Blueprint Popover notification panel',
+      '`All` filtering',
+      'Header action dropdown panels use `#171d20` surface',
+    ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
+  );
+
   record(
-    'A10: Header responsive tabs and action buttons remain frozen',
+    'A10: Header responsive tabs, action states, and dropdowns remain frozen',
     failures.length === 0,
     failures.length ? failures.slice(0, 8).join('; ') : undefined,
   );
