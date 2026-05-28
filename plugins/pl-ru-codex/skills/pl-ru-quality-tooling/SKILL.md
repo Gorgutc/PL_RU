@@ -12,8 +12,8 @@ dependency-cruiser, and package scripts.
 ## Command Layers
 
 - `pnpm quality:fast`: cheap local checks.
-- `pnpm quality:deep`: audit checks plus browser/a11y smoke and full frozen
-  runtime.
+- `pnpm quality:deep`: audit checks, `pnpm check:visual`, browser/a11y smoke,
+  and full frozen runtime.
 - `pnpm quality:all`: full local gate, including refs and Lighthouse.
 - `pnpm codex:ship`: required before commit and push.
 
@@ -23,5 +23,12 @@ dependency-cruiser, and package scripts.
 - Do not auto-format the whole repo unless the user asks.
 - Keep read-only reference folders excluded from format/lint/audit tools unless
   the tool is explicitly checking reference integrity.
+- Keep `pnpm check:visual` in the deep gate so UI-surface changes cannot ship
+  without visual QA evidence.
+- `pnpm check:visual` must fail closed when the base ref is unavailable, include
+  staged/unstaged/untracked UI files, and perform real PNG comparison from
+  `pixelComparison.cases` before PASS.
+- Keep visual diff output constrained to ignored artifact folders such as
+  `reports/visual-qa/` or `test-results/visual-qa/`.
 - Browser checks may require approved execution outside a restricted Windows
   sandbox.

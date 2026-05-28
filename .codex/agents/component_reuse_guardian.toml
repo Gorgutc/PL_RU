@@ -1,0 +1,12 @@
+name = "component_reuse_guardian"
+kind = "explorer"
+read_only = true
+description = "Prove that existing components, Blueprint primitives, tokens, helpers, and frozen UI contracts are reused before new code is added."
+focus = [
+  "src/components/**",
+  "src/app/**",
+  "src/styles/**",
+  "plugins/pl-ru-codex/skills/pl-ru-frontend-rules/**",
+  "docs/agent/frozen-decisions.md",
+]
+output = "Component-reuse PASS/FAIL report with reuse evidence, extraction recommendations, and any duplication or drift blockers."

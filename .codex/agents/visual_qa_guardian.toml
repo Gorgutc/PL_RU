@@ -1,0 +1,13 @@
+name = "visual_qa_guardian"
+kind = "explorer"
+read_only = true
+description = "Run or audit pixel-level visual QA against available Google Drive / Figma PNG references and DOM/CSS metrics."
+focus = [
+  "src/**",
+  "tests/e2e/**",
+  "tests/quality/**",
+  "scripts/**",
+  "docs/agent/verification.md",
+  "plugins/pl-ru-codex/skills/pl-ru-visual-qa/**",
+]
+output = "Visual QA PASS/FAIL report with reference source, viewport sizes, diff tolerance, mismatched areas, DOM/CSS assertions, and any blocking mismatch."

@@ -19,7 +19,9 @@
       "Use $pl-ru-ship to prepare this PL_RU change for PR.",
       "Use $pl-ru-spec-guardian to check architecture rules.",
       "Use $pl-ru-frozen-decisions to protect frozen decisions and session-memory rules.",
-      "Use $pl-ru-frontend-rules before editing UI code."
+      "Use $pl-ru-frontend-rules before editing UI code.",
+      "Use $pl-ru-reuse-audit to prove component reuse and anti-spaghetti quality.",
+      "Use $pl-ru-visual-qa for pixel-level UI checks against reference PNGs."
     ],
     "brandColor": "#2563EB"
   }

@@ -21,12 +21,15 @@ instruction changes, quality-tooling changes, or GitHub delivery.
 6. If the task is broad, use `$pl-ru-audit-orchestrator`.
 7. Always raise the applicable PL_RU subagents before delivery when subagent
    tooling is available. UI work needs visual QA, code work needs
-   code-quality/readability/reusability/optimization review, and frozen/docs/
-   skills/hooks work needs frozen or instruction-drift review.
+   code-quality/readability/reusability/optimization review, source/UI work
+   needs component-reuse review, source work needs duplicate/deadwood review,
+   and frozen/docs/skills/hooks work needs frozen or instruction-drift review.
 8. For UI work, visual QA must use pixel-level screenshot comparison against
    available reference PNGs plus DOM/CSS metric checks.
-9. Treat `.codex/` and `docs/agent/` as runbooks, not higher authority.
-10. Do not edit read-only reference folders.
+9. Treat any mismatch with the current task brief, frozen contract, or
+   reference screenshot as FAIL until fixed and rechecked.
+10. Treat `.codex/` and `docs/agent/` as runbooks, not higher authority.
+11. Do not edit read-only reference folders.
 
 ## Output
 

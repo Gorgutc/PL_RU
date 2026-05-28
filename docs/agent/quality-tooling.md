@@ -14,6 +14,12 @@ before CI and before a draft PR is opened.
 - dependency-cruiser: dependency graph and circular import checks.
 - Knip: unused files, exports, and dependencies.
 - JSCPD: duplicate code detection.
+- Visual QA evidence gate: blocks UI-surface changes without recorded
+  pixel-comparison PASS, reference sources, checked states/viewports, tolerance,
+  mismatched areas, and DOM/CSS metric PASS. It also fails closed when the base
+  ref is unavailable, includes staged/unstaged/untracked UI files, compares
+  local PNG pairs from `pixelComparison.cases`, and writes diff PNGs only to
+  ignored artifact folders.
 - Playwright: browser smoke tests.
 - axe through Playwright: browser accessibility smoke.
 - Pa11y: page-level accessibility check.
@@ -23,7 +29,8 @@ before CI and before a draft PR is opened.
 ## Command Groups
 
 - `quality:fast`: cheap local checks.
-- `quality:deep`: audit checks plus browser and a11y smoke.
+- `quality:deep`: audit checks, visual QA evidence, browser smoke, and a11y
+  smoke.
 - `quality:all`: full local ship gate, including audit and Lighthouse.
 - `codex:ship`: required before commit and push.
 

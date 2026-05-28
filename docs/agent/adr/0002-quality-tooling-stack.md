@@ -14,8 +14,10 @@ unit tests, Playwright e2e, and frozen architecture rules.
 
 Add a broad free toolchain around the existing checks: HTMLHint, Knip, JSCPD,
 axe, Pa11y, Lighthouse CI, Markdownlint, CSpell, Lefthook, and
-dependency-cruiser. Group commands into `quality:fast`, `quality:deep`, and
-`quality:all`.
+dependency-cruiser. Add `check:visual` as a local visual QA evidence gate for
+UI-surface changes, including staged/unstaged/untracked detection, fail-closed
+base-ref handling, local PNG pair comparison, and ignored diff artifacts. Group
+commands into `quality:fast`, `quality:deep`, and `quality:all`.
 
 ## Consequences
 

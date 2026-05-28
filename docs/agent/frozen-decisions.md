@@ -20,17 +20,27 @@ mirrors the highest-risk checks so drift is caught by `pnpm verify`.
 - Always raise the applicable PL_RU subagents for implementation or review work
   when subagent tooling is available.
 - UI/frontend changes require visual QA. Code changes require
-  code-quality/readability/reusability/optimization review. Frozen-contract,
-  memory, docs, skills, or hook changes require frozen or instruction-drift
-  review.
+  code-quality/readability/reusability/optimization review. Source or UI changes
+  require component-reuse review. Source changes require duplicate/deadwood
+  review. Frozen-contract, memory, docs, skills, or hook changes require frozen
+  or instruction-drift review.
 - Do not deliver while a required subagent is failing. Fix findings and recheck,
   or explicitly report the unavailable-subagent fallback.
+- A subagent PASS is valid only after exact alignment with the current task
+  brief, frozen contracts, and available reference screenshots. Any meaningful
+  spec or screenshot mismatch is a delivery blocker.
 - Visual QA for UI work must include pixel-level screenshot comparison against
   available reference PNGs, including Google Drive Figma exports, plus DOM/CSS
   metric assertions.
 - Visual QA must report viewport sizes, diff tolerance, and mismatched areas.
   If a reference PNG is inaccessible, delivery stays blocked unless the current
   user request explicitly accepts a metric-only fallback.
+- The mandatory read-only role roster stays documented in `.codex/agents/`:
+  `code_deadwood_auditor`, `code_quality_guardian`,
+  `component_reuse_guardian`, `runtime_behavior_mapper`,
+  `tech_stack_cartographer`, `instruction_drift_auditor`,
+  `quality_tooling_architect`, `codex_infra_architect`,
+  `frozen_decisions_guardian`, and `visual_qa_guardian`.
 
 ## Header Responsive Tabs
 
@@ -86,3 +96,17 @@ mirrors the highest-risk checks so drift is caught by `pnpm verify`.
   `scripts/sync-refs.mjs` and `scripts/verify-reference.js` should share it.
 - Pa11y uses the Playwright Chromium executable from `playwright` so local runs
   and Linux CI use the same installed browser family.
+- `pnpm check:visual` stays in the deep quality gate. It must require visual QA
+  evidence for UI-surface changes detected in the base diff, unstaged worktree
+  diff, staged diff, or untracked files.
+- `pnpm check:visual` must validate reference sources, viewports, states,
+  pixel-comparison PASS, tolerance, mismatched areas, and DOM/CSS metric PASS
+  before delivery. The gate cannot accept only a self-reported manifest:
+  `pixelComparison.cases` must list local `referencePath`, `actualPath`, and
+  `diffPath` PNG artifacts, and the script must perform a real pixel comparison
+  before reporting PASS.
+- `pnpm check:visual` fails closed when the base ref is unavailable unless
+  `VISUAL_QA_ALLOW_MISSING_BASE=1` is explicitly set for a known local fallback.
+  Diff PNG output must stay in ignored visual-artifact directories such as
+  `reports/visual-qa/` or `test-results/visual-qa/`, and must never overwrite a
+  tracked source, config, or Git file.

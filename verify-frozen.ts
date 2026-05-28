@@ -82,6 +82,15 @@ function getScssTokenValue(text: string, token: string) {
   return match?.[1].trim().toLowerCase().replace(/\s+/g, ' ') ?? null;
 }
 
+async function pathExists(file: string) {
+  try {
+    await stat(path.join(ROOT, file));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function missingSnippets(text: string, snippets: readonly string[]) {
   return snippets.filter((snippet) => !text.includes(snippet));
 }
@@ -273,6 +282,7 @@ async function testFrozenHeaderContract() {
     path.join(SRC, 'components', 'Header', 'Header.module.scss'),
     'utf8',
   );
+  const headerSpec = await readFile(path.join(ROOT, 'tests', 'e2e', 'header.spec.ts'), 'utf8');
   const expectedTokens = new Map([
     ['$color-header-bg', '#0c1316'],
     ['$color-header-border', 'rgb(233 234 235 / 50%)'],
@@ -372,6 +382,20 @@ async function testFrozenHeaderContract() {
     ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
   );
 
+  failures.push(
+    ...missingSnippets(headerSpec, [
+      'keeps compact icon-only header layout',
+      'keeps expanded Figma header dimensions',
+      'uses Figma tab colors and keeps base tabs borderless',
+      'opens account dropdown from the account action button',
+      'opens notification dropdown and filters placeholder notifications',
+      'keeps account and notification popovers mutually exclusive',
+      'expectDropdownOffset',
+      'Unread (11)',
+      'Mark all as read',
+    ]).map((snippet) => `tests/e2e/header.spec.ts missing ${snippet}`),
+  );
+
   record(
     'A10: Header responsive tabs, action states, and dropdowns remain frozen',
     failures.length === 0,
@@ -381,6 +405,7 @@ async function testFrozenHeaderContract() {
 
 async function testFrozenQualityToolingContract() {
   const pkg = JSON.parse(await readFile(path.join(ROOT, 'package.json'), 'utf8'));
+  const jscpd = JSON.parse(await readFile(path.join(ROOT, '.jscpd.json'), 'utf8'));
   const shared = await readFile(path.join(ROOT, 'playwright.shared.config.ts'), 'utf8');
   const e2e = await readFile(path.join(ROOT, 'playwright.config.ts'), 'utf8');
   const quality = await readFile(path.join(ROOT, 'playwright.quality.config.ts'), 'utf8');
@@ -392,8 +417,36 @@ async function testFrozenQualityToolingContract() {
   if (pkg.scripts?.['check:duplicates'] !== 'jscpd --config .jscpd.json --noTips .') {
     failures.push('package.json check:duplicates drifted');
   }
+  if (pkg.scripts?.['check:visual'] !== 'node scripts/check-visual-evidence.mjs') {
+    failures.push('package.json check:visual drifted');
+  }
+  if (!pkg.scripts?.['quality:deep']?.includes('pnpm check:visual')) {
+    failures.push('package.json quality:deep must include pnpm check:visual');
+  }
+  if (jscpd.threshold !== 1) failures.push('.jscpd.json threshold must stay 1');
+  for (const required of [
+    'src/**/*.{ts,tsx,scss}',
+    'tests/**/*.{ts,tsx,mjs}',
+    'scripts/**/*.{js,mjs}',
+    'verify-frozen.ts',
+  ]) {
+    if (!jscpd.files?.includes(required)) failures.push(`.jscpd.json files missing ${required}`);
+  }
+  for (const requiredIgnore of [
+    '**/Blueprints_lib/**',
+    '**/Osiris_ref/**',
+    '**/plugins/pl-ru-codex/skills/blueprint-design/**',
+    '**/plugins/pl-ru-codex/skills/osiris-design/**',
+  ]) {
+    if (!jscpd.ignore?.includes(requiredIgnore)) {
+      failures.push(`.jscpd.json ignore missing ${requiredIgnore}`);
+    }
+  }
 
   failures.push(
+    ...((await pathExists('scripts/check-visual-evidence.mjs'))
+      ? []
+      : ['scripts/check-visual-evidence.mjs missing']),
     ...missingSnippets(shared, ['createPlaywrightConfig', 'Desktop Chrome']).map(
       (snippet) => `playwright.shared.config.ts missing ${snippet}`,
     ),
@@ -424,6 +477,7 @@ async function testFrozenQualityToolingContract() {
 }
 
 async function testAgentVisualQaContract() {
+  const pkg = JSON.parse(await readFile(path.join(ROOT, 'package.json'), 'utf8'));
   const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
   const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
   const bootstrap = await readFile(path.join(ROOT, 'docs', 'agent', 'bootstrap.md'), 'utf8');
@@ -448,11 +502,66 @@ async function testAgentVisualQaContract() {
     path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-quality-gate', 'SKILL.md'),
     'utf8',
   );
+  const reuseSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-reuse-audit', 'SKILL.md'),
+    'utf8',
+  );
+  const visualSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-visual-qa', 'SKILL.md'),
+    'utf8',
+  );
+  const shipSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-ship', 'SKILL.md'),
+    'utf8',
+  );
   const frozenSkill = await readFile(
     path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-frozen-decisions', 'SKILL.md'),
     'utf8',
   );
+  const visualScript = await readFile(
+    path.join(ROOT, 'scripts', 'check-visual-evidence.mjs'),
+    'utf8',
+  );
   const missing: string[] = [];
+  const requiredSkills = ['pl-ru-reuse-audit', 'pl-ru-visual-qa'];
+  const requiredAgents = [
+    'code_deadwood_auditor',
+    'code_quality_guardian',
+    'component_reuse_guardian',
+    'runtime_behavior_mapper',
+    'tech_stack_cartographer',
+    'instruction_drift_auditor',
+    'quality_tooling_architect',
+    'codex_infra_architect',
+    'frozen_decisions_guardian',
+    'visual_qa_guardian',
+  ];
+
+  for (const skill of requiredSkills) {
+    if (!(await pathExists(path.join('plugins', 'pl-ru-codex', 'skills', skill, 'SKILL.md')))) {
+      missing.push(`${skill} SKILL.md`);
+    }
+    if (
+      !(await pathExists(
+        path.join('plugins', 'pl-ru-codex', 'skills', skill, 'agents', 'openai.yaml'),
+      ))
+    ) {
+      missing.push(`${skill} openai agent metadata`);
+    }
+  }
+
+  for (const agent of requiredAgents) {
+    if (!(await pathExists(path.join('.codex', 'agents', `${agent}.toml`)))) {
+      missing.push(`.codex agent missing ${agent}`);
+    }
+    if (
+      !hasPhrase(agents, agent) &&
+      !hasPhrase(frozen, agent) &&
+      !hasPhrase(orchestration, agent)
+    ) {
+      missing.push(`agent roster docs missing ${agent}`);
+    }
+  }
 
   if (!hasPhrase(agents, '## Mandatory Agents And Visual QA')) {
     missing.push('AGENTS.md mandatory agents section');
@@ -460,14 +569,38 @@ async function testAgentVisualQaContract() {
   if (!hasPhrase(agents, 'Always raise the applicable PL_RU subagents')) {
     missing.push('AGENTS.md always-raise-subagents rule');
   }
+  if (!hasPhrase(agents, 'component-reuse subagent')) {
+    missing.push('AGENTS.md component-reuse subagent rule');
+  }
+  if (!hasPhrase(agents, 'dead-code / duplicate-code subagent')) {
+    missing.push('AGENTS.md duplicate/deadwood subagent rule');
+  }
+  if (!hasPhrase(agents, 'A PASS is valid only')) {
+    missing.push('AGENTS.md exact PASS rule');
+  }
   if (!hasPhrase(agents, 'pixel-level screenshot comparison')) {
     missing.push('AGENTS.md pixel-level visual QA rule');
+  }
+  if (!hasPhrase(agents, 'reports/visual-qa/')) {
+    missing.push('AGENTS.md visual artifact directory rule');
   }
   if (!hasPhrase(frozen, '## Agent Orchestration And Visual QA')) {
     missing.push('frozen-decisions agent/visual QA section');
   }
   if (!hasPhrase(frozen, 'reference PNG is inaccessible')) {
     missing.push('frozen-decisions reference PNG blocking rule');
+  }
+  if (!hasPhrase(frozen, 'unstaged worktree diff')) {
+    missing.push('frozen-decisions visual gate worktree detection rule');
+  }
+  if (!hasPhrase(frozen, 'The gate cannot accept only a self-reported manifest')) {
+    missing.push('frozen-decisions real pixel comparison rule');
+  }
+  if (!hasPhrase(frozen, 'VISUAL_QA_ALLOW_MISSING_BASE')) {
+    missing.push('frozen-decisions fail-closed base-ref rule');
+  }
+  if (!hasPhrase(frozen, 'reports/visual-qa/')) {
+    missing.push('frozen-decisions visual artifact directory rule');
   }
 
   for (const [label, text] of [
@@ -482,17 +615,80 @@ async function testAgentVisualQaContract() {
     if (!hasPhrase(text, 'applicable PL_RU subagents')) {
       missing.push(`${label} subagent rule`);
     }
+    if (!hasPhrase(text, 'component-reuse')) {
+      missing.push(`${label} component-reuse rule`);
+    }
+    if (!hasPhrase(text, 'duplicate/deadwood')) {
+      missing.push(`${label} duplicate/deadwood rule`);
+    }
     if (!hasPhrase(text, 'pixel-level screenshot comparison')) {
       missing.push(`${label} pixel visual QA rule`);
+    }
+  }
+  if (
+    !hasPhrase(verification, 'base diff, unstaged worktree diff, staged diff, and untracked files')
+  ) {
+    missing.push('docs/agent/verification.md worktree detection rule');
+  }
+  if (!hasPhrase(verification, 'pixelComparison.cases')) {
+    missing.push('docs/agent/verification.md pixel cases rule');
+  }
+  if (!hasPhrase(verification, 'writes a diff PNG')) {
+    missing.push('docs/agent/verification.md diff PNG rule');
+  }
+  if (!hasPhrase(verification, 'The base diff fails closed')) {
+    missing.push('docs/agent/verification.md fail-closed base-ref rule');
+  }
+  if (!hasPhrase(verification, 'must not overwrite a tracked file')) {
+    missing.push('docs/agent/verification.md diff artifact safety rule');
+  }
+
+  for (const [label, text] of [
+    ['pl-ru-reuse-audit', reuseSkill],
+    ['pl-ru-visual-qa', visualSkill],
+    ['pl-ru-quality-gate', qualitySkill],
+    ['pl-ru-frozen-decisions', frozenSkill],
+  ] as const) {
+    if (!hasPhrase(text, 'task brief')) missing.push(`${label} task-brief alignment rule`);
+    if (!hasPhrase(text, 'reference screenshot') && !hasPhrase(text, 'reference PNG')) {
+      missing.push(`${label} reference alignment rule`);
     }
   }
 
   if (!hasPhrase(frozenSkill, 'pixel-level visual QA rules remain documented')) {
     missing.push('pl-ru-frozen-decisions visual QA guard rule');
   }
+  if (hasPhrase(shipSkill, 'only when the user explicitly asks')) {
+    missing.push('pl-ru-ship weak optional-subagent language');
+  }
+  if (pkg.scripts?.['check:visual'] !== 'node scripts/check-visual-evidence.mjs') {
+    missing.push('package.json check:visual script');
+  }
+  if (!pkg.scripts?.['quality:deep']?.includes('pnpm check:visual')) {
+    missing.push('package.json quality:deep visual gate');
+  }
+  for (const snippet of [
+    'VISUAL_QA_EVIDENCE',
+    'export const visualQaContract = Object.freeze({',
+    "baseDiffFailureMode: 'fail-closed-unless-VISUAL_QA_ALLOW_MISSING_BASE'",
+    "changeSources: ['base-diff', 'unstaged-worktree', 'staged-index', 'untracked-files']",
+    "diffArtifactPathPrefixes: ['reports/visual-qa/', 'test-results/visual-qa/']",
+    "pixelComparisonEngine: 'playwright-canvas-png-diff'",
+    'pixelComparison',
+    'pixelComparison.cases must list screenshot/reference PNG pairs',
+    'referencePath',
+    'actualPath',
+    'diffPath',
+    'mismatchedAreas',
+    'domCssMetrics',
+    'referenceUnavailable',
+    'metricOnlyFallbackAcceptedByCurrentUser',
+  ]) {
+    if (!visualScript.includes(snippet)) missing.push(`check-visual-evidence missing ${snippet}`);
+  }
 
   record(
-    'A12: mandatory subagents and pixel-level visual QA stay documented',
+    'A12: mandatory agents, reuse, exact-spec, and visual QA gates stay documented',
     missing.length === 0,
     missing.length ? missing.join('; ') : undefined,
   );

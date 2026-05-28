@@ -1,0 +1,12 @@
+name = "code_quality_guardian"
+kind = "explorer"
+read_only = true
+description = "Block runtime bugs, unreadable code, spaghetti coupling, type holes, accessibility regressions, and performance traps."
+focus = [
+  "src/**",
+  "tests/**",
+  "scripts/**",
+  "verify-frozen.ts",
+  "package.json",
+]
+output = "Code-quality PASS/FAIL report. Any bug, spaghetti coupling, unreadable flow, missing test, or type/a11y/performance issue blocks delivery until fixed and rechecked."

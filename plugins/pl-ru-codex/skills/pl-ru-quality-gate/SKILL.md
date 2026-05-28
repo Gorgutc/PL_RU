@@ -9,14 +9,17 @@ Review the implemented diff. Do not edit files unless the user asks to apply the
 
 Final delivery requires the applicable PL_RU subagents when subagent tooling is
 available. Code changes need code-quality/readability/reusability/optimization
-review. UI changes also need visual QA with pixel-level screenshot comparison
-against available reference PNGs plus DOM/CSS metric checks. Treat visual or
-code-review FAIL output as a blocker until fixed and rechecked.
+review. Source or UI changes need component-reuse review. Source changes need
+duplicate/deadwood review. UI changes also need visual QA with pixel-level
+screenshot comparison against available reference PNGs plus DOM/CSS metric
+checks. Treat visual, reuse, duplicate/deadwood, or code-review FAIL output as a
+blocker until fixed and rechecked. A PASS is valid only when the final diff
+matches the task brief, frozen contracts, and available reference screenshots.
 
 Severity:
 
 - block: bug, security issue, broken UX, accessibility violation, runtime error
-- fix-before-merge: code smell, missing type, missing alt text, missing accessible name, suboptimal selector
+- fix-before-merge: code smell, spaghetti coupling, duplicated logic or styles, missing reuse, missing type, missing alt text, missing accessible name, suboptimal selector
 - nit: style, naming, or comment issue
 
 Output shape:

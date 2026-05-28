@@ -30,6 +30,16 @@ and `verify-frozen.ts`. Do not edit files when using this as a review skill.
 - Mandatory PL_RU subagent orchestration and pixel-level visual QA rules remain
   documented in `AGENTS.md`, `docs/agent/verification.md`, and the relevant
   skills/hooks.
+- Component reuse, duplicate/deadwood review, anti-spaghetti review, and exact
+  task brief / spec / reference screenshot alignment remain mandatory delivery
+  gates.
+- `.codex/agents/` keeps code-quality, component-reuse, duplicate/deadwood,
+  frozen/instruction-drift, and visual QA roles.
+- `pnpm check:visual` stays in the deep quality gate and requires visual QA
+  evidence for UI-surface changes. It must fail closed when the base ref is
+  unavailable, include staged/unstaged/untracked UI files, perform real PNG
+  comparison from `pixelComparison.cases`, and keep diff output under ignored
+  visual-artifact folders.
 - `verify-frozen.ts` keeps static guards for these decisions.
 
 ## Output
