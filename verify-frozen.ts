@@ -86,6 +86,11 @@ function missingSnippets(text: string, snippets: readonly string[]) {
   return snippets.filter((snippet) => !text.includes(snippet));
 }
 
+function hasPhrase(text: string, phrase: string) {
+  const normalize = (value: string) => value.replace(/\s+/g, ' ').trim();
+  return normalize(text).includes(normalize(phrase));
+}
+
 // ─── A. Static (no server) ───────────────────────────────────────────────────
 
 async function testNoTailwind() {
@@ -226,6 +231,11 @@ async function testCodexMemoryContract() {
   const config = await readFile(path.join(ROOT, '.codex', 'config.toml'), 'utf8');
   const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
   const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+  const bootstrap = await readFile(path.join(ROOT, 'docs', 'agent', 'bootstrap.md'), 'utf8');
+  const bootstrapSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-session-bootstrap', 'SKILL.md'),
+    'utf8',
+  );
   const missing: string[] = [];
 
   if (!hasTomlSetting(config, 'features', 'memories', 'true')) {
@@ -235,7 +245,19 @@ async function testCodexMemoryContract() {
   if (!agents.includes('At the end of every completed task')) {
     missing.push('AGENTS.md completed-task memory handoff rule');
   }
+  if (!agents.includes('At the start of every PL_RU session, do a quick Memories pass')) {
+    missing.push('AGENTS.md startup Memories pass rule');
+  }
+  if (!agents.includes('extensions/ad_hoc/notes/')) {
+    missing.push('AGENTS.md explicit user-request memory update path');
+  }
   if (!frozen.includes('## Session Memory')) missing.push('frozen-decisions Session Memory');
+  if (!bootstrap.includes('Do a quick Memories pass')) {
+    missing.push('docs/agent/bootstrap.md Memories pass step');
+  }
+  if (!bootstrapSkill.includes('Do a quick Memories pass')) {
+    missing.push('pl-ru-session-bootstrap Memories pass step');
+  }
 
   record(
     'A9: Codex Memories enabled and documented',
@@ -258,6 +280,10 @@ async function testFrozenHeaderContract() {
     ['$color-header-tab-hover', '#528bff'],
     ['$color-header-action-text', '#d3d3d3'],
     ['$color-header-data', '#1c6e42'],
+    ['$color-header-action-hover', '#84adff'],
+    ['$color-header-dropdown-bg', '#171d20'],
+    ['$color-header-dropdown-border', '#727677'],
+    ['$color-header-dropdown-filter-bg', '#33434b'],
     ['$header-height', '3rem'],
     ['$header-edge-padding', '0.5rem'],
     ['$header-side-width', '20.625rem'],
@@ -266,9 +292,16 @@ async function testFrozenHeaderContract() {
     ['$header-tab-lead-width', '9.625rem'],
     ['$header-expanded-breakpoint', '120rem'],
     ['$header-action-height', '1.875rem'],
+    ['$header-dropdown-offset', '0.25rem'],
+    ['$header-dropdown-padding-block', '1rem'],
+    ['$header-dropdown-padding-inline', '0.5rem'],
+    ['$header-account-menu-item-gap', '0.5rem'],
+    ['$fs-header-filter', '0.625rem'],
     ['$radius-xs', '0.1875rem'],
+    ['$radius-dropdown', '0.125rem'],
   ]);
   const failures: string[] = [];
+  const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
 
   for (const [token, expected] of expectedTokens) {
     const actual = getScssTokenValue(tokens, token);
@@ -283,11 +316,24 @@ async function testFrozenHeaderContract() {
       'tabs?: readonly HeaderTab[];',
       'className?: string;',
       'data-testid="praios-header-tabs"',
+      'PopupKind.MENU',
+      'PopupKind.DIALOG',
+      "useState<NotificationFilterId>('all')",
       'aria-label={tab.title}',
       'text="Данные"',
       'text="База данных"',
       'text="Аккаунт"',
       'aria-label="Уведомления"',
+      'role="group"',
+      'aria-expanded={isAccountDropdownOpen}',
+      'aria-expanded={isNotificationsDropdownOpen}',
+      'text="Изменить профиль"',
+      'text="Выйти из аккаунта"',
+      "label: 'AI Info'",
+      "label: 'Unread'",
+      'Mark all as read',
+      'role="dialog"',
+      'onMarkAllRead',
     ]).map((snippet) => `Header.tsx missing ${snippet}`),
   );
 
@@ -302,13 +348,32 @@ async function testFrozenHeaderContract() {
       'width: t.$header-tab-lead-width;',
       'height: t.$header-action-height;',
       'border-radius: t.$radius-xs;',
+      'border-color: t.$color-header-action-hover;',
+      'background: t.$color-header-tab-active !important;',
       'opacity: 1 !important;',
+      'color: t.$color-header-text-on-color !important;',
+      'padding-block-start: t.$header-dropdown-offset;',
+      'padding: t.$header-dropdown-padding-block t.$header-dropdown-padding-inline;',
+      'gap: t.$header-account-menu-item-gap;',
+      'background: t.$color-header-dropdown-bg;',
       'outline: 0.125rem solid t.$color-header-text-on-color;',
     ]).map((snippet) => `Header.module.scss missing ${snippet}`),
   );
 
+  failures.push(
+    ...missingSnippets(frozen, [
+      'hover uses `#84adff`',
+      '`Аккаунт` opens a Blueprint Popover/Menu profile dropdown',
+      '`Уведомления` opens a Blueprint Popover notification panel',
+      '`All` filtering',
+      'Header action dropdown panels use `#171d20` surface',
+      'sit `4px` below their trigger buttons',
+      '`8px` item gap',
+    ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
+  );
+
   record(
-    'A10: Header responsive tabs and action buttons remain frozen',
+    'A10: Header responsive tabs, action states, and dropdowns remain frozen',
     failures.length === 0,
     failures.length ? failures.slice(0, 8).join('; ') : undefined,
   );
@@ -355,6 +420,81 @@ async function testFrozenQualityToolingContract() {
     'A11: quality tooling shared contracts remain frozen',
     failures.length === 0,
     failures.length ? failures.join('; ') : undefined,
+  );
+}
+
+async function testAgentVisualQaContract() {
+  const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
+  const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+  const bootstrap = await readFile(path.join(ROOT, 'docs', 'agent', 'bootstrap.md'), 'utf8');
+  const verification = await readFile(path.join(ROOT, 'docs', 'agent', 'verification.md'), 'utf8');
+  const orchestration = await readFile(
+    path.join(ROOT, 'docs', 'agent', 'orchestration.md'),
+    'utf8',
+  );
+  const sessionStartHook = await readFile(
+    path.join(ROOT, '.codex', 'hooks', 'session-start.md'),
+    'utf8',
+  );
+  const promptHook = await readFile(
+    path.join(ROOT, '.codex', 'hooks', 'user-prompt-submit.md'),
+    'utf8',
+  );
+  const bootstrapSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-session-bootstrap', 'SKILL.md'),
+    'utf8',
+  );
+  const qualitySkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-quality-gate', 'SKILL.md'),
+    'utf8',
+  );
+  const frozenSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-frozen-decisions', 'SKILL.md'),
+    'utf8',
+  );
+  const missing: string[] = [];
+
+  if (!hasPhrase(agents, '## Mandatory Agents And Visual QA')) {
+    missing.push('AGENTS.md mandatory agents section');
+  }
+  if (!hasPhrase(agents, 'Always raise the applicable PL_RU subagents')) {
+    missing.push('AGENTS.md always-raise-subagents rule');
+  }
+  if (!hasPhrase(agents, 'pixel-level screenshot comparison')) {
+    missing.push('AGENTS.md pixel-level visual QA rule');
+  }
+  if (!hasPhrase(frozen, '## Agent Orchestration And Visual QA')) {
+    missing.push('frozen-decisions agent/visual QA section');
+  }
+  if (!hasPhrase(frozen, 'reference PNG is inaccessible')) {
+    missing.push('frozen-decisions reference PNG blocking rule');
+  }
+
+  for (const [label, text] of [
+    ['docs/agent/bootstrap.md', bootstrap],
+    ['docs/agent/verification.md', verification],
+    ['docs/agent/orchestration.md', orchestration],
+    ['.codex/hooks/session-start.md', sessionStartHook],
+    ['.codex/hooks/user-prompt-submit.md', promptHook],
+    ['pl-ru-session-bootstrap', bootstrapSkill],
+    ['pl-ru-quality-gate', qualitySkill],
+  ] as const) {
+    if (!hasPhrase(text, 'applicable PL_RU subagents')) {
+      missing.push(`${label} subagent rule`);
+    }
+    if (!hasPhrase(text, 'pixel-level screenshot comparison')) {
+      missing.push(`${label} pixel visual QA rule`);
+    }
+  }
+
+  if (!hasPhrase(frozenSkill, 'pixel-level visual QA rules remain documented')) {
+    missing.push('pl-ru-frozen-decisions visual QA guard rule');
+  }
+
+  record(
+    'A12: mandatory subagents and pixel-level visual QA stay documented',
+    missing.length === 0,
+    missing.length ? missing.join('; ') : undefined,
   );
 }
 
@@ -492,6 +632,7 @@ async function main() {
   await testCodexMemoryContract();
   await testFrozenHeaderContract();
   await testFrozenQualityToolingContract();
+  await testAgentVisualQaContract();
 
   if (!process.argv.includes('--static')) {
     try {

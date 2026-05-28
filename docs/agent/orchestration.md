@@ -9,6 +9,18 @@ Use orchestration for project-wide audits, architecture changes, quality-tooling
 changes, instruction or skill rewrites, and broad refactors. For narrow fixes,
 use the relevant skill and local checks directly.
 
+Always raise the applicable PL_RU subagents for implementation or review work
+when subagent tooling is available. UI/frontend changes must include visual QA,
+code changes must include code-quality/readability/reusability/optimization
+review, and frozen/docs/skills/hooks changes must include frozen or
+instruction-drift review. Do not deliver while a required subagent is failing.
+
+For UI changes, visual QA must include pixel-level screenshot comparison against
+the available reference PNGs plus DOM/CSS metric assertions. Record viewport
+sizes, diff tolerance, and mismatched areas. If reference PNGs are inaccessible,
+block delivery unless the current user request explicitly accepts a metric-only
+fallback.
+
 ## Read-Only Audit Roles
 
 - `code_deadwood_auditor`: dead code, duplicate code, oversized modules, and

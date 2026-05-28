@@ -15,6 +15,23 @@ mirrors the highest-risk checks so drift is caught by `pnpm verify`.
   changes, preserved decisions, checks, branch, commit, PR, and known follow-up.
 - Generated memory files are external state and must not be committed.
 
+## Agent Orchestration And Visual QA
+
+- Always raise the applicable PL_RU subagents for implementation or review work
+  when subagent tooling is available.
+- UI/frontend changes require visual QA. Code changes require
+  code-quality/readability/reusability/optimization review. Frozen-contract,
+  memory, docs, skills, or hook changes require frozen or instruction-drift
+  review.
+- Do not deliver while a required subagent is failing. Fix findings and recheck,
+  or explicitly report the unavailable-subagent fallback.
+- Visual QA for UI work must include pixel-level screenshot comparison against
+  available reference PNGs, including Google Drive Figma exports, plus DOM/CSS
+  metric assertions.
+- Visual QA must report viewport sizes, diff tolerance, and mismatched areas.
+  If a reference PNG is inaccessible, delivery stays blocked unless the current
+  user request explicitly accepts a metric-only fallback.
+
 ## Header Responsive Tabs
 
 - Header height stays `48px`.
@@ -34,9 +51,27 @@ mirrors the highest-risk checks so drift is caught by `pnpm verify`.
 ## Header Action Buttons
 
 - `Данные`, `База данных`, `Аккаунт`, and `Уведомления` keep the current
-  Blueprint outlined-button visual contract from the Header iteration.
-- Their height stays `30px`, radius stays `3px`, text size stays `14px`, and
-  disabled opacity stays visually stable.
+  Blueprint outlined-button visual contract from the Header iterations.
+- Their height stays `30px`, radius stays `3px`, text size stays `14px`, rest
+  text stays `#d3d3d3`, hover uses `#84adff`, and open/active dropdown actions
+  use `#2970ff` with white foreground.
+- Action button icons stay white in rest, hover, disabled, and open states.
+- `Данные` and `База данных` keep their current non-functional/disabled
+  behavior until a dedicated task adds their click behavior; this iteration only
+  prepares the shared visual state contract for them.
+- `Аккаунт` opens a Blueprint Popover/Menu profile dropdown with
+  `Изменить профиль` and `Выйти из аккаунта`. The profile menu keeps `16px`
+  vertical padding, `8px` horizontal padding, `8px` item gap, `1px` border,
+  `2px` radius, white item icons, and menu items with rest/hover states but no
+  selected/active item state.
+- `Уведомления` opens a Blueprint Popover notification panel with default
+  `All` filtering, `AI Info` and dynamic unread filtering, `Mark all as read`,
+  `Last 7 days` and `Older` sections, and static placeholder data until a real
+  notification source is added.
+- Header action dropdown panels use `#171d20` surface, `#727677` border,
+  `2px` radius, sit `4px` below their trigger buttons, and stay anchored to
+  those triggers.
+- Disabled opacity stays visually stable.
 - These buttons are candidates for reuse outside Header. If another screen needs
   the same visual language, extract or reuse the current contract instead of
   duplicating a similar component with drift-prone styles.

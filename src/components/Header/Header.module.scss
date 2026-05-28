@@ -184,8 +184,13 @@
   gap: 0.25rem;
 }
 
-.actionButton.actionButton.actionButton,
-.notificationButton.notificationButton.notificationButton {
+.dropdownTarget {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.actionButton.actionButton,
+.notificationButton.notificationButton {
   flex: 0 0 auto;
   height: t.$header-action-height;
   min-height: 0;
@@ -195,18 +200,38 @@
   overflow: hidden;
   border: 0.0625rem solid t.$color-header-action-border-muted;
   border-radius: t.$radius-xs;
-  background: transparent;
+  background: transparent !important;
   box-shadow: none;
   color: t.$color-header-action-text;
   font-family: t.$font-header;
   font-weight: 400;
   white-space: nowrap;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
 }
 
-.actionButton.actionButton.actionButton:disabled,
-.actionButton.actionButton.actionButton:disabled:hover,
-.notificationButton.notificationButton.notificationButton:disabled,
-.notificationButton.notificationButton.notificationButton:disabled:hover {
+.actionButton.actionButton:not(:disabled):hover,
+.notificationButton.notificationButton:not(:disabled):hover {
+  border-color: t.$color-header-action-hover;
+  background: transparent !important;
+  color: t.$color-header-action-hover;
+}
+
+.actionButton.actionButtonOpen.actionButtonOpen,
+.actionButton.actionButtonOpen.actionButtonOpen:not(:disabled):hover,
+.notificationButton.notificationButton.actionButtonOpen,
+.notificationButton.notificationButton.actionButtonOpen:not(:disabled):hover {
+  border-color: t.$color-header-tab-active !important;
+  background: t.$color-header-tab-active !important;
+  color: t.$color-header-text-on-color !important;
+}
+
+.actionButton.actionButton:disabled,
+.actionButton.actionButton:disabled:hover,
+.notificationButton.notificationButton:disabled,
+.notificationButton.notificationButton:disabled:hover {
   border-color: t.$color-header-action-border-muted !important;
   background: transparent !important;
   color: t.$color-header-action-text !important;
@@ -214,91 +239,267 @@
   opacity: 1 !important;
 }
 
-.actionButton.actionButton.actionButtonData.actionButtonData {
+.actionButtonData.actionButtonData {
   border-color: t.$color-header-data-border;
   color: t.$color-header-data;
 }
 
-.actionButton.actionButton.actionButtonData.actionButtonData:disabled,
-.actionButton.actionButton.actionButtonData.actionButtonData:disabled:hover {
+.actionButtonData.actionButtonData:disabled,
+.actionButtonData.actionButtonData:disabled:hover {
   border-color: t.$color-header-data-border !important;
   color: t.$color-header-data !important;
 }
 
-.actionButton.actionButton.actionButtonAccount.actionButtonAccount {
+.actionButtonDatabase.actionButtonDatabase {
+  border-color: t.$color-header-action-border-muted;
+}
+
+.actionButtonAccount.actionButtonAccount {
   border-color: t.$color-header-action-border;
 }
 
-.actionButton.actionButton.actionButtonAccount.actionButtonAccount:disabled,
-.actionButton.actionButton.actionButtonAccount.actionButtonAccount:disabled:hover {
-  border-color: t.$color-header-action-border !important;
-}
-
-.notificationButton.notificationButton.notificationButton {
+.notificationButton.notificationButton {
   width: t.$header-action-height;
   padding: 0;
 }
 
 .actionText {
-  color: t.$color-header-action-text;
+  color: currentcolor;
   font-size: t.$fs-header-action;
   line-height: 1rem;
   white-space: nowrap;
 }
 
-.actionButtonData .actionText {
-  color: t.$color-header-data;
-}
-
-.actionButton.actionButton.actionButton:disabled .actionText,
-.notificationButton.notificationButton.notificationButton:disabled .actionText {
-  color: t.$color-header-action-text !important;
-}
-
-.actionButton.actionButton.actionButtonData.actionButtonData:disabled .actionText {
-  color: t.$color-header-data !important;
-}
-
-.actionButtonData .actionIconData {
-  color: t.$color-header-data;
-}
-
-.actionIcon,
-.actionIconAccent,
-.actionIconData {
+.actionIcon {
   flex: 0 0 auto;
   margin: 0 !important;
-}
-
-.actionIcon {
-  color: t.$color-header-text-on-color;
-}
-
-.actionButton.actionButton.actionButton:disabled .actionIcon.actionIcon,
-.notificationButton.notificationButton.notificationButton:disabled .actionIcon.actionIcon {
   color: t.$color-header-text-on-color !important;
 }
 
-.actionIconAccent {
-  color: t.$color-header-tab-active;
+.actionButton.actionButton .actionIcon,
+.notificationButton.notificationButton .actionIcon {
+  color: t.$color-header-text-on-color !important;
 }
 
-.actionButton.actionButton.actionButton:disabled .actionIconAccent.actionIconAccent {
-  color: t.$color-header-tab-active !important;
+.dropdownPopover {
+  padding-block-start: t.$header-dropdown-offset;
+  background: transparent;
+  box-shadow: none !important;
 }
 
-.actionIconData {
-  color: t.$color-header-data;
+.accountMenu {
+  display: grid;
+  gap: t.$header-account-menu-item-gap;
+  min-width: 11.25rem;
+  padding: t.$header-dropdown-padding-block t.$header-dropdown-padding-inline;
+  border: 0.0625rem solid t.$color-header-dropdown-border;
+  border-radius: t.$radius-dropdown;
+  background: t.$color-header-dropdown-bg;
 }
 
-.actionButton.actionButton.actionButtonData.actionButtonData:disabled
-  .actionIconData.actionIconData {
-  color: t.$color-header-data !important;
+.accountMenuItem {
+  display: flex;
+  align-items: center;
+  min-height: t.$header-action-height;
+  padding: 0 0.5rem;
+  border-radius: t.$radius-dropdown;
+  color: t.$color-header-action-text;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  line-height: 1rem;
+}
+
+.accountMenuIcon.accountMenuIcon {
+  color: t.$color-header-text-on-color !important;
+}
+
+.accountMenuItem:hover,
+.accountMenuItem:focus {
+  background: t.$color-header-tab-hover;
+  color: t.$color-header-text-on-color;
+}
+
+.accountMenuItemText {
+  color: currentcolor;
+}
+
+.notificationsPanel {
+  width: min(25rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 4rem);
+  padding: 1rem 0;
+  overflow: hidden;
+  border: 0.0625rem solid t.$color-header-dropdown-border;
+  border-radius: t.$radius-dropdown;
+  background: t.$color-header-dropdown-bg;
+  color: t.$color-header-action-text;
+  font-family: t.$font-sans;
+}
+
+.notificationsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0 1rem 0.75rem;
+}
+
+.notificationsTitle {
+  margin: 0;
+  color: t.$color-header-text-on-color;
+  font-size: t.$fs-header-action;
+  font-weight: 500;
+  line-height: 1.25rem;
+}
+
+.notificationsCloseButton.notificationsCloseButton {
+  width: 1.5rem;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  padding: 0;
+  color: t.$color-header-action-text;
+}
+
+.notificationsCloseButton.notificationsCloseButton:hover {
+  color: t.$color-header-action-hover;
+}
+
+.notificationsDivider {
+  height: 0.0875rem;
+  background: t.$color-header-dropdown-border;
+}
+
+.notificationsToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
+.notificationFilters {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.notificationFilter.notificationFilter,
+.markAllReadButton.markAllReadButton {
+  min-height: 1.5rem;
+  border: 0;
+  border-radius: 0.375rem;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-filter;
+  line-height: 1rem;
+  cursor: pointer;
+  box-shadow: none !important;
+}
+
+.notificationFilter.notificationFilter {
+  padding: 0 0.5rem;
+  background: t.$color-header-dropdown-filter-bg !important;
+  color: t.$color-header-action-text !important;
+}
+
+.notificationFilter.notificationFilter:hover {
+  color: t.$color-header-text-on-color !important;
+}
+
+.notificationFilterSelected.notificationFilterSelected {
+  background: t.$color-header-tab-active !important;
+  color: t.$color-header-text-on-color !important;
+}
+
+.markAllReadButton.markAllReadButton {
+  padding: 0;
+  background: transparent !important;
+  color: t.$color-header-action-hover !important;
+  white-space: nowrap;
+}
+
+.markAllReadButton.markAllReadButton:disabled {
+  color: t.$color-text-muted !important;
+  cursor: default;
+}
+
+.notificationsList {
+  max-height: 25rem;
+  padding: 0 0.5rem 0.5rem;
+  overflow: auto;
+}
+
+.notificationsEmpty {
+  margin: 0;
+  padding: 1rem 0.5rem 0;
+  color: t.$color-text-muted;
+  font-size: t.$fs-header-nav;
+}
+
+.notificationSection {
+  padding: 0.5rem 0 0;
+}
+
+.notificationSectionTitle {
+  margin: 0;
+  padding: 0 0.5rem 0.375rem;
+  color: t.$color-text-muted;
+  font-size: t.$fs-header-nav;
+  font-weight: 500;
+  line-height: 1rem;
+}
+
+.notificationRows {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.notificationRow {
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  color: t.$color-header-action-text;
+}
+
+.notificationRowUnread {
+  color: t.$color-header-text-on-color;
+}
+
+.notificationRowHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.notificationCategory,
+.notificationDate {
+  color: t.$color-text-muted;
+  font-size: t.$fs-header-filter;
+  line-height: 1rem;
+}
+
+.notificationTitle,
+.notificationDescription {
+  margin: 0;
+  line-height: 1rem;
+}
+
+.notificationTitle {
+  padding-block-start: 0.125rem;
+  font-size: t.$fs-header-nav;
+  font-weight: 500;
+}
+
+.notificationDescription {
+  padding-block-start: 0.125rem;
+  color: t.$color-text-muted;
+  font-size: t.$fs-header-filter;
 }
 
 .tabButton:focus-visible,
 .actionButton:focus-visible,
-.notificationButton:focus-visible {
+.notificationButton:focus-visible,
+.notificationFilter:focus-visible,
+.markAllReadButton:focus-visible,
+.notificationsCloseButton:focus-visible {
   outline: 0.125rem solid t.$color-header-text-on-color;
   outline-offset: -0.125rem;
 }
