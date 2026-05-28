@@ -103,17 +103,18 @@
 
 .tabButton.tabButton {
   position: relative;
-  width: t.$header-tab-width;
+  width: t.$header-tab-compact-width;
   height: 100%;
   min-height: 0;
   justify-content: center;
   gap: 0.5rem;
   padding: 0 0.625rem;
+  outline: 0;
   overflow: hidden;
   border: 0;
   border-radius: 0;
   background: transparent !important;
-  box-shadow: inset 0 0 0 0.0625rem t.$color-header-tab-divider !important;
+  box-shadow: none !important;
   color: t.$color-header-text-on-color !important;
   font-family: t.$font-header;
   font-weight: 400;
@@ -124,39 +125,24 @@
   color: t.$color-header-text-on-color !important;
 }
 
-.tabButtonWide.tabButtonWide {
-  width: t.$header-tab-wide-width;
+.tabButton.tabButton:not(:disabled):hover .tabIcon {
+  color: t.$color-header-text-on-color;
 }
 
 .tabButtonActive.tabButtonActive {
-  width: t.$header-tab-active-width;
-  background: t.$color-header-tab-active-a11y !important;
+  background: t.$color-header-tab-active !important;
   box-shadow: none !important;
   color: t.$color-header-text-on-color !important;
 }
 
-.tabButtonActive::before {
-  position: absolute;
-  inset: 0;
-  background: t.$color-header-tab-active;
-  content: '';
-}
-
 .tabButtonActive.tabButtonActive:not(:disabled):hover {
-  background: t.$color-header-tab-active-hover !important;
-}
-
-.tabButtonActive.tabButtonActive:not(:disabled):hover::before {
-  background: t.$color-header-tab-active-hover;
-}
-
-.tabButtonWideActive.tabButtonWideActive {
-  width: t.$header-tab-wide-active-width;
+  background: t.$color-header-tab-active !important;
 }
 
 .tabText {
   position: relative;
   z-index: 1;
+  display: none;
   font-size: t.$fs-header-nav;
   line-height: 1rem;
   overflow: hidden;
@@ -174,6 +160,20 @@
 
 .tabIconActive {
   color: t.$color-header-text-on-color;
+}
+
+@media (min-width: t.$header-expanded-breakpoint) {
+  .tabButton.tabButton {
+    width: t.$header-tab-width;
+  }
+
+  .tabButtonLead.tabButtonLead {
+    width: t.$header-tab-lead-width;
+  }
+
+  .tabText {
+    display: inline;
+  }
 }
 
 .actions {
