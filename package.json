@@ -29,7 +29,7 @@
     "check:spelling": "cspell . --no-progress",
     "check:deps": "depcruise --config dependency-cruiser.config.cjs src scripts tests verify-frozen.ts next.config.ts playwright.config.ts playwright.quality.config.ts vitest.config.ts",
     "check:dead": "knip --exclude unlisted --no-config-hints",
-    "check:duplicates": "jscpd",
+    "check:duplicates": "jscpd --config .jscpd.json --noTips .",
     "check:audit": "pnpm audit --prod --audit-level high",
     "check:a11y": "playwright test --config=playwright.quality.config.ts && node scripts/run-pa11y.mjs",
     "check:lighthouse": "pnpm build && node scripts/run-lhci.mjs",

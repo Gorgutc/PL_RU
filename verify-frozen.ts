@@ -44,6 +44,20 @@ async function walk(dir: string, out: string[] = []): Promise<string[]> {
   return out;
 }
 
+async function readSourceFiles(
+  filePattern: RegExp,
+): Promise<Array<{ file: string; text: string }>> {
+  const files = await walk(SRC);
+  const matches: Array<{ file: string; text: string }> = [];
+
+  for (const file of files) {
+    if (!filePattern.test(file)) continue;
+    matches.push({ file, text: await readFile(file, 'utf8') });
+  }
+
+  return matches;
+}
+
 // ─── A. Static (no server) ───────────────────────────────────────────────────
 
 async function testNoTailwind() {
@@ -133,13 +147,10 @@ async function testNoInlineHex() {
 }
 
 async function testNoLocalStorage() {
-  const files = await walk(SRC);
   const offenders: string[] = [];
-  for (const f of files) {
-    if (!/\.(tsx?|jsx?)$/.test(f)) continue;
-    const txt = await readFile(f, 'utf8');
-    if (/\b(localStorage|sessionStorage)\b/.test(txt)) {
-      offenders.push(path.relative(ROOT, f));
+  for (const { file, text } of await readSourceFiles(/\.(tsx?|jsx?)$/)) {
+    if (/\b(localStorage|sessionStorage)\b/.test(text)) {
+      offenders.push(path.relative(ROOT, file));
     }
   }
   record(
@@ -150,13 +161,10 @@ async function testNoLocalStorage() {
 }
 
 async function testNoBlueprintInternalImports() {
-  const files = await walk(SRC);
   const offenders: string[] = [];
-  for (const f of files) {
-    if (!/\.(tsx?|jsx?)$/.test(f)) continue;
-    const txt = await readFile(f, 'utf8');
-    const m = txt.match(/from\s+['"]@blueprintjs\/[^'"\/]+\/[^'"]+['"]/g);
-    if (m) offenders.push(`${path.relative(ROOT, f)}: ${m.join(' | ')}`);
+  for (const { file, text } of await readSourceFiles(/\.(tsx?|jsx?)$/)) {
+    const imports = text.match(/from\s+['"]@blueprintjs\/[^'"\/]+\/[^'"]+['"]/g);
+    if (imports) offenders.push(`${path.relative(ROOT, file)}: ${imports.join(' | ')}`);
   }
   record(
     'A7: no Blueprint internal-path imports',

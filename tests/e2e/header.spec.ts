@@ -1,5 +1,6 @@
 // cspell:disable
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { collectConsoleErrors } from './helpers/console-errors';
 
 const HEADER_HEIGHT = 48;
 const VIEWPORT_HEIGHT = 1080;
@@ -51,12 +52,7 @@ async function expectTabTextFits(tab: Locator) {
 
 test.describe('PraiOS header', () => {
   test('renders Figma header regions and action controls', async ({ page }) => {
-    const errors: string[] = [];
-    page.on('pageerror', (e) => errors.push(e.message));
-    page.on('console', (m) => {
-      if (m.type() === 'error') errors.push(m.text());
-    });
-
+    const errors = collectConsoleErrors(page);
     const header = await openHeader(page, 1920);
 
     await expect(header.getByText('PraiOS')).toBeVisible();
