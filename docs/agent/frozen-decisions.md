@@ -49,3 +49,5 @@ mirrors the highest-risk checks so drift is caught by `pnpm verify`.
   quality configs should extend it instead of duplicating the full config body.
 - Reference manifest hashing lives in `scripts/lib/reference-manifest.mjs`;
   `scripts/sync-refs.mjs` and `scripts/verify-reference.js` should share it.
+- Pa11y uses the Playwright Chromium executable from `playwright` so local runs
+  and Linux CI use the same installed browser family.

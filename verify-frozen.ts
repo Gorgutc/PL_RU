@@ -321,6 +321,7 @@ async function testFrozenQualityToolingContract() {
   const quality = await readFile(path.join(ROOT, 'playwright.quality.config.ts'), 'utf8');
   const syncRefs = await readFile(path.join(ROOT, 'scripts', 'sync-refs.mjs'), 'utf8');
   const verifyRefs = await readFile(path.join(ROOT, 'scripts', 'verify-reference.js'), 'utf8');
+  const pa11yScript = await readFile(path.join(ROOT, 'scripts', 'run-pa11y.mjs'), 'utf8');
   const failures: string[] = [];
 
   if (pkg.scripts?.['check:duplicates'] !== 'jscpd --config .jscpd.json --noTips .') {
@@ -343,6 +344,11 @@ async function testFrozenQualityToolingContract() {
     ...missingSnippets(verifyRefs, ['./lib/reference-manifest.mjs']).map(
       (snippet) => `verify-reference.js missing ${snippet}`,
     ),
+    ...missingSnippets(pa11yScript, [
+      "import { chromium } from 'playwright';",
+      'chromium.executablePath()',
+      'executablePath: chromiumExecutablePath',
+    ]).map((snippet) => `run-pa11y.mjs missing ${snippet}`),
   );
 
   record(
