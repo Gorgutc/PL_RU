@@ -29,6 +29,12 @@ verifier.
 
 ## Subagents
 
-Codex subagents are not an automatic replacement for Claude `/ship`. Spawn parallel subagents only when the user explicitly asks for parallel agent work. Otherwise use `$pl-ru-spec-guardian`, `$pl-ru-quality-gate`, and `pnpm codex:ship` as the standard local gate.
+Before shipping, run every applicable PL_RU subagent or local fallback role.
+Delivery is blocked until each required role returns PASS after fixes. At
+minimum, source changes need code-quality, component-reuse, and
+duplicate/deadwood review; UI changes need pixel-level visual QA; frozen/docs/
+skills/hooks changes need frozen or instruction-drift review. Do not pass work
+forward while the final diff mismatches the task brief, frozen contract, or
+available reference screenshots.
 
 This skill replaces the former Claude command `.claude/commands/ship.md`.

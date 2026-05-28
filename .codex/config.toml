@@ -22,9 +22,22 @@ verify_command = "pnpm verify"
 fast = "pnpm quality:fast"
 deep = "pnpm quality:deep"
 all = "pnpm quality:all"
+visual = "pnpm check:visual"
 
 [limits]
-read_only_audit_agents = 6
+read_only_audit_agents = 10
+required_read_only_agents = [
+  "code_deadwood_auditor",
+  "code_quality_guardian",
+  "component_reuse_guardian",
+  "runtime_behavior_mapper",
+  "tech_stack_cartographer",
+  "instruction_drift_auditor",
+  "quality_tooling_architect",
+  "codex_infra_architect",
+  "frozen_decisions_guardian",
+  "visual_qa_guardian",
+]
 worker_agents_require_disjoint_write_scopes = true
 production_cleanup_requires_separate_pr = true
 

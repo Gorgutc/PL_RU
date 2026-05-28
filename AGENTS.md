@@ -44,6 +44,8 @@ Use these skills when relevant:
 - `$pl-ru-quality-gate` for final code review.
 - `$pl-ru-quality-tooling` for scripts, lint configs, browser checks, a11y checks, and ship gates.
 - `$pl-ru-deadwood-audit` for read-only dead-code, duplicate-code, and cleanup candidate audits.
+- `$pl-ru-reuse-audit` for mandatory component reuse, anti-spaghetti, readability, and extraction checks.
+- `$pl-ru-visual-qa` for pixel-level visual QA against Google Drive / Figma PNG references.
 - `$pl-ru-instruction-drift` for checking drift between docs, skills, scripts, CI, and frozen rules.
 - `$pl-ru-ship` for final verification, GitHub push, and draft PR workflow.
 - `$blueprint-design` and `$osiris-design` as read-only design references.
@@ -59,6 +61,12 @@ available. At minimum:
 - UI/frontend changes require a visual QA subagent.
 - Code changes require a code-quality/readability/reusability/optimization
   subagent.
+- Source or UI changes require a component-reuse subagent to prove existing
+  components, Blueprint primitives, tokens, helpers, and local patterns were
+  reused before adding new code.
+- Source changes require a dead-code / duplicate-code subagent. Repeated logic,
+  repeated SCSS structures, oversized modules, and spaghetti-style coupling are
+  blockers until fixed or explicitly accepted by the current user request.
 - Frozen-contract, memory, docs, skills, or hook changes require a
   frozen/instruction-drift subagent.
 
@@ -67,6 +75,12 @@ finding is fixed and rechecked. If subagent tooling is unavailable, run the same
 roles locally, state that fallback explicitly, and keep the same PASS/fix
 standard.
 
+Agents must check exact alignment with the current user request, any attached
+task document, and any available reference screenshots. A PASS is valid only
+when the code, tests, documentation, and rendered UI match that evidence. Any
+meaningful mismatch with the task brief, frozen contract, or reference PNG is a
+delivery blocker.
+
 Visual QA for UI work must include pixel-level screenshot comparison against
 the available reference PNGs, including Google Drive Figma exports, before final
 delivery. Use Playwright screenshots and a pixel-level comparison tool or
@@ -74,7 +88,10 @@ equivalent script, report viewport sizes, diff tolerance, and mismatched areas,
 and pair the image diff with DOM/CSS metric assertions for spacing, sizes,
 colors, and responsive behavior. Do not rely on eyeballing alone. If a reference
 PNG is inaccessible, say so explicitly and block delivery unless the current
-user request accepts a metric-only fallback.
+user request accepts a metric-only fallback. Visual diff output must stay in
+ignored artifact folders such as `reports/visual-qa/` or
+`test-results/visual-qa/`; do not point it at source, config, docs, `.git/`, or
+tracked files.
 
 ## Frozen Rules
 
@@ -91,7 +108,8 @@ Rules mirrored by `verify-frozen.ts` are binding:
 - A9: Codex Memories stay enabled and documented for future-session handoff.
 - A10: Header responsive-tabs, action-button, and dropdown contracts stay frozen.
 - A11: quality-tooling dedupe/shared-config contracts stay frozen.
-- A12: mandatory PL_RU subagent orchestration and pixel-level visual QA stay documented.
+- A12: mandatory PL_RU subagent orchestration, component reuse, duplicate-code,
+  exact-spec, and pixel-level visual QA gates stay documented.
 
 Additional project rules:
 
@@ -102,6 +120,10 @@ Additional project rules:
 - Use Blueprint primitives instead of rebuilding `Button`, `Card`, `Dialog`, `Menu`, or `Popover`.
 - Use Blueprint icons through `<Icon icon="..." />`, not raw SVG in production UI.
 - The Blueprint CSS imports in `src/app/layout.tsx` are the stylesheet exception to the package-root import rule.
+- Before adding a component, helper, style contract, or visual state, search for
+  an existing local component, Blueprint primitive, token, or frozen contract to
+  reuse. If a new abstraction is still needed, document why the existing
+  contracts were insufficient in the handoff or PR body.
 
 ## Session Memory
 
@@ -174,8 +196,11 @@ For changes touching `src/**`, `next.config.ts`, `tsconfig.json`, `playwright.co
 1. Inspect the existing pattern before editing.
 2. Use Blueprint and local project patterns before adding new abstractions.
 3. Run `pnpm verify` after architecture-sensitive work.
-4. Run `pnpm codex:ship` before commit/push.
-5. Check `DO_NOT_PUSH.md` before staging.
+4. For UI-surface changes, run `pnpm check:visual` and provide PASS evidence
+   with reference PNGs, viewports, states, tolerance, mismatched areas, and
+   DOM/CSS metrics.
+5. Run `pnpm codex:ship` before commit/push.
+6. Check `DO_NOT_PUSH.md` before staging.
 
 ## GitHub
 

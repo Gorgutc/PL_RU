@@ -15,11 +15,14 @@ Use this when starting a new Codex session in this repository.
    `docs/agent/orchestration.md` and the audit roles listed there.
 8. Always raise the applicable PL_RU subagents before delivery. UI work needs
    visual QA, code work needs code-quality/readability/reusability/optimization
-   review, and frozen/docs/skills/hooks work needs frozen or instruction-drift
-   review.
+   review, source/UI work needs component-reuse review, source work needs
+   duplicate/deadwood review, and frozen/docs/skills/hooks work needs frozen or
+   instruction-drift review.
 9. For UI work, visual QA must use pixel-level screenshot comparison against
    available reference PNGs plus DOM/CSS metric checks.
-10. Treat `.codex/` as a convenience mirror, not the source of truth.
-11. Before delivery, run the appropriate quality command and report failures.
-12. End completed work with a concise handoff summary so Codex Memories can carry
+10. Treat any mismatch with the current task brief, frozen contract, or
+    reference screenshot as FAIL until fixed and rechecked.
+11. Treat `.codex/` as a convenience mirror, not the source of truth.
+12. Before delivery, run the appropriate quality command and report failures.
+13. End completed work with a concise handoff summary so Codex Memories can carry
     the task context into future sessions.

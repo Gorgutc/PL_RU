@@ -20,6 +20,10 @@ Validate a proposed or implemented change against the frozen architecture. Read 
 - Component co-location remains `src/components/<Name>/<Name>.tsx` plus `<Name>.module.scss`.
 - Images have alt text or use `next/image` appropriately.
 - New TypeScript code avoids `any`; use `unknown` and narrow at boundaries.
+- Existing components, Blueprint primitives, tokens, helpers, and frozen visual
+  contracts are reused before adding new abstractions.
+- Any mismatch with the current task brief, frozen contract, or reference
+  screenshot is FAIL until fixed and rechecked.
 
 ## Output
 

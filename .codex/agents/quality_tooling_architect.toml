@@ -6,9 +6,18 @@ focus = [
   "package.json",
   "eslint.config.mjs",
   ".stylelintrc.json",
+  ".jscpd.json",
+  "knip.json",
+  "cspell.json",
+  ".markdownlint-cli2.jsonc",
+  "lefthook.yml",
   "playwright.config.ts",
+  "playwright.quality.config.ts",
+  "playwright.shared.config.ts",
   "lighthouserc.cjs",
   "scripts/**",
+  "verify-frozen.ts",
+  ".github/workflows/**",
 ]
 output = "Tool map, script map, pass/fail risks, and Windows caveats."
 

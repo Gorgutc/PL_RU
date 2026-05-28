@@ -10,5 +10,10 @@
     "**/plugins/pl-ru-codex/skills/osiris-design/**",
     "**/pnpm-lock.yaml"
   ],
-  "files": ["src/**/*.{ts,tsx,scss}", "tests/**/*.{ts,tsx,mjs}", "scripts/**/*.{js,mjs}"]
+  "files": [
+    "src/**/*.{ts,tsx,scss}",
+    "tests/**/*.{ts,tsx,mjs}",
+    "scripts/**/*.{js,mjs}",
+    "verify-frozen.ts"
+  ]
 }

@@ -11,6 +11,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       # pnpm version is taken from package.json "packageManager". Do not also
       # set `version:` here; pnpm/action-setup errors on double specification.

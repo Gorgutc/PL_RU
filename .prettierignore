@@ -12,6 +12,8 @@ test-results/
 jscpd-report/
 reports/
 /codex_*.md
+.codex/**/*.toml
+.codex/config.toml
 
 Blueprints_lib/
 Osiris_ref/

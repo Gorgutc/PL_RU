@@ -7,6 +7,9 @@ description: Use for read-only PL_RU dead-code, duplicate-code, dependency, and 
 
 Use read-only commands such as `rg`, `rg --files`, `pnpm check:dead`, and
 `pnpm check:duplicates` when appropriate. Do not delete code from this skill.
+Repeated logic, repeated SCSS structures, oversized modules, and spaghetti
+coupling are blockers until fixed, extracted, or explicitly accepted by the
+current user request.
 
 ## Scope
 
@@ -17,6 +20,9 @@ Include:
 - `scripts/**`
 - root configs
 - non-reference repo-local skills
+
+Also inspect `.jscpd.json` and `knip.json` when the task changes quality
+tooling or duplicate/dead-code gates.
 
 Exclude:
 

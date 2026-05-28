@@ -29,6 +29,9 @@ Run `pnpm verify` whenever architecture rules may be affected. Run `pnpm codex:s
 - Use Blueprint icons through `<Icon icon="..." />`; icon-only controls need accessible names.
 - All images need `alt`; bundled images larger than 100px should use `next/image` with dimensions.
 - Google Drive materials must not be committed unless the user explicitly exports them and the result passes `DO_NOT_PUSH.md` checks.
+- Before adding a component, helper, style contract, or visual state, prove that
+  existing local components, Blueprint primitives, tokens, helpers, and frozen
+  contracts cannot be reused or extracted cleanly.
 
 ## References
 

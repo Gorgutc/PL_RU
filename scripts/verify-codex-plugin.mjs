@@ -55,6 +55,8 @@ async function verifySkills() {
     'pl-ru-quality-gate',
     'pl-ru-quality-tooling',
     'pl-ru-deadwood-audit',
+    'pl-ru-reuse-audit',
+    'pl-ru-visual-qa',
     'pl-ru-instruction-drift',
     'pl-ru-ship',
     'blueprint-design',
@@ -73,6 +75,22 @@ async function verifySkills() {
       record(`skill frontmatter description: ${name}`, body.includes('description: '));
     }
     record(`skill has openai agent metadata: ${name}`, await exists(agentPath));
+  }
+}
+
+async function verifyAgentSkillReferences() {
+  const agentsBody = await readFile(path.join(root, 'AGENTS.md'), 'utf8');
+  const refs = new Set(
+    Array.from(agentsBody.matchAll(/\$([a-z0-9-]+)/g), (match) => match[1]).filter((name) =>
+      name.startsWith('pl-ru-'),
+    ),
+  );
+
+  for (const name of refs) {
+    record(
+      `AGENTS skill reference exists: ${name}`,
+      await exists(`plugins/pl-ru-codex/skills/${name}/SKILL.md`),
+    );
   }
 }
 
@@ -103,12 +121,15 @@ async function verifyCodexMirror() {
     '.codex/hooks/session-start.md',
     '.codex/hooks/user-prompt-submit.md',
     '.codex/agents/code_deadwood_auditor.toml',
+    '.codex/agents/code_quality_guardian.toml',
+    '.codex/agents/component_reuse_guardian.toml',
     '.codex/agents/runtime_behavior_mapper.toml',
     '.codex/agents/tech_stack_cartographer.toml',
     '.codex/agents/instruction_drift_auditor.toml',
     '.codex/agents/quality_tooling_architect.toml',
     '.codex/agents/codex_infra_architect.toml',
     '.codex/agents/frozen_decisions_guardian.toml',
+    '.codex/agents/visual_qa_guardian.toml',
   ];
   for (const file of files) {
     record(`codex mirror exists: ${file}`, await exists(file));
@@ -118,6 +139,7 @@ async function verifyCodexMirror() {
 await verifyPluginManifest();
 await verifyMarketplace();
 await verifySkills();
+await verifyAgentSkillReferences();
 await verifyDocs();
 await verifyCodexMirror();
 

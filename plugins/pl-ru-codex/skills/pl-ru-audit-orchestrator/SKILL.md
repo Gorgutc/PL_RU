@@ -6,27 +6,21 @@ description: Use for broad PL_RU audits, instruction/tooling changes, and archit
 # PL_RU Audit Orchestrator
 
 Use this for project-wide audits and orchestration work. If subagents are
-available and the user explicitly authorized agent work, dispatch the read-only
-roles in parallel. If subagents are unavailable, run the roles locally.
+available, dispatch every applicable read-only role in parallel. If subagents
+are unavailable, run the same roles locally and keep the same PASS/fix standard.
 
 ## Read-Only Roles
 
-- `code_deadwood_auditor`: dead code, duplicate code, oversized modules, and
-  future cleanup candidates.
-- `runtime_behavior_mapper`: runtime invariants, browser behavior, and checks to
-  preserve.
-- `tech_stack_cartographer`: factual stack, configs, dependencies, and
-  architecture decisions.
-- `instruction_drift_auditor`: drift between docs, skills, scripts, CI, and
-  frozen rules.
-- `quality_tooling_architect`: quality tools, scripts, configs, and browser
-  caveats.
-- `codex_infra_architect`: future-session bootstrap, skill layout, docs, hooks,
-  and handoff flow.
+Use the canonical role roster from `docs/agent/orchestration.md`. This skill is
+the dispatch wrapper: select every role whose focus matches the task, and add
+the visual QA role for UI work, the reuse and duplicate/deadwood roles for
+source work, and the frozen/instruction roles for rules or hooks.
 
 ## Rules
 
 - Audit first, implement second.
+- No required role may report PASS while code mismatches the task brief, frozen
+  contract, or available reference screenshot.
 - Do not edit production code during the first infrastructure PR unless the
   change is a safe comment/config correction.
 - Do not edit read-only reference folders.
