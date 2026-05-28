@@ -50,6 +50,19 @@ async function expectTabTextFits(tab: Locator) {
   expect(textBox.scrollWidth).toBeLessThanOrEqual(textBox.clientWidth);
 }
 
+async function expectActionIconIsWhite(button: Locator) {
+  await expect(button.locator('.bp6-icon').first()).toHaveCSS('color', 'rgb(255, 255, 255)');
+}
+
+async function expectDropdownOffset(trigger: Locator, dropdown: Locator) {
+  const triggerBox = await requireBox(trigger);
+  const dropdownBox = await requireBox(dropdown);
+  const offset = dropdownBox.y - (triggerBox.y + triggerBox.height);
+
+  expect(offset).toBeGreaterThanOrEqual(3.5);
+  expect(offset).toBeLessThanOrEqual(4.5);
+}
+
 test.describe('PraiOS header', () => {
   test('renders Figma header regions and action controls', async ({ page }) => {
     const errors = collectConsoleErrors(page);
@@ -70,6 +83,11 @@ test.describe('PraiOS header', () => {
     await expect(header.getByRole('button', { name: 'База данных' })).toBeDisabled();
     await expect(header.getByRole('button', { name: 'Аккаунт' })).toBeEnabled();
     await expect(header.getByRole('button', { name: 'Уведомления' })).toBeEnabled();
+
+    await expectActionIconIsWhite(header.getByRole('button', { name: 'Данные' }));
+    await expectActionIconIsWhite(header.getByRole('button', { name: 'База данных' }));
+    await expectActionIconIsWhite(header.getByRole('button', { name: 'Аккаунт' }));
+    await expectActionIconIsWhite(header.getByRole('button', { name: 'Уведомления' }));
 
     expect(errors).toEqual([]);
   });
@@ -182,9 +200,43 @@ test.describe('PraiOS header', () => {
 
     await expect(accountButton).toHaveAttribute('aria-expanded', 'true');
     await expect(accountButton).toHaveCSS('background-color', 'rgb(41, 112, 255)');
-    await expect(page.getByRole('menu', { name: 'Блок профиля' })).toBeVisible();
+    const accountMenu = page.getByRole('menu', { name: 'Блок профиля' });
+    await expect(accountMenu).toBeVisible();
+    await expectDropdownOffset(accountButton, accountMenu);
     await expect(page.getByRole('menuitem', { name: 'Изменить профиль' })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: 'Выйти из аккаунта' })).toBeVisible();
+    await expect(
+      page.getByRole('menuitem', { name: 'Изменить профиль' }).locator('.bp6-icon'),
+    ).toHaveCSS('color', 'rgb(255, 255, 255)');
+
+    const accountMenuMetrics = await accountMenu.evaluate((menu) => {
+      const styles = getComputedStyle(menu);
+      const items = Array.from(menu.querySelectorAll('[role="menuitem"]'));
+      const firstItemBox = items[0]?.getBoundingClientRect();
+      const secondItemBox = items[1]?.getBoundingClientRect();
+      const itemGap =
+        firstItemBox && secondItemBox ? Math.round(secondItemBox.top - firstItemBox.bottom) : null;
+
+      return {
+        borderTopLeftRadius: styles.borderTopLeftRadius,
+        borderTopWidth: styles.borderTopWidth,
+        itemGap,
+        paddingBottom: styles.paddingBottom,
+        paddingLeft: styles.paddingLeft,
+        paddingRight: styles.paddingRight,
+        paddingTop: styles.paddingTop,
+      };
+    });
+
+    expect(accountMenuMetrics).toEqual({
+      borderTopLeftRadius: '2px',
+      borderTopWidth: '1px',
+      itemGap: 8,
+      paddingBottom: '16px',
+      paddingLeft: '8px',
+      paddingRight: '8px',
+      paddingTop: '16px',
+    });
 
     await page.keyboard.press('Escape');
 
@@ -204,6 +256,7 @@ test.describe('PraiOS header', () => {
     await expect(notificationsButton).toHaveAttribute('aria-expanded', 'true');
     await expect(notificationsButton).toHaveCSS('background-color', 'rgb(41, 112, 255)');
     await expect(panel).toBeVisible();
+    await expectDropdownOffset(notificationsButton, panel);
     await expect(page.getByRole('button', { name: 'All', exact: true })).toHaveAttribute(
       'aria-pressed',
       'true',

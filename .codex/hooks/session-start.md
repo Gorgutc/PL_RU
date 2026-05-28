@@ -4,5 +4,9 @@
 2. Check `git status --short --branch`.
 3. If the task is broad, read `docs/agent/orchestration.md`.
 4. If the task touches UI/code, use `plugins/pl-ru-codex/skills/pl-ru-frontend-rules/SKILL.md`.
-5. Do not run `pnpm refs:sync` unless reference folders are needed.
-6. Never edit read-only reference folders.
+5. Always raise the applicable PL_RU subagents before delivery when subagent
+   tooling is available.
+6. UI work must include visual QA with pixel-level screenshot comparison against
+   available reference PNGs plus DOM/CSS metric checks.
+7. Do not run `pnpm refs:sync` unless reference folders are needed.
+8. Never edit read-only reference folders.

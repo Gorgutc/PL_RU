@@ -19,8 +19,14 @@ instruction changes, quality-tooling changes, or GitHub delivery.
    `verify-frozen.ts > current user request > AGENTS.md > plugins/pl-ru-codex/skills/**`.
 5. If the task touches UI or source code, use `$pl-ru-frontend-rules`.
 6. If the task is broad, use `$pl-ru-audit-orchestrator`.
-7. Treat `.codex/` and `docs/agent/` as runbooks, not higher authority.
-8. Do not edit read-only reference folders.
+7. Always raise the applicable PL_RU subagents before delivery when subagent
+   tooling is available. UI work needs visual QA, code work needs
+   code-quality/readability/reusability/optimization review, and frozen/docs/
+   skills/hooks work needs frozen or instruction-drift review.
+8. For UI work, visual QA must use pixel-level screenshot comparison against
+   available reference PNGs plus DOM/CSS metric checks.
+9. Treat `.codex/` and `docs/agent/` as runbooks, not higher authority.
+10. Do not edit read-only reference folders.
 
 ## Output
 

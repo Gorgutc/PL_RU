@@ -7,6 +7,12 @@ description: Use as the final PL_RU code-quality review for TypeScript, React, S
 
 Review the implemented diff. Do not edit files unless the user asks to apply the fixes. Apply `$pl-ru-frontend-rules` and inspect the changed code for runtime bugs, broken UX, accessibility problems, type holes, and performance traps.
 
+Final delivery requires the applicable PL_RU subagents when subagent tooling is
+available. Code changes need code-quality/readability/reusability/optimization
+review. UI changes also need visual QA with pixel-level screenshot comparison
+against available reference PNGs plus DOM/CSS metric checks. Treat visual or
+code-review FAIL output as a blocker until fixed and rechecked.
+
 Severity:
 
 - block: bug, security issue, broken UX, accessibility violation, runtime error

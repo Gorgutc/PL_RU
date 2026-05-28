@@ -184,7 +184,7 @@
   gap: 0.25rem;
 }
 
-.actionPopoverTarget {
+.dropdownTarget {
   display: inline-flex;
   flex: 0 0 auto;
 }
@@ -219,10 +219,10 @@
   color: t.$color-header-action-hover;
 }
 
-.actionButton.actionButtonActive.actionButtonActive,
-.actionButton.actionButtonActive.actionButtonActive:not(:disabled):hover,
-.notificationButton.notificationButton.actionButtonActive,
-.notificationButton.notificationButton.actionButtonActive:not(:disabled):hover {
+.actionButton.actionButtonOpen.actionButtonOpen,
+.actionButton.actionButtonOpen.actionButtonOpen:not(:disabled):hover,
+.notificationButton.notificationButton.actionButtonOpen,
+.notificationButton.notificationButton.actionButtonOpen:not(:disabled):hover {
   border-color: t.$color-header-tab-active !important;
   background: t.$color-header-tab-active !important;
   color: t.$color-header-text-on-color !important;
@@ -270,37 +270,30 @@
   white-space: nowrap;
 }
 
-.actionIcon,
-.actionIconAccent,
-.actionIconData {
+.actionIcon {
   flex: 0 0 auto;
   margin: 0 !important;
-  color: currentcolor;
+  color: t.$color-header-text-on-color !important;
 }
 
-.actionIconAccent {
-  color: t.$color-header-tab-active;
+.actionButton.actionButton .actionIcon,
+.notificationButton.notificationButton .actionIcon {
+  color: t.$color-header-text-on-color !important;
 }
 
-.actionButton:not(:disabled):hover .actionIconAccent,
-.actionButtonActive .actionIconAccent {
-  color: currentcolor;
-}
-
-.actionButton.actionButton:disabled .actionIconAccent.actionIconAccent {
-  color: t.$color-header-tab-active !important;
-}
-
-.headerPopover {
+.dropdownPopover {
+  padding-block-start: t.$header-dropdown-offset;
   background: transparent;
   box-shadow: none !important;
 }
 
 .accountMenu {
+  display: grid;
+  gap: t.$header-account-menu-item-gap;
   min-width: 11.25rem;
-  padding: 1rem 0.5rem;
+  padding: t.$header-dropdown-padding-block t.$header-dropdown-padding-inline;
   border: 0.0625rem solid t.$color-header-dropdown-border;
-  border-radius: 0.125rem;
+  border-radius: t.$radius-dropdown;
   background: t.$color-header-dropdown-bg;
 }
 
@@ -309,11 +302,15 @@
   align-items: center;
   min-height: t.$header-action-height;
   padding: 0 0.5rem;
-  border-radius: 0.125rem;
+  border-radius: t.$radius-dropdown;
   color: t.$color-header-action-text;
   font-family: t.$font-sans;
   font-size: t.$fs-header-nav;
   line-height: 1rem;
+}
+
+.accountMenuIcon.accountMenuIcon {
+  color: t.$color-header-text-on-color !important;
 }
 
 .accountMenuItem:hover,
@@ -332,7 +329,7 @@
   padding: 1rem 0;
   overflow: hidden;
   border: 0.0625rem solid t.$color-header-dropdown-border;
-  border-radius: 0.125rem;
+  border-radius: t.$radius-dropdown;
   background: t.$color-header-dropdown-bg;
   color: t.$color-header-action-text;
   font-family: t.$font-sans;
@@ -407,7 +404,7 @@
   color: t.$color-header-text-on-color !important;
 }
 
-.notificationFilterActive.notificationFilterActive {
+.notificationFilterSelected.notificationFilterSelected {
   background: t.$color-header-tab-active !important;
   color: t.$color-header-text-on-color !important;
 }

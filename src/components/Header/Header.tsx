@@ -46,7 +46,7 @@ export const DEFAULT_HEADER_TABS: readonly HeaderTab[] = [
   { id: 'stats', label: 'Статистика', icon: 'timeline-line-chart', title: 'Статистика' },
 ];
 
-type HeaderActionMenu = 'account' | 'notifications';
+type HeaderDropdownId = 'account' | 'notifications';
 
 type NotificationFilterId = 'all' | 'ai-info' | 'unread';
 
@@ -219,23 +219,23 @@ function filterNotifications(
   });
 }
 
-type AccountMenuProps = {
+type AccountDropdownMenuProps = {
   onDismiss: () => void;
 };
 
-function AccountMenu({ onDismiss }: AccountMenuProps) {
+function AccountDropdownMenu({ onDismiss }: AccountDropdownMenuProps) {
   return (
     <Menu className={styles.accountMenu} aria-label="Блок профиля">
       <MenuItem
         className={styles.accountMenuItem}
-        icon="edit"
+        icon={<Icon className={styles.accountMenuIcon} icon="edit" size={16} />}
         onClick={onDismiss}
         text="Изменить профиль"
         textClassName={styles.accountMenuItemText}
       />
       <MenuItem
         className={styles.accountMenuItem}
-        icon="log-out"
+        icon={<Icon className={styles.accountMenuIcon} icon="log-out" size={16} />}
         onClick={onDismiss}
         text="Выйти из аккаунта"
         textClassName={styles.accountMenuItemText}
@@ -244,7 +244,56 @@ function AccountMenu({ onDismiss }: AccountMenuProps) {
   );
 }
 
-type NotificationsPanelProps = {
+type NotificationRowProps = {
+  notification: HeaderNotification;
+  isUnread: boolean;
+};
+
+function NotificationRow({ notification, isUnread }: NotificationRowProps) {
+  return (
+    <article className={cx(styles.notificationRow, isUnread && styles.notificationRowUnread)}>
+      <div className={styles.notificationRowHeader}>
+        <span className={styles.notificationCategory}>{notification.category}</span>
+        <time className={styles.notificationDate} dateTime={notification.dateTime}>
+          {notification.date}
+        </time>
+      </div>
+      <p className={styles.notificationTitle}>{notification.title}</p>
+      <p className={styles.notificationDescription}>{notification.description}</p>
+    </article>
+  );
+}
+
+type NotificationSectionProps = {
+  section: (typeof NOTIFICATION_SECTIONS)[number];
+  notifications: readonly HeaderNotification[];
+  readNotificationIds: ReadonlySet<string>;
+};
+
+function NotificationSection({
+  section,
+  notifications,
+  readNotificationIds,
+}: NotificationSectionProps) {
+  if (notifications.length === 0) return null;
+
+  return (
+    <section className={styles.notificationSection}>
+      <h3 className={styles.notificationSectionTitle}>{section.label}</h3>
+      <div className={styles.notificationRows}>
+        {notifications.map((notification) => (
+          <NotificationRow
+            isUnread={notification.unread && !readNotificationIds.has(notification.id)}
+            key={notification.id}
+            notification={notification}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+type NotificationsDropdownPanelProps = {
   activeFilter: NotificationFilterId;
   notifications: readonly HeaderNotification[];
   readNotificationIds: ReadonlySet<string>;
@@ -253,14 +302,14 @@ type NotificationsPanelProps = {
   onMarkAllRead: () => void;
 };
 
-function NotificationsPanel({
+function NotificationsDropdownPanel({
   activeFilter,
   notifications,
   readNotificationIds,
   onDismiss,
   onFilterChange,
   onMarkAllRead,
-}: NotificationsPanelProps) {
+}: NotificationsDropdownPanelProps) {
   const unreadCount = notifications.filter(
     (notification) => notification.unread && !readNotificationIds.has(notification.id),
   ).length;
@@ -269,6 +318,12 @@ function NotificationsPanel({
     activeFilter,
     readNotificationIds,
   );
+  const notificationSections = NOTIFICATION_SECTIONS.map((section) => ({
+    section,
+    notifications: visibleNotifications.filter(
+      (notification) => notification.section === section.id,
+    ),
+  }));
 
   return (
     <section
@@ -304,7 +359,7 @@ function NotificationsPanel({
                 aria-pressed={isActive}
                 className={cx(
                   styles.notificationFilter,
-                  isActive && styles.notificationFilterActive,
+                  isActive && styles.notificationFilterSelected,
                 )}
                 onClick={() => onFilterChange(filter.id)}
                 text={label}
@@ -328,49 +383,14 @@ function NotificationsPanel({
         {visibleNotifications.length === 0 ? (
           <p className={styles.notificationsEmpty}>No notifications</p>
         ) : (
-          NOTIFICATION_SECTIONS.map((section) => {
-            const sectionNotifications = visibleNotifications.filter(
-              (notification) => notification.section === section.id,
-            );
-
-            if (sectionNotifications.length === 0) return null;
-
-            return (
-              <section className={styles.notificationSection} key={section.id}>
-                <h3 className={styles.notificationSectionTitle}>{section.label}</h3>
-                <div className={styles.notificationRows}>
-                  {sectionNotifications.map((notification) => {
-                    const isUnread =
-                      notification.unread && !readNotificationIds.has(notification.id);
-
-                    return (
-                      <article
-                        className={cx(
-                          styles.notificationRow,
-                          isUnread && styles.notificationRowUnread,
-                        )}
-                        key={notification.id}
-                      >
-                        <div className={styles.notificationRowHeader}>
-                          <span className={styles.notificationCategory}>
-                            {notification.category}
-                          </span>
-                          <time
-                            className={styles.notificationDate}
-                            dateTime={notification.dateTime}
-                          >
-                            {notification.date}
-                          </time>
-                        </div>
-                        <p className={styles.notificationTitle}>{notification.title}</p>
-                        <p className={styles.notificationDescription}>{notification.description}</p>
-                      </article>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })
+          notificationSections.map(({ section, notifications: sectionNotifications }) => (
+            <NotificationSection
+              key={section.id}
+              notifications={sectionNotifications}
+              readNotificationIds={readNotificationIds}
+              section={section}
+            />
+          ))
         )}
       </div>
     </section>
@@ -383,18 +403,18 @@ export function Header({
   tabs = DEFAULT_HEADER_TABS,
   className,
 }: HeaderProps) {
-  const [openMenu, setOpenMenu] = useState<HeaderActionMenu | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<HeaderDropdownId | null>(null);
   const [activeNotificationFilter, setActiveNotificationFilter] =
     useState<NotificationFilterId>('all');
   const [readNotificationIds, setReadNotificationIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
-  const isAccountOpen = openMenu === 'account';
-  const isNotificationsOpen = openMenu === 'notifications';
+  const isAccountDropdownOpen = openDropdown === 'account';
+  const isNotificationsDropdownOpen = openDropdown === 'notifications';
   const notifications = HEADER_NOTIFICATIONS;
 
-  const handleMenuInteraction = (menu: HeaderActionMenu) => (nextOpenState: boolean) => {
-    setOpenMenu(nextOpenState ? menu : null);
+  const handleDropdownInteraction = (dropdownId: HeaderDropdownId) => (nextOpenState: boolean) => {
+    setOpenDropdown(nextOpenState ? dropdownId : null);
   };
 
   const markAllNotificationsRead = () => {
@@ -435,8 +455,6 @@ export function Header({
                   isLeadTab && styles.tabButtonLead,
                   isActive && styles.tabButtonActive,
                 )}
-                data-state={isActive ? 'active' : 'base'}
-                data-type={tab.title}
                 disabled={tab.disabled}
                 id={getTabId(tab.id)}
                 icon={
@@ -463,7 +481,7 @@ export function Header({
           <Button
             className={cx(styles.actionButton, styles.actionButtonData)}
             disabled
-            icon={<Icon className={styles.actionIconData} icon="circle" size={16} />}
+            icon={<Icon className={styles.actionIcon} icon="circle" size={16} />}
             text="Данные"
             textClassName={styles.actionText}
             title="Действие будет подключено следующим этапом"
@@ -473,7 +491,7 @@ export function Header({
           <Button
             className={cx(styles.actionButton, styles.actionButtonDatabase)}
             disabled
-            icon={<Icon className={styles.actionIconAccent} icon="th" size={16} />}
+            icon={<Icon className={styles.actionIcon} icon="th" size={16} />}
             text="База данных"
             textClassName={styles.actionText}
             title="Действие будет подключено следующим этапом"
@@ -481,24 +499,24 @@ export function Header({
             variant="outlined"
           />
           <Popover
-            className={styles.actionPopoverTarget}
-            content={<AccountMenu onDismiss={() => setOpenMenu(null)} />}
+            className={styles.dropdownTarget}
+            content={<AccountDropdownMenu onDismiss={() => setOpenDropdown(null)} />}
             interactionKind={PopoverInteractionKind.CLICK}
-            isOpen={isAccountOpen}
+            isOpen={isAccountDropdownOpen}
             minimal
-            onInteraction={handleMenuInteraction('account')}
+            onInteraction={handleDropdownInteraction('account')}
             placement="bottom-end"
-            popoverClassName={styles.headerPopover}
+            popoverClassName={styles.dropdownPopover}
             popupKind={PopupKind.MENU}
           >
             <Button
-              active={isAccountOpen}
-              aria-expanded={isAccountOpen}
+              active={isAccountDropdownOpen}
+              aria-expanded={isAccountDropdownOpen}
               aria-haspopup="menu"
               className={cx(
                 styles.actionButton,
                 styles.actionButtonAccount,
-                isAccountOpen && styles.actionButtonActive,
+                isAccountDropdownOpen && styles.actionButtonOpen,
               )}
               icon={<Icon className={styles.actionIcon} icon="user" size={16} />}
               text="Аккаунт"
@@ -509,33 +527,33 @@ export function Header({
             />
           </Popover>
           <Popover
-            className={styles.actionPopoverTarget}
+            className={styles.dropdownTarget}
             content={
-              <NotificationsPanel
+              <NotificationsDropdownPanel
                 activeFilter={activeNotificationFilter}
                 notifications={notifications}
                 readNotificationIds={readNotificationIds}
-                onDismiss={() => setOpenMenu(null)}
+                onDismiss={() => setOpenDropdown(null)}
                 onFilterChange={setActiveNotificationFilter}
                 onMarkAllRead={markAllNotificationsRead}
               />
             }
             interactionKind={PopoverInteractionKind.CLICK}
-            isOpen={isNotificationsOpen}
+            isOpen={isNotificationsDropdownOpen}
             minimal
-            onInteraction={handleMenuInteraction('notifications')}
+            onInteraction={handleDropdownInteraction('notifications')}
             placement="bottom-end"
-            popoverClassName={styles.headerPopover}
+            popoverClassName={styles.dropdownPopover}
             popupKind={PopupKind.DIALOG}
           >
             <Button
-              active={isNotificationsOpen}
-              aria-expanded={isNotificationsOpen}
+              active={isNotificationsDropdownOpen}
+              aria-expanded={isNotificationsDropdownOpen}
               aria-haspopup="dialog"
               aria-label="Уведомления"
               className={cx(
                 styles.notificationButton,
-                isNotificationsOpen && styles.actionButtonActive,
+                isNotificationsDropdownOpen && styles.actionButtonOpen,
               )}
               icon={<Icon className={styles.actionIcon} icon="notifications" size={16} />}
               title="Открыть уведомления"

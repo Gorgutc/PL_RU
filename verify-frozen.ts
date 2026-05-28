@@ -86,6 +86,11 @@ function missingSnippets(text: string, snippets: readonly string[]) {
   return snippets.filter((snippet) => !text.includes(snippet));
 }
 
+function hasPhrase(text: string, phrase: string) {
+  const normalize = (value: string) => value.replace(/\s+/g, ' ').trim();
+  return normalize(text).includes(normalize(phrase));
+}
+
 // ─── A. Static (no server) ───────────────────────────────────────────────────
 
 async function testNoTailwind() {
@@ -287,8 +292,13 @@ async function testFrozenHeaderContract() {
     ['$header-tab-lead-width', '9.625rem'],
     ['$header-expanded-breakpoint', '120rem'],
     ['$header-action-height', '1.875rem'],
+    ['$header-dropdown-offset', '0.25rem'],
+    ['$header-dropdown-padding-block', '1rem'],
+    ['$header-dropdown-padding-inline', '0.5rem'],
+    ['$header-account-menu-item-gap', '0.5rem'],
     ['$fs-header-filter', '0.625rem'],
     ['$radius-xs', '0.1875rem'],
+    ['$radius-dropdown', '0.125rem'],
   ]);
   const failures: string[] = [];
   const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
@@ -306,7 +316,6 @@ async function testFrozenHeaderContract() {
       'tabs?: readonly HeaderTab[];',
       'className?: string;',
       'data-testid="praios-header-tabs"',
-      "type HeaderActionMenu = 'account' | 'notifications';",
       'PopupKind.MENU',
       'PopupKind.DIALOG',
       "useState<NotificationFilterId>('all')",
@@ -316,8 +325,8 @@ async function testFrozenHeaderContract() {
       'text="Аккаунт"',
       'aria-label="Уведомления"',
       'role="group"',
-      'aria-expanded={isAccountOpen}',
-      'aria-expanded={isNotificationsOpen}',
+      'aria-expanded={isAccountDropdownOpen}',
+      'aria-expanded={isNotificationsDropdownOpen}',
       'text="Изменить профиль"',
       'text="Выйти из аккаунта"',
       "label: 'AI Info'",
@@ -333,7 +342,6 @@ async function testFrozenHeaderContract() {
       'width: t.$header-tab-compact-width;',
       'background: t.$color-header-tab-hover !important;',
       'background: t.$color-header-tab-active !important;',
-      '.actionButtonDatabase',
       'display: none;',
       '@media (min-width: t.$header-expanded-breakpoint)',
       'width: t.$header-tab-width;',
@@ -343,11 +351,11 @@ async function testFrozenHeaderContract() {
       'border-color: t.$color-header-action-hover;',
       'background: t.$color-header-tab-active !important;',
       'opacity: 1 !important;',
-      '.accountMenu',
-      '.notificationsPanel',
+      'color: t.$color-header-text-on-color !important;',
+      'padding-block-start: t.$header-dropdown-offset;',
+      'padding: t.$header-dropdown-padding-block t.$header-dropdown-padding-inline;',
+      'gap: t.$header-account-menu-item-gap;',
       'background: t.$color-header-dropdown-bg;',
-      '.notificationFilterActive',
-      '.notificationRowUnread',
       'outline: 0.125rem solid t.$color-header-text-on-color;',
     ]).map((snippet) => `Header.module.scss missing ${snippet}`),
   );
@@ -359,6 +367,8 @@ async function testFrozenHeaderContract() {
       '`Уведомления` opens a Blueprint Popover notification panel',
       '`All` filtering',
       'Header action dropdown panels use `#171d20` surface',
+      'sit `4px` below their trigger buttons',
+      '`8px` item gap',
     ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
   );
 
@@ -410,6 +420,81 @@ async function testFrozenQualityToolingContract() {
     'A11: quality tooling shared contracts remain frozen',
     failures.length === 0,
     failures.length ? failures.join('; ') : undefined,
+  );
+}
+
+async function testAgentVisualQaContract() {
+  const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
+  const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+  const bootstrap = await readFile(path.join(ROOT, 'docs', 'agent', 'bootstrap.md'), 'utf8');
+  const verification = await readFile(path.join(ROOT, 'docs', 'agent', 'verification.md'), 'utf8');
+  const orchestration = await readFile(
+    path.join(ROOT, 'docs', 'agent', 'orchestration.md'),
+    'utf8',
+  );
+  const sessionStartHook = await readFile(
+    path.join(ROOT, '.codex', 'hooks', 'session-start.md'),
+    'utf8',
+  );
+  const promptHook = await readFile(
+    path.join(ROOT, '.codex', 'hooks', 'user-prompt-submit.md'),
+    'utf8',
+  );
+  const bootstrapSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-session-bootstrap', 'SKILL.md'),
+    'utf8',
+  );
+  const qualitySkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-quality-gate', 'SKILL.md'),
+    'utf8',
+  );
+  const frozenSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-frozen-decisions', 'SKILL.md'),
+    'utf8',
+  );
+  const missing: string[] = [];
+
+  if (!hasPhrase(agents, '## Mandatory Agents And Visual QA')) {
+    missing.push('AGENTS.md mandatory agents section');
+  }
+  if (!hasPhrase(agents, 'Always raise the applicable PL_RU subagents')) {
+    missing.push('AGENTS.md always-raise-subagents rule');
+  }
+  if (!hasPhrase(agents, 'pixel-level screenshot comparison')) {
+    missing.push('AGENTS.md pixel-level visual QA rule');
+  }
+  if (!hasPhrase(frozen, '## Agent Orchestration And Visual QA')) {
+    missing.push('frozen-decisions agent/visual QA section');
+  }
+  if (!hasPhrase(frozen, 'reference PNG is inaccessible')) {
+    missing.push('frozen-decisions reference PNG blocking rule');
+  }
+
+  for (const [label, text] of [
+    ['docs/agent/bootstrap.md', bootstrap],
+    ['docs/agent/verification.md', verification],
+    ['docs/agent/orchestration.md', orchestration],
+    ['.codex/hooks/session-start.md', sessionStartHook],
+    ['.codex/hooks/user-prompt-submit.md', promptHook],
+    ['pl-ru-session-bootstrap', bootstrapSkill],
+    ['pl-ru-quality-gate', qualitySkill],
+  ] as const) {
+    if (!hasPhrase(text, 'applicable PL_RU subagents')) {
+      missing.push(`${label} subagent rule`);
+    }
+    if (!hasPhrase(text, 'pixel-level screenshot comparison')) {
+      missing.push(`${label} pixel visual QA rule`);
+    }
+  }
+
+  if (!hasPhrase(frozenSkill, 'pixel-level visual QA rules remain documented')) {
+    missing.push('pl-ru-frozen-decisions visual QA guard rule');
+  }
+
+  record(
+    'A12: mandatory subagents and pixel-level visual QA stay documented',
+    missing.length === 0,
+    missing.length ? missing.join('; ') : undefined,
   );
 }
 
@@ -547,6 +632,7 @@ async function main() {
   await testCodexMemoryContract();
   await testFrozenHeaderContract();
   await testFrozenQualityToolingContract();
+  await testAgentVisualQaContract();
 
   if (!process.argv.includes('--static')) {
     try {

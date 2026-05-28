@@ -10,6 +10,7 @@ Read this file before editing anything in this repo. It is the canonical instruc
 4. Finished work must pass `pnpm codex:ship` before commit/push.
 5. GitHub flow: work on `codex/*` branches, push to GitHub, and open a draft PR.
 6. Codex Memories are enabled for this repo; preserve handoff-worthy task context between sessions.
+7. Always raise the applicable PL_RU subagents for implementation or review work before final delivery.
 
 ## Quick Start
 
@@ -49,6 +50,32 @@ Use these skills when relevant:
 
 For broad tasks, use `docs/agent/bootstrap.md` and `docs/agent/orchestration.md` as the runbook. `.codex/` mirrors this orchestration for tools that read repo-local Codex config, but it does not outrank the authority order above.
 
+## Mandatory Agents And Visual QA
+
+Always raise the applicable PL_RU subagents for implementation, review,
+frontend, instruction, frozen-contract, or delivery work when subagent tooling is
+available. At minimum:
+
+- UI/frontend changes require a visual QA subagent.
+- Code changes require a code-quality/readability/reusability/optimization
+  subagent.
+- Frozen-contract, memory, docs, skills, or hook changes require a
+  frozen/instruction-drift subagent.
+
+Do not deliver work until every required subagent reports PASS, or until every
+finding is fixed and rechecked. If subagent tooling is unavailable, run the same
+roles locally, state that fallback explicitly, and keep the same PASS/fix
+standard.
+
+Visual QA for UI work must include pixel-level screenshot comparison against
+the available reference PNGs, including Google Drive Figma exports, before final
+delivery. Use Playwright screenshots and a pixel-level comparison tool or
+equivalent script, report viewport sizes, diff tolerance, and mismatched areas,
+and pair the image diff with DOM/CSS metric assertions for spacing, sizes,
+colors, and responsive behavior. Do not rely on eyeballing alone. If a reference
+PNG is inaccessible, say so explicitly and block delivery unless the current
+user request accepts a metric-only fallback.
+
 ## Frozen Rules
 
 Rules mirrored by `verify-frozen.ts` are binding:
@@ -64,6 +91,7 @@ Rules mirrored by `verify-frozen.ts` are binding:
 - A9: Codex Memories stay enabled and documented for future-session handoff.
 - A10: Header responsive-tabs, action-button, and dropdown contracts stay frozen.
 - A11: quality-tooling dedupe/shared-config contracts stay frozen.
+- A12: mandatory PL_RU subagent orchestration and pixel-level visual QA stay documented.
 
 Additional project rules:
 

@@ -75,11 +75,16 @@ $header-tab-width: 9.5625rem;
 $header-tab-lead-width: 9.625rem;
 $header-expanded-breakpoint: 120rem;
 $header-action-height: 1.875rem;
+$header-dropdown-offset: 0.25rem;
+$header-dropdown-padding-block: 1rem;
+$header-dropdown-padding-inline: 0.5rem;
+$header-account-menu-item-gap: 0.5rem;
 $header-logo-mark-size: 1.375rem;
 $header-logo-dot-size: 0.6875rem;
 
 // ─── Radii / shadows ─────────────────────────────────────────────────────────
 $radius-xs: 0.1875rem;
+$radius-dropdown: 0.125rem;
 $radius-sm: 0.25rem;
 $radius-md: 0.5rem;
 $radius-lg: 0.75rem;

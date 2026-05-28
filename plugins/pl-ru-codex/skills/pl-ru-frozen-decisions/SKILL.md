@@ -27,6 +27,9 @@ and `verify-frozen.ts`. Do not edit files when using this as a review skill.
   Popover/Menu contract unless the current user request explicitly changes it.
 - Codex memory rules remain documented and repo mirror keeps
   `[features] memories = true`.
+- Mandatory PL_RU subagent orchestration and pixel-level visual QA rules remain
+  documented in `AGENTS.md`, `docs/agent/verification.md`, and the relevant
+  skills/hooks.
 - `verify-frozen.ts` keeps static guards for these decisions.
 
 ## Output
