@@ -1,0 +1,40 @@
+@use '../styles/tokens' as t;
+
+.page {
+  max-width: none;
+  min-width: t.$container-max;
+  min-height: 100vh;
+  padding: calc(t.$header-height + t.$space-5) t.$space-4 t.$space-4;
+}
+
+.placeholder {
+  max-width: t.$container-max;
+  min-height: 24rem;
+  margin: 0 auto;
+  background: t.$color-surface;
+  border: 0.0625rem solid t.$color-border;
+}
+
+.eyebrow {
+  margin: 0 0 t.$space-2;
+  color: t.$color-text-muted;
+  font-family: t.$font-mono;
+  font-size: t.$fs-small;
+}
+
+.heading {
+  margin: 0 0 t.$space-3;
+  font-size: t.$fs-h2;
+}
+
+.stubNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 14rem;
+  margin: 0;
+  color: t.$color-header-text;
+  font-family: t.$font-header;
+  font-size: t.$fs-h1;
+  font-weight: 500;
+}

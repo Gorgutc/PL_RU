@@ -1,0 +1,304 @@
+@use '../../styles/tokens' as t;
+
+.header {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 20;
+  min-width: t.$container-max;
+  height: t.$header-height;
+  background: t.$color-header-bg;
+  border-block-end: 0.0625rem solid t.$color-header-border;
+}
+
+.navbar.navbar {
+  display: grid;
+  grid-template-columns: minmax(t.$header-side-width, 1fr) auto minmax(t.$header-side-width, 1fr);
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0 t.$header-edge-padding;
+  overflow: hidden;
+  background: t.$color-header-bg;
+  box-shadow: none;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-self: start;
+  width: t.$header-side-width;
+  height: 100%;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 0.25rem;
+  min-width: 0;
+  color: t.$color-header-text;
+}
+
+.logoMark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(t.$header-logo-mark-size + 0.75rem);
+  height: calc(t.$header-logo-mark-size + 0.75rem);
+  border-radius: 0.375rem;
+}
+
+.logoMark::before {
+  display: block;
+  width: t.$header-logo-mark-size;
+  height: t.$header-logo-mark-size;
+  border: 0.0575rem solid currentcolor;
+  border-radius: 999rem;
+  content: '';
+}
+
+.logoDot {
+  position: absolute;
+  inset-block-start: calc(50% + t.$header-logo-dot-size / 2);
+  inset-inline-start: 50%;
+  width: t.$header-logo-dot-size;
+  height: t.$header-logo-dot-size;
+  border-radius: 999rem;
+  background: currentcolor;
+  transform: translate(-50%, -50%);
+}
+
+.logoText {
+  font-family: t.$font-header;
+  font-size: t.$fs-header-brand;
+  font-weight: 500;
+  line-height: 1;
+  color: t.$color-header-text;
+  white-space: nowrap;
+}
+
+.descriptor {
+  min-width: 0;
+  overflow: hidden;
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-header-mono;
+  font-size: t.$fs-header-nav;
+  font-weight: 400;
+  line-height: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tabs {
+  display: flex;
+  align-items: stretch;
+  justify-self: center;
+  height: 100%;
+}
+
+.tabButton.tabButton {
+  position: relative;
+  width: t.$header-tab-width;
+  height: 100%;
+  min-height: 0;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 0.625rem;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: inset 0 0 0 0.0625rem t.$color-header-tab-divider !important;
+  color: t.$color-header-text-on-color !important;
+  font-family: t.$font-header;
+  font-weight: 400;
+}
+
+.tabButton.tabButton:not(:disabled):hover {
+  background: t.$color-header-tab-hover !important;
+  color: t.$color-header-text-on-color !important;
+}
+
+.tabButtonWide.tabButtonWide {
+  width: t.$header-tab-wide-width;
+}
+
+.tabButtonActive.tabButtonActive {
+  width: t.$header-tab-active-width;
+  background: t.$color-header-tab-active-a11y !important;
+  box-shadow: none !important;
+  color: t.$color-header-text-on-color !important;
+}
+
+.tabButtonActive::before {
+  position: absolute;
+  inset: 0;
+  background: t.$color-header-tab-active;
+  content: '';
+}
+
+.tabButtonActive.tabButtonActive:not(:disabled):hover {
+  background: t.$color-header-tab-active-hover !important;
+}
+
+.tabButtonActive.tabButtonActive:not(:disabled):hover::before {
+  background: t.$color-header-tab-active-hover;
+}
+
+.tabButtonWideActive.tabButtonWideActive {
+  width: t.$header-tab-wide-active-width;
+}
+
+.tabText {
+  position: relative;
+  z-index: 1;
+  font-size: t.$fs-header-nav;
+  line-height: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tabIcon {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  margin: 0 !important;
+  color: t.$color-header-icon-muted;
+}
+
+.tabIconActive {
+  color: t.$color-header-text-on-color;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-self: end;
+  height: 100%;
+  gap: 0.25rem;
+}
+
+.actionButton.actionButton.actionButton,
+.notificationButton.notificationButton.notificationButton {
+  flex: 0 0 auto;
+  height: t.$header-action-height;
+  min-height: 0;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 0.625rem;
+  overflow: hidden;
+  border: 0.0625rem solid t.$color-header-action-border-muted;
+  border-radius: t.$radius-xs;
+  background: transparent;
+  box-shadow: none;
+  color: t.$color-header-action-text;
+  font-family: t.$font-header;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.actionButton.actionButton.actionButton:disabled,
+.actionButton.actionButton.actionButton:disabled:hover,
+.notificationButton.notificationButton.notificationButton:disabled,
+.notificationButton.notificationButton.notificationButton:disabled:hover {
+  border-color: t.$color-header-action-border-muted !important;
+  background: transparent !important;
+  color: t.$color-header-action-text !important;
+  cursor: default;
+  opacity: 1 !important;
+}
+
+.actionButton.actionButton.actionButtonData.actionButtonData {
+  border-color: t.$color-header-data-border;
+  color: t.$color-header-data;
+}
+
+.actionButton.actionButton.actionButtonData.actionButtonData:disabled,
+.actionButton.actionButton.actionButtonData.actionButtonData:disabled:hover {
+  border-color: t.$color-header-data-border !important;
+  color: t.$color-header-data !important;
+}
+
+.actionButton.actionButton.actionButtonAccount.actionButtonAccount {
+  border-color: t.$color-header-action-border;
+}
+
+.actionButton.actionButton.actionButtonAccount.actionButtonAccount:disabled,
+.actionButton.actionButton.actionButtonAccount.actionButtonAccount:disabled:hover {
+  border-color: t.$color-header-action-border !important;
+}
+
+.notificationButton.notificationButton.notificationButton {
+  width: t.$header-action-height;
+  padding: 0;
+}
+
+.actionText {
+  color: t.$color-header-action-text;
+  font-size: t.$fs-header-action;
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+.actionButtonData .actionText {
+  color: t.$color-header-data;
+}
+
+.actionButton.actionButton.actionButton:disabled .actionText,
+.notificationButton.notificationButton.notificationButton:disabled .actionText {
+  color: t.$color-header-action-text !important;
+}
+
+.actionButton.actionButton.actionButtonData.actionButtonData:disabled .actionText {
+  color: t.$color-header-data !important;
+}
+
+.actionButtonData .actionIconData {
+  color: t.$color-header-data;
+}
+
+.actionIcon,
+.actionIconAccent,
+.actionIconData {
+  flex: 0 0 auto;
+  margin: 0 !important;
+}
+
+.actionIcon {
+  color: t.$color-header-text-on-color;
+}
+
+.actionButton.actionButton.actionButton:disabled .actionIcon.actionIcon,
+.notificationButton.notificationButton.notificationButton:disabled .actionIcon.actionIcon {
+  color: t.$color-header-text-on-color !important;
+}
+
+.actionIconAccent {
+  color: t.$color-header-tab-active;
+}
+
+.actionButton.actionButton.actionButton:disabled .actionIconAccent.actionIconAccent {
+  color: t.$color-header-tab-active !important;
+}
+
+.actionIconData {
+  color: t.$color-header-data;
+}
+
+.actionButton.actionButton.actionButtonData.actionButtonData:disabled
+  .actionIconData.actionIconData {
+  color: t.$color-header-data !important;
+}
+
+.tabButton:focus-visible,
+.actionButton:focus-visible,
+.notificationButton:focus-visible {
+  outline: 0.125rem solid t.$color-header-text-on-color;
+  outline-offset: -0.125rem;
+}

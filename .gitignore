@@ -19,6 +19,7 @@ dist/
 scratch/
 *.scratch.*
 notes.private.md
+/codex_*.md
 
 .DS_Store
 Thumbs.db
