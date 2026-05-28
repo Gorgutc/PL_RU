@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { collectConsoleErrors } from './helpers/console-errors';
 
 test('home renders an h1', async ({ page }) => {
   await page.goto('/');
@@ -13,11 +14,7 @@ test('home renders a Blueprint card', async ({ page }) => {
 });
 
 test('no console errors on load', async ({ page }) => {
-  const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
-  page.on('console', (m) => {
-    if (m.type() === 'error') errors.push(m.text());
-  });
+  const errors = collectConsoleErrors(page);
   await page.goto('/');
   await page.waitForLoadState('networkidle');
   expect(errors).toEqual([]);

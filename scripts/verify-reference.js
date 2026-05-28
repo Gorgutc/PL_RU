@@ -7,62 +7,23 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
-import { createHash } from 'node:crypto';
+import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
-
-const ROOT = process.cwd();
-const STATE_DIR = path.join(ROOT, '.codex-refs-baseline');
-const REFS = [
-  'Blueprints_lib',
-  'Osiris_ref',
-  path.join('plugins', 'pl-ru-codex', 'skills', 'blueprint-design'),
-  path.join('plugins', 'pl-ru-codex', 'skills', 'osiris-design'),
-];
+import {
+  REFERENCE_PATHS,
+  ROOT,
+  STATE_DIR,
+  manifestHash,
+  referenceStateName,
+  toPosix,
+} from './lib/reference-manifest.mjs';
 
 const results = [];
-
-function toPosix(value) {
-  return value.split(path.sep).join('/');
-}
 
 function record(name, pass, detail) {
   results.push({ name, pass, detail });
   const tag = pass ? 'PASS' : 'FAIL';
   console.log(`[${tag}] ${name}${detail ? ` — ${detail}` : ''}`);
-}
-
-function walk(dir, out = []) {
-  let entries = [];
-  try {
-    entries = readdirSync(dir, { withFileTypes: true });
-  } catch {
-    return out;
-  }
-  for (const entry of entries) {
-    if (entry.name === '.git') continue;
-    const filePath = path.join(dir, entry.name);
-    if (entry.isDirectory()) walk(filePath, out);
-    else out.push(filePath);
-  }
-  return out;
-}
-
-function manifestHash(absDir) {
-  const rels = walk(absDir)
-    .map((filePath) => {
-      const rel = toPosix(path.relative(absDir, filePath));
-      const stats = statSync(filePath);
-      return `./${rel} ${stats.size}`;
-    })
-    .sort();
-  return createHash('sha256')
-    .update(`${rels.join('\n')}\n`)
-    .digest('hex');
-}
-
-function stateName(ref) {
-  return toPosix(ref).replaceAll('/', '-');
 }
 
 function checkGitClean(ref) {
@@ -91,7 +52,7 @@ function checkGitClean(ref) {
 
 function checkBaseline(ref) {
   const displayRef = toPosix(ref);
-  const baselinePath = path.join(STATE_DIR, `${stateName(ref)}.sha256`);
+  const baselinePath = path.join(STATE_DIR, `${referenceStateName(ref)}.sha256`);
   if (!existsSync(baselinePath)) {
     record(
       `baseline:${displayRef}`,
@@ -115,7 +76,7 @@ function checkBaseline(ref) {
 }
 
 console.log('=== verify-reference.js ===');
-for (const ref of REFS) {
+for (const ref of REFERENCE_PATHS) {
   const abs = path.join(ROOT, ref);
   if (!existsSync(abs)) {
     record(`exists:${toPosix(ref)}`, false, 'folder missing');

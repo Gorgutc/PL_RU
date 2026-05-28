@@ -9,6 +9,7 @@ Read this file before editing anything in this repo. It is the canonical instruc
 3. Architecture source of truth: `verify-frozen.ts`, executed through `pnpm verify`.
 4. Finished work must pass `pnpm codex:ship` before commit/push.
 5. GitHub flow: work on `codex/*` branches, push to GitHub, and open a draft PR.
+6. Codex Memories are enabled for this repo; preserve handoff-worthy task context between sessions.
 
 ## Quick Start
 
@@ -38,6 +39,7 @@ Use these skills when relevant:
 - `$pl-ru-frontend-rules` for frontend architecture, React, SCSS modules, Blueprint, a11y, and performance rules.
 - `$pl-ru-context-keeper` for small read-only codebase slices.
 - `$pl-ru-spec-guardian` for architecture validation.
+- `$pl-ru-frozen-decisions` for checking frozen project decisions, reusable UI contracts, and session-memory rules.
 - `$pl-ru-quality-gate` for final code review.
 - `$pl-ru-quality-tooling` for scripts, lint configs, browser checks, a11y checks, and ship gates.
 - `$pl-ru-deadwood-audit` for read-only dead-code, duplicate-code, and cleanup candidate audits.
@@ -59,6 +61,9 @@ Rules mirrored by `verify-frozen.ts` are binding:
 - A6: no `localStorage` or `sessionStorage` in `src/`.
 - A7: Blueprint imports only from `@blueprintjs/core` and `@blueprintjs/icons` package roots.
 - A8: no `px` for `font-size` in SCSS.
+- A9: Codex Memories stay enabled and documented for future-session handoff.
+- A10: Header responsive-tabs and action-button contracts stay frozen.
+- A11: quality-tooling dedupe/shared-config contracts stay frozen.
 
 Additional project rules:
 
@@ -69,6 +74,46 @@ Additional project rules:
 - Use Blueprint primitives instead of rebuilding `Button`, `Card`, `Dialog`, `Menu`, or `Popover`.
 - Use Blueprint icons through `<Icon icon="..." />`, not raw SVG in production UI.
 - The Blueprint CSS imports in `src/app/layout.tsx` are the stylesheet exception to the package-root import rule.
+
+## Session Memory
+
+Codex Memories are enabled in the repo mirror via:
+
+```toml
+[features]
+memories = true
+```
+
+The user-level Codex config at `~/.codex/config.toml` should also keep the same
+feature flag enabled so Codex can summarize prior sessions into
+`~/.codex/memories/` and load them as future context.
+
+Use `AGENTS.md` and Memories together:
+
+- `AGENTS.md` is the static constitution: code style, architecture rules, test
+  commands, workflow, and frozen decisions.
+- Memories are the dynamic working notes Codex generates automatically from
+  completed sessions: project facts, decisions, patterns, and handoff context.
+
+At the end of every completed task, include a concise final summary of what was
+changed, what decisions were made or preserved, what checks passed, and what
+branch/PR/commit state matters. This makes the session easy for Memories to
+capture and carry into the next session. Do not commit generated memory files.
+
+## Frozen Decisions
+
+Frozen decisions live in `docs/agent/frozen-decisions.md` and are mirrored by
+checks in `verify-frozen.ts`. Future iterations must preserve those decisions
+unless the current user request explicitly asks to change a specific frozen
+decision. Add new functionality by extending or reusing the current contract;
+do not silently rewrite existing behavior.
+
+Header decisions from the responsive-tabs iteration are frozen. In particular,
+the Header layout, tab states, responsive tab widths, Figma colors, lack of
+base-tab outlines, and the current action-button visual contract are not to be
+changed unless explicitly requested. If the Header action buttons need to
+appear elsewhere, extract or reuse the same visual contract instead of creating
+a near-duplicate component.
 
 ## Read-Only References
 

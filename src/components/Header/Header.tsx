@@ -70,18 +70,18 @@ export function Header({
         >
           {tabs.map((tab) => {
             const isActive = tab.id === activeTab;
-            const isStatsTab = tab.id === 'stats';
+            const isLeadTab = tab.id === 'map' || tab.id === 'bar';
             return (
               <Button
                 key={tab.id}
+                aria-label={tab.title}
                 active={isActive}
                 aria-controls="praios-tab-panel"
                 aria-selected={isActive}
                 className={cx(
                   styles.tabButton,
-                  isStatsTab && styles.tabButtonWide,
+                  isLeadTab && styles.tabButtonLead,
                   isActive && styles.tabButtonActive,
-                  isActive && isStatsTab && styles.tabButtonWideActive,
                 )}
                 data-state={isActive ? 'active' : 'base'}
                 data-type={tab.title}

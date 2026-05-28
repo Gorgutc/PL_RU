@@ -23,6 +23,8 @@ use the relevant skill and local checks directly.
   and Windows/browser caveats.
 - `codex_infra_architect`: future-session bootstrap, plugin layout, skills,
   hooks, and handoff docs.
+- `frozen_decisions_guardian`: frozen project decisions, Header responsive
+  contract, reusable UI contracts, memory rules, and `verify-frozen.ts` drift.
 
 ## Audit Matrix
 

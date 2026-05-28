@@ -51,6 +51,7 @@ async function verifySkills() {
     'pl-ru-context-keeper',
     'pl-ru-frontend-rules',
     'pl-ru-spec-guardian',
+    'pl-ru-frozen-decisions',
     'pl-ru-quality-gate',
     'pl-ru-quality-tooling',
     'pl-ru-deadwood-audit',
@@ -82,6 +83,7 @@ async function verifyDocs() {
     'docs/agent/code_review.md',
     'docs/agent/verification.md',
     'docs/agent/orchestration.md',
+    'docs/agent/frozen-decisions.md',
     'docs/agent/archive_policy.md',
     'docs/agent/plan_template.md',
     'docs/agent/quality-tooling.md',
@@ -106,6 +108,7 @@ async function verifyCodexMirror() {
     '.codex/agents/instruction_drift_auditor.toml',
     '.codex/agents/quality_tooling_architect.toml',
     '.codex/agents/codex_infra_architect.toml',
+    '.codex/agents/frozen_decisions_guardian.toml',
   ];
   for (const file of files) {
     record(`codex mirror exists: ${file}`, await exists(file));

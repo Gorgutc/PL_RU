@@ -18,6 +18,7 @@
       "Use $pl-ru-audit-orchestrator for broad audits, instruction changes, and quality-tooling work.",
       "Use $pl-ru-ship to prepare this PL_RU change for PR.",
       "Use $pl-ru-spec-guardian to check architecture rules.",
+      "Use $pl-ru-frozen-decisions to protect frozen decisions and session-memory rules.",
       "Use $pl-ru-frontend-rules before editing UI code."
     ],
     "brandColor": "#2563EB"

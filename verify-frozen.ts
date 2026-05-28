@@ -44,6 +44,48 @@ async function walk(dir: string, out: string[] = []): Promise<string[]> {
   return out;
 }
 
+async function readSourceFiles(
+  filePattern: RegExp,
+): Promise<Array<{ file: string; text: string }>> {
+  const files = await walk(SRC);
+  const matches: Array<{ file: string; text: string }> = [];
+
+  for (const file of files) {
+    if (!filePattern.test(file)) continue;
+    matches.push({ file, text: await readFile(file, 'utf8') });
+  }
+
+  return matches;
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function getTomlSection(text: string, section: string) {
+  const header = new RegExp(`^\\[${escapeRegExp(section)}\\]\\s*$`, 'm').exec(text);
+  if (!header) return '';
+
+  const sectionBody = text.slice(header.index + header[0].length);
+  const nextSection = sectionBody.search(/^\[[^\]]+\]\s*$/m);
+  return nextSection === -1 ? sectionBody : sectionBody.slice(0, nextSection);
+}
+
+function hasTomlSetting(text: string, section: string, key: string, value: string) {
+  const sectionBody = getTomlSection(text, section);
+  const setting = new RegExp(`^\\s*${escapeRegExp(key)}\\s*=\\s*${escapeRegExp(value)}\\s*$`, 'm');
+  return setting.test(sectionBody);
+}
+
+function getScssTokenValue(text: string, token: string) {
+  const match = new RegExp(`^${escapeRegExp(token)}\\s*:\\s*(.+);\\s*$`, 'm').exec(text);
+  return match?.[1].trim().toLowerCase().replace(/\s+/g, ' ') ?? null;
+}
+
+function missingSnippets(text: string, snippets: readonly string[]) {
+  return snippets.filter((snippet) => !text.includes(snippet));
+}
+
 // ─── A. Static (no server) ───────────────────────────────────────────────────
 
 async function testNoTailwind() {
@@ -133,13 +175,10 @@ async function testNoInlineHex() {
 }
 
 async function testNoLocalStorage() {
-  const files = await walk(SRC);
   const offenders: string[] = [];
-  for (const f of files) {
-    if (!/\.(tsx?|jsx?)$/.test(f)) continue;
-    const txt = await readFile(f, 'utf8');
-    if (/\b(localStorage|sessionStorage)\b/.test(txt)) {
-      offenders.push(path.relative(ROOT, f));
+  for (const { file, text } of await readSourceFiles(/\.(tsx?|jsx?)$/)) {
+    if (/\b(localStorage|sessionStorage)\b/.test(text)) {
+      offenders.push(path.relative(ROOT, file));
     }
   }
   record(
@@ -150,13 +189,10 @@ async function testNoLocalStorage() {
 }
 
 async function testNoBlueprintInternalImports() {
-  const files = await walk(SRC);
   const offenders: string[] = [];
-  for (const f of files) {
-    if (!/\.(tsx?|jsx?)$/.test(f)) continue;
-    const txt = await readFile(f, 'utf8');
-    const m = txt.match(/from\s+['"]@blueprintjs\/[^'"\/]+\/[^'"]+['"]/g);
-    if (m) offenders.push(`${path.relative(ROOT, f)}: ${m.join(' | ')}`);
+  for (const { file, text } of await readSourceFiles(/\.(tsx?|jsx?)$/)) {
+    const imports = text.match(/from\s+['"]@blueprintjs\/[^'"\/]+\/[^'"]+['"]/g);
+    if (imports) offenders.push(`${path.relative(ROOT, file)}: ${imports.join(' | ')}`);
   }
   record(
     'A7: no Blueprint internal-path imports',
@@ -183,6 +219,142 @@ async function testNoPxFontSize() {
     'A8: no `px` for font-size (use rem / clamp)',
     offenders.length === 0,
     offenders.length ? offenders.slice(0, 3).join(', ') : undefined,
+  );
+}
+
+async function testCodexMemoryContract() {
+  const config = await readFile(path.join(ROOT, '.codex', 'config.toml'), 'utf8');
+  const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
+  const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+  const missing: string[] = [];
+
+  if (!hasTomlSetting(config, 'features', 'memories', 'true')) {
+    missing.push('.codex/config.toml [features].memories=true');
+  }
+  if (!agents.includes('## Session Memory')) missing.push('AGENTS.md Session Memory section');
+  if (!agents.includes('At the end of every completed task')) {
+    missing.push('AGENTS.md completed-task memory handoff rule');
+  }
+  if (!frozen.includes('## Session Memory')) missing.push('frozen-decisions Session Memory');
+
+  record(
+    'A9: Codex Memories enabled and documented',
+    missing.length === 0,
+    missing.length ? missing.join('; ') : undefined,
+  );
+}
+
+async function testFrozenHeaderContract() {
+  const tokens = await readFile(path.join(SRC, 'styles', '_tokens.scss'), 'utf8');
+  const header = await readFile(path.join(SRC, 'components', 'Header', 'Header.tsx'), 'utf8');
+  const styles = await readFile(
+    path.join(SRC, 'components', 'Header', 'Header.module.scss'),
+    'utf8',
+  );
+  const expectedTokens = new Map([
+    ['$color-header-bg', '#0c1316'],
+    ['$color-header-border', 'rgb(233 234 235 / 50%)'],
+    ['$color-header-tab-active', '#2970ff'],
+    ['$color-header-tab-hover', '#528bff'],
+    ['$color-header-action-text', '#d3d3d3'],
+    ['$color-header-data', '#1c6e42'],
+    ['$header-height', '3rem'],
+    ['$header-edge-padding', '0.5rem'],
+    ['$header-side-width', '20.625rem'],
+    ['$header-tab-compact-width', '5rem'],
+    ['$header-tab-width', '9.5625rem'],
+    ['$header-tab-lead-width', '9.625rem'],
+    ['$header-expanded-breakpoint', '120rem'],
+    ['$header-action-height', '1.875rem'],
+    ['$radius-xs', '0.1875rem'],
+  ]);
+  const failures: string[] = [];
+
+  for (const [token, expected] of expectedTokens) {
+    const actual = getScssTokenValue(tokens, token);
+    if (actual !== expected) failures.push(`${token}=${actual ?? '(missing)'}`);
+  }
+
+  failures.push(
+    ...missingSnippets(header, [
+      'export type HeaderProps = {',
+      'activeTab: HeaderTabId;',
+      'onTabChange: (id: HeaderTabId) => void;',
+      'tabs?: readonly HeaderTab[];',
+      'className?: string;',
+      'data-testid="praios-header-tabs"',
+      'aria-label={tab.title}',
+      'text="Данные"',
+      'text="База данных"',
+      'text="Аккаунт"',
+      'aria-label="Уведомления"',
+    ]).map((snippet) => `Header.tsx missing ${snippet}`),
+  );
+
+  failures.push(
+    ...missingSnippets(styles, [
+      'width: t.$header-tab-compact-width;',
+      'background: t.$color-header-tab-hover !important;',
+      'background: t.$color-header-tab-active !important;',
+      'display: none;',
+      '@media (min-width: t.$header-expanded-breakpoint)',
+      'width: t.$header-tab-width;',
+      'width: t.$header-tab-lead-width;',
+      'height: t.$header-action-height;',
+      'border-radius: t.$radius-xs;',
+      'opacity: 1 !important;',
+      'outline: 0.125rem solid t.$color-header-text-on-color;',
+    ]).map((snippet) => `Header.module.scss missing ${snippet}`),
+  );
+
+  record(
+    'A10: Header responsive tabs and action buttons remain frozen',
+    failures.length === 0,
+    failures.length ? failures.slice(0, 8).join('; ') : undefined,
+  );
+}
+
+async function testFrozenQualityToolingContract() {
+  const pkg = JSON.parse(await readFile(path.join(ROOT, 'package.json'), 'utf8'));
+  const shared = await readFile(path.join(ROOT, 'playwright.shared.config.ts'), 'utf8');
+  const e2e = await readFile(path.join(ROOT, 'playwright.config.ts'), 'utf8');
+  const quality = await readFile(path.join(ROOT, 'playwright.quality.config.ts'), 'utf8');
+  const syncRefs = await readFile(path.join(ROOT, 'scripts', 'sync-refs.mjs'), 'utf8');
+  const verifyRefs = await readFile(path.join(ROOT, 'scripts', 'verify-reference.js'), 'utf8');
+  const pa11yScript = await readFile(path.join(ROOT, 'scripts', 'run-pa11y.mjs'), 'utf8');
+  const failures: string[] = [];
+
+  if (pkg.scripts?.['check:duplicates'] !== 'jscpd --config .jscpd.json --noTips .') {
+    failures.push('package.json check:duplicates drifted');
+  }
+
+  failures.push(
+    ...missingSnippets(shared, ['createPlaywrightConfig', 'Desktop Chrome']).map(
+      (snippet) => `playwright.shared.config.ts missing ${snippet}`,
+    ),
+    ...missingSnippets(e2e, ["createPlaywrightConfig('./tests/e2e')"]).map(
+      (snippet) => `playwright.config.ts missing ${snippet}`,
+    ),
+    ...missingSnippets(quality, ["createPlaywrightConfig('./tests/quality')"]).map(
+      (snippet) => `playwright.quality.config.ts missing ${snippet}`,
+    ),
+    ...missingSnippets(syncRefs, ['./lib/reference-manifest.mjs']).map(
+      (snippet) => `sync-refs.mjs missing ${snippet}`,
+    ),
+    ...missingSnippets(verifyRefs, ['./lib/reference-manifest.mjs']).map(
+      (snippet) => `verify-reference.js missing ${snippet}`,
+    ),
+    ...missingSnippets(pa11yScript, [
+      "import { chromium } from 'playwright';",
+      'chromium.executablePath()',
+      'executablePath: chromiumExecutablePath',
+    ]).map((snippet) => `run-pa11y.mjs missing ${snippet}`),
+  );
+
+  record(
+    'A11: quality tooling shared contracts remain frozen',
+    failures.length === 0,
+    failures.length ? failures.join('; ') : undefined,
   );
 }
 
@@ -317,6 +489,9 @@ async function main() {
   await testNoLocalStorage();
   await testNoBlueprintInternalImports();
   await testNoPxFontSize();
+  await testCodexMemoryContract();
+  await testFrozenHeaderContract();
+  await testFrozenQualityToolingContract();
 
   if (!process.argv.includes('--static')) {
     try {

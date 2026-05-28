@@ -31,6 +31,14 @@ dependency audit, Lighthouse CI, and verifies read-only references.
 `codex:ship` is the same full local gate used before committing and pushing a
 finished change.
 
+## Frozen Decisions
+
+`pnpm verify` also checks the repo-level memory and frozen-decision contracts.
+When changing Header behavior, shared UI contracts, Codex instructions, or
+quality tooling, update `docs/agent/frozen-decisions.md` and `verify-frozen.ts`
+in the same change only when the current user request explicitly asks for that
+frozen decision to change.
+
 ## Windows Notes
 
 Browser checks may fail inside restricted sandboxes with Chromium spawn errors.

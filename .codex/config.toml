@@ -2,6 +2,9 @@
 # Canonical authority remains:
 # verify-frozen.ts > current user request > AGENTS.md > plugins/pl-ru-codex/skills/**
 
+[features]
+memories = true
+
 [project]
 name = "PL_RU"
 repository = "Gorgutc/PL_RU"

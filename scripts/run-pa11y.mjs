@@ -1,7 +1,9 @@
 import pa11y from 'pa11y';
+import { chromium } from 'playwright';
 import { withNextDevServer } from './lib/next-server.mjs';
 
 const urls = ['/'];
+const chromiumExecutablePath = chromium.executablePath();
 
 await withNextDevServer({ port: 3101 }, async (baseUrl) => {
   let failures = 0;
@@ -12,6 +14,7 @@ await withNextDevServer({ port: 3101 }, async (baseUrl) => {
       standard: 'WCAG2AA',
       timeout: 45_000,
       chromeLaunchConfig: {
+        executablePath: chromiumExecutablePath,
         args: ['--no-sandbox', '--disable-dev-shm-usage'],
       },
     });
