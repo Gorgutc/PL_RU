@@ -17,7 +17,7 @@ import styles from './Header.module.scss';
 
 export type HeaderTabId = 'map' | 'bar' | 'tmi' | 'sat' | 'kick' | 'stats';
 
-export type HeaderTab = {
+type HeaderTab = {
   id: HeaderTabId;
   label: string;
   icon: IconName;
@@ -32,7 +32,7 @@ export type HeaderProps = {
   className?: string;
 };
 
-export const DEFAULT_HEADER_TABS: readonly HeaderTab[] = [
+const DEFAULT_HEADER_TABS: readonly HeaderTab[] = [
   { id: 'map', label: 'Оперативная карта', icon: 'globe', title: 'Оперативная карта' },
   { id: 'bar', label: 'Маршруты', icon: 'route', title: 'Маршруты' },
   { id: 'tmi', label: 'Телеметрия', icon: 'antenna', title: 'Телеметрия' },

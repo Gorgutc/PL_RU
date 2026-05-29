@@ -1,16 +1,14 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleErrors } from './helpers/console-errors';
 
-test('home renders an h1', async ({ page }) => {
+test('home exposes the workspace heading', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'PraiOS workspace' })).toBeAttached();
 });
 
-test('home renders a Blueprint card', async ({ page }) => {
+test('home renders the workspace map as a Blueprint card surface', async ({ page }) => {
   await page.goto('/');
-  // Blueprint v6 uses `.bp6-card`; allow v5 selector for migration parity.
-  const card = page.locator('.bp6-card, .bp5-card');
-  await expect(card.first()).toBeVisible();
+  await expect(page.getByTestId('workspace-map-card')).toHaveClass(/bp6-card|bp5-card/);
 });
 
 test('no console errors on load', async ({ page }) => {

@@ -696,6 +696,114 @@ async function testAgentVisualQaContract() {
 
 // ─── B. Runtime (dev server) ─────────────────────────────────────────────────
 
+async function testWorkspaceShellContract() {
+  const tokens = await readFile(path.join(SRC, 'styles', '_tokens.scss'), 'utf8');
+  const appShell = await readFile(path.join(SRC, 'components', 'AppShell', 'AppShell.tsx'), 'utf8');
+  const appShellStyles = await readFile(
+    path.join(SRC, 'components', 'AppShell', 'AppShell.module.scss'),
+    'utf8',
+  );
+  const leftRail = await readFile(path.join(SRC, 'components', 'LeftRail', 'LeftRail.tsx'), 'utf8');
+  const tabSidePanel = await readFile(
+    path.join(SRC, 'components', 'TabSidePanel', 'TabSidePanel.tsx'),
+    'utf8',
+  );
+  const workspaceMap = await readFile(
+    path.join(SRC, 'components', 'WorkspaceMap', 'WorkspaceMap.tsx'),
+    'utf8',
+  );
+  const workspaceSpec = await readFile(
+    path.join(ROOT, 'tests', 'e2e', 'workspace-shell.spec.ts'),
+    'utf8',
+  );
+  const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+  const failures: string[] = [];
+  const expectedTokens = new Map([
+    ['$color-workspace-bg', '#12181b'],
+    ['$color-workspace-border', '#666'],
+    ['$color-workspace-button-hover', '#528bff'],
+    ['$color-workspace-button-active', '#2970ff'],
+    ['$workspace-rail-width', '3.125rem'],
+    ['$workspace-panel-width', '18.75rem'],
+    ['$workspace-rail-button-size', '2.125rem'],
+    ['$workspace-control-height', '2rem'],
+  ]);
+
+  for (const [token, expected] of expectedTokens) {
+    const actual = getScssTokenValue(tokens, token);
+    if (actual !== expected) failures.push(`${token}=${actual ?? '(missing)'}`);
+  }
+
+  failures.push(
+    ...missingSnippets(appShell, [
+      '<main',
+      '<section',
+      'id="praios-tab-panel"',
+      'role="tabpanel"',
+      'data-testid="workspace-shell"',
+      'data-testid="workspace-left-area"',
+      'PraiOS workspace',
+      'getWorkspaceSidebarMode(activeTab)',
+      '<WorkspaceMap />',
+    ]).map((snippet) => `AppShell.tsx missing ${snippet}`),
+    ...missingSnippets(appShellStyles, [
+      'height: calc(100dvh - t.$header-height);',
+      'margin: t.$header-height 0 0;',
+      'grid-template-columns: t.$workspace-rail-width minmax(0, 1fr);',
+      'grid-template-columns: t.$workspace-panel-width minmax(0, 1fr);',
+      '.tabPanelWide',
+    ]).map((snippet) => `AppShell.module.scss missing ${snippet}`),
+    ...missingSnippets(leftRail, [
+      'Button',
+      'Icon',
+      'data-testid="left-rail"',
+      "data-testid={item.primary ? 'left-rail-button-primary' : undefined}",
+      'aria-pressed={pressed}',
+      'onClick={onPress}',
+    ]).map((snippet) => `LeftRail.tsx missing ${snippet}`),
+    ...missingSnippets(tabSidePanel, [
+      'HTMLSelect',
+      'InputGroup',
+      'TextArea',
+      'Checkbox',
+      'testId="kick-side-panel"',
+      'testId="stats-side-panel"',
+      'testId="sat-side-panel"',
+      'Создание параметров для пуска',
+      'Фильтры таблицы',
+      'Зондирование',
+    ]).map((snippet) => `TabSidePanel.tsx missing ${snippet}`),
+    ...missingSnippets(workspaceMap, [
+      'Card',
+      'data-testid="workspace-map"',
+      'data-testid="workspace-map-card"',
+    ]).map((snippet) => `WorkspaceMap.tsx missing ${snippet}`),
+    ...missingSnippets(workspaceSpec, [
+      'keeps compact left rail anchored',
+      'syncs tab-specific left panels with Header state',
+      'workspace-map-card',
+      'left-rail-button-primary',
+      'kick-side-panel',
+      'stats-side-panel',
+      'sat-side-panel',
+      'RAIL_HEIGHTS = [768, 900, 1080, 1200, 1440, 2160]',
+    ]).map((snippet) => `workspace-shell.spec.ts missing ${snippet}`),
+    ...missingSnippets(frozen, [
+      '## Workspace Shell And Left Sidebar',
+      'compact left rail is fixed at `50px` wide',
+      'Wide side panels are fixed at `300px` wide',
+      'CSS placeholder, not a real map',
+      'Header visual contract is not part of this shell contract',
+    ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
+  );
+
+  record(
+    'A13: workspace shell, left sidebar, and map placeholder contract stay frozen',
+    failures.length === 0,
+    failures.length ? failures.slice(0, 10).join('; ') : undefined,
+  );
+}
+
 async function waitForUrl(url: string, timeoutMs: number) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -829,6 +937,7 @@ async function main() {
   await testFrozenHeaderContract();
   await testFrozenQualityToolingContract();
   await testAgentVisualQaContract();
+  await testWorkspaceShellContract();
 
   if (!process.argv.includes('--static')) {
     try {
