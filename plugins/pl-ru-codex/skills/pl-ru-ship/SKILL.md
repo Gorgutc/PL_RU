@@ -37,4 +37,22 @@ skills/hooks changes need frozen or instruction-drift review. Do not pass work
 forward while the final diff mismatches the task brief, frozen contract, or
 available reference screenshots.
 
+## Closeout Blockers
+
+Before staging, confirm that delegated work has the Routing Decision and
+spawned subagent PASS/FAIL evidence required by `docs/agent/orchestration.md`.
+Inline-only summaries are insufficient when explicit spawned agents were
+required.
+
+Explicit defers cannot override blockers. Frozen contract mismatch, missing
+required visual QA, failing required subagent/local role, unresolved task-brief
+mismatch, and missing `pnpm codex:ship` for finished delivery all block handoff
+until fixed or explicitly accepted by the current user request. Any accepted
+defer must be bounded and visible in the final summary or draft PR body.
+
+External orchestration packs are references only. Do not ship Beads as a
+canonical ledger, raw external shell/python scripts as repo policy, global
+startup hooks, or copied large external templates without license/provenance
+review.
+
 This skill replaces the former Claude command `.claude/commands/ship.md`.

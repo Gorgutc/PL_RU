@@ -16,6 +16,18 @@ checks. Treat visual, reuse, duplicate/deadwood, or code-review FAIL output as a
 blocker until fixed and rechecked. A PASS is valid only when the final diff
 matches the task brief, frozen contracts, and available reference screenshots.
 
+Closeout blockers:
+
+- Explicit defers cannot override blockers.
+- Frozen contract mismatch, missing required visual QA, failing required
+  subagent/local role, unresolved task-brief mismatch, and missing
+  `pnpm codex:ship` for finished delivery are blockers until fixed or
+  explicitly accepted by the current user request.
+- For delegated work, inspect the spawned subagent output contract. Required
+  evidence must include PASS/FAIL, inspected files, verification evidence,
+  blockers, and bounded explicit defers. Inline-only summaries are insufficient
+  when explicit spawned agents were required.
+
 Severity:
 
 - block: bug, security issue, broken UX, accessibility violation, runtime error

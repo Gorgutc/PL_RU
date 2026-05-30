@@ -24,6 +24,59 @@ sizes, diff tolerance, and mismatched areas. If reference PNGs are inaccessible,
 block delivery unless the current user request explicitly accepts a metric-only
 fallback.
 
+## Routing Decision
+
+Before spawning subagents for medium, complex, docs-sensitive, instruction,
+hook, skill, or quality-tooling work, record a compact routing decision in the
+working notes, plan, PR body, or handoff. It is a traceability contract, not a
+new authority layer, and it must stay subordinate to `verify-frozen.ts`, the
+current user request, `AGENTS.md`, Superpowers, and repo-local PL_RU skills.
+
+Use this shape:
+
+```text
+Documentation: <docs/runbooks checked, or "No dependency documentation lookup needed">
+Selected skills: <PL_RU or plugin skills selected, or "none - reason">
+Selected agents: <.codex/agents roles selected, or "none - reason">
+Catalog candidates: <external/reference orchestration candidates considered, or "none - reason">
+Reason: <why this routing lowers delivery risk for the current task>
+```
+
+External orchestration packs may inform naming or prompt structure, but they are
+reference material only. Do not introduce Beads as a canonical ledger, raw
+external shell/python scripts as repo policy, global startup hooks, or copied
+large external templates without license/provenance review.
+
+## Subagent Prompt And Output Contract
+
+Delegate through explicit spawned subagents when subagent tooling is available.
+Inline summaries are not a substitute for required spawned-agent evidence.
+Every prompt to a PL_RU subagent must include:
+
+- `Goal`: the exact task the role owns.
+- `Success Criteria`: the concrete PASS conditions for the role.
+- `Documentation`: the source docs, frozen decisions, references, screenshots,
+  or "no external docs required" note the role must use.
+- `Selected skills` and `Selected agents`: the routing result the role should
+  respect instead of rediscovering the whole repo.
+- `Ownership / Write Zone`: read-only or exact files/directories the role may
+  change. Most review roles are read-only.
+- `Verification`: commands, screenshots, checks, or evidence the role must
+  inspect before PASS.
+- `Stop Rules`: blockers that require FAIL or escalation instead of guessing.
+
+Every subagent output must include:
+
+- `PASS/FAIL`: one clear status.
+- Evidence: files inspected, checks run or reviewed, and relevant output.
+- Findings or blockers: concrete paths and what must change.
+- Explicit defers: bounded follow-up only, never a waiver for a blocker.
+
+Explicit defers cannot override blockers. Frozen contract mismatch, missing
+required visual QA, failing required roles, unresolved task-brief mismatch, and
+missing `pnpm codex:ship` for finished delivery all block handoff until fixed or
+explicitly accepted by the current user request.
+
 ## Read-Only Audit Roles
 
 - `code_deadwood_auditor`: dead code, duplicate code, oversized modules, and

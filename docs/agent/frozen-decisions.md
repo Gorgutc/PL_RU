@@ -41,6 +41,24 @@ mirrors the highest-risk checks so drift is caught by `pnpm verify`.
   `tech_stack_cartographer`, `instruction_drift_auditor`,
   `quality_tooling_architect`, `codex_infra_architect`,
   `frozen_decisions_guardian`, and `visual_qa_guardian`.
+- Medium, complex, delegated, docs-sensitive, instruction, hook, skill, and
+  quality-tooling work must record a `Routing Decision` with `Documentation`,
+  `Selected skills`, `Selected agents`, `Catalog candidates`, and `Reason`.
+  This is traceability only and does not outrank `verify-frozen.ts`, the current
+  user request, `AGENTS.md`, Superpowers, or repo-local PL_RU skills.
+- Explicit spawned subagents must receive the PL_RU prompt/output contract:
+  `Goal`, `Success Criteria`, `Documentation`, `Selected skills`, `Selected
+agents`, ownership / write zone, `Verification`, `Stop Rules`, and
+  `PASS/FAIL` evidence. Inline summaries are not a substitute for required
+  spawned-agent evidence.
+- External orchestration packs remain references, not authority. Do not adopt
+  Beads as a canonical ledger, raw external shell/python scripts as repo policy,
+  global startup hooks, or copied large external templates without
+  license/provenance review.
+- Explicit defers cannot override blockers. Frozen contract mismatch, missing
+  required visual QA, failing required roles, unresolved task-brief mismatch,
+  and missing `pnpm codex:ship` for finished delivery all block handoff until
+  fixed or explicitly accepted by the current user request.
 
 ## Header Responsive Tabs
 

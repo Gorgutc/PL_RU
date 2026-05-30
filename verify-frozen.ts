@@ -518,6 +518,10 @@ async function testAgentVisualQaContract() {
     path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-frozen-decisions', 'SKILL.md'),
     'utf8',
   );
+  const driftSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-instruction-drift', 'SKILL.md'),
+    'utf8',
+  );
   const visualScript = await readFile(
     path.join(ROOT, 'scripts', 'check-visual-evidence.mjs'),
     'utf8',
@@ -608,6 +612,39 @@ async function testAgentVisualQaContract() {
   if (!hasPhrase(frozen, 'Visual evidence cases may include `capture` metadata')) {
     missing.push('frozen-decisions visual capture rule');
   }
+  for (const snippet of [
+    '## Routing Decision',
+    'Documentation: <docs/runbooks checked, or "No dependency documentation lookup needed">',
+    'Selected skills: <PL_RU or plugin skills selected, or "none - reason">',
+    'Selected agents: <.codex/agents roles selected, or "none - reason">',
+    'Catalog candidates: <external/reference orchestration candidates considered, or "none - reason">',
+    'Reason: <why this routing lowers delivery risk for the current task>',
+    '## Subagent Prompt And Output Contract',
+    'Every prompt to a PL_RU subagent must include:',
+    '`Goal`: the exact task the role owns.',
+    '`Success Criteria`: the concrete PASS conditions for the role.',
+    '`Ownership / Write Zone`: read-only or exact files/directories the role may change.',
+    '`Stop Rules`: blockers that require FAIL or escalation instead of guessing.',
+    'Every subagent output must include:',
+    '`PASS/FAIL`: one clear status.',
+    'Explicit defers: bounded follow-up only, never a waiver for a blocker.',
+    'Explicit defers cannot override blockers. Frozen contract mismatch',
+  ]) {
+    if (!hasPhrase(orchestration, snippet)) {
+      missing.push(`docs/agent/orchestration.md missing ${snippet}`);
+    }
+  }
+  for (const snippet of [
+    'must record a `Routing Decision` with `Documentation`, `Selected skills`, `Selected agents`, `Catalog candidates`, and `Reason`',
+    'Explicit spawned subagents must receive the PL_RU prompt/output contract',
+    'Inline summaries are not a substitute for required spawned-agent evidence',
+    'External orchestration packs remain references, not authority',
+    'Explicit defers cannot override blockers. Frozen contract mismatch',
+  ]) {
+    if (!hasPhrase(frozen, snippet)) {
+      missing.push(`frozen-decisions missing orchestration contract snippet: ${snippet}`);
+    }
+  }
 
   for (const [label, text] of [
     ['docs/agent/bootstrap.md', bootstrap],
@@ -674,6 +711,58 @@ async function testAgentVisualQaContract() {
 
   if (!hasPhrase(frozenSkill, 'pixel-level visual QA rules remain documented')) {
     missing.push('pl-ru-frozen-decisions visual QA guard rule');
+  }
+  if (
+    !hasPhrase(
+      frozenSkill,
+      'Routing Decision and spawned subagent prompt/output contracts remain documented',
+    )
+  ) {
+    missing.push('pl-ru-frozen-decisions routing contract rule');
+  }
+  if (
+    !hasPhrase(
+      frozenSkill,
+      'Inline summaries remain insufficient when explicit spawned-agent evidence is required',
+    )
+  ) {
+    missing.push('pl-ru-frozen-decisions spawned evidence rule');
+  }
+  if (!hasPhrase(frozenSkill, 'External orchestration references remain reference-only')) {
+    missing.push('pl-ru-frozen-decisions external orchestration reference rule');
+  }
+  if (
+    !hasPhrase(
+      frozenSkill,
+      'Explicit defers cannot override blockers such as frozen contract mismatch',
+    )
+  ) {
+    missing.push('pl-ru-frozen-decisions explicit defer blocker rule');
+  }
+  if (
+    !hasPhrase(
+      driftSkill,
+      'Do Routing Decision and subagent prompt/output contracts stay subordinate',
+    )
+  ) {
+    missing.push('pl-ru-instruction-drift routing authority rule');
+  }
+  if (!hasPhrase(driftSkill, 'external orchestration references remain reference-only')) {
+    missing.push('pl-ru-instruction-drift external orchestration reference rule');
+  }
+  if (
+    !hasPhrase(
+      driftSkill,
+      'Do closeout rules preserve that explicit defers cannot override blockers',
+    )
+  ) {
+    missing.push('pl-ru-instruction-drift closeout blocker rule');
+  }
+  if (!hasPhrase(qualitySkill, 'Explicit defers cannot override blockers')) {
+    missing.push('pl-ru-quality-gate closeout blocker rule');
+  }
+  if (!hasPhrase(shipSkill, 'Explicit defers cannot override blockers')) {
+    missing.push('pl-ru-ship closeout blocker rule');
   }
   if (hasPhrase(shipSkill, 'only when the user explicitly asks')) {
     missing.push('pl-ru-ship weak optional-subagent language');
