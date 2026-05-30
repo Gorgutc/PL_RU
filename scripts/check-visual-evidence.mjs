@@ -537,9 +537,20 @@ function stopServer(server) {
   if (server.exitCode != null || server.signalCode != null) return Promise.resolve();
 
   return new Promise((resolve) => {
-    const timeout = setTimeout(resolve, 5_000);
+    let forceTimeout;
+    const timeout = setTimeout(() => {
+      if (process.platform !== 'win32') {
+        try {
+          process.kill(-server.pid, 'SIGKILL');
+        } catch {
+          server.kill('SIGKILL');
+        }
+      }
+      resolve();
+    }, 5_000);
     server.once('exit', () => {
       clearTimeout(timeout);
+      clearTimeout(forceTimeout);
       resolve();
     });
     if (process.platform === 'win32') {
@@ -553,7 +564,18 @@ function stopServer(server) {
       return;
     }
 
-    server.kill();
+    try {
+      process.kill(-server.pid, 'SIGTERM');
+      forceTimeout = setTimeout(() => {
+        try {
+          process.kill(-server.pid, 'SIGKILL');
+        } catch {
+          server.kill('SIGKILL');
+        }
+      }, 2_000);
+    } catch {
+      server.kill();
+    }
   });
 }
 
@@ -566,6 +588,7 @@ async function ensureVisualQaServer(baseUrl) {
   const devServerCommand = getDevServerCommand();
   const server = spawn(devServerCommand.command, devServerCommand.args, {
     cwd: root,
+    detached: process.platform !== 'win32',
     env: {
       ...process.env,
       PORT: getPortFromBaseUrl(baseUrl),
