@@ -86,6 +86,30 @@ mirrors the highest-risk checks so drift is caught by `pnpm verify`.
   the same visual language, extract or reuse the current contract instead of
   duplicating a similar component with drift-prone styles.
 
+## Workspace Shell And Left Sidebar
+
+- Header remains the only owner of the active top-level tab state; the workspace
+  shell only reads that state through `activeTab`.
+- The workspace shell starts below the frozen `48px` Header and uses
+  `calc(100dvh - $header-height)` so the map and left side area fill the
+  remaining viewport height without sliding underneath Header.
+- The compact left rail is fixed at `50px` wide. It is contextual for
+  `map`, `bar`, and `tmi`, and uses Blueprint `Button` plus `Icon` primitives.
+- Wide side panels are fixed at `300px` wide. `kick` renders the launch-parameter
+  form, `stats` renders table filters, and `sat` renders a temporary probing
+  placeholder panel until the probing task gets its own full spec.
+- Left-rail buttons preserve the shared visual state contract: transparent rest,
+  `#528bff` hover, `#2970ff` active, white icon color, and one uniform button
+  size.
+- The center workspace is a Blueprint `Card` map surface that fills
+  `minmax(0, 1fr)`. It is intentionally a CSS placeholder, not a real map and
+  not a Google Drive reference image, until a dedicated map task replaces it.
+- Large panel controls reuse Blueprint primitives (`HTMLSelect`, `InputGroup`,
+  `TextArea`, `Checkbox`, and `Button`) and take spacing, widths, colors, and
+  sizes from `src/styles/_tokens.scss`.
+- The Header visual contract is not part of this shell contract and must not be
+  changed when extending the left side menu or map placeholder.
+
 ## Quality Tooling
 
 - `pnpm check:duplicates` must run `jscpd --config .jscpd.json --noTips .` so
@@ -105,6 +129,14 @@ mirrors the highest-risk checks so drift is caught by `pnpm verify`.
   `pixelComparison.cases` must list local `referencePath`, `actualPath`, and
   `diffPath` PNG artifacts, and the script must perform a real pixel comparison
   before reporting PASS.
+- For base-diff UI changes, default CI evidence must be a tracked
+  `tests/visual-qa/latest.json` manifest. Ignored `reports/visual-qa/latest.json`
+  evidence is only valid when explicitly selected through `VISUAL_QA_EVIDENCE`
+  for a local run.
+- Visual evidence cases may include `capture` metadata. When they do, the guard
+  must start or reuse the app, capture a fresh Playwright screenshot to
+  `actualPath`, then compare that fresh PNG against the committed
+  `referencePath`.
 - `pnpm check:visual` fails closed when the base ref is unavailable unless
   `VISUAL_QA_ALLOW_MISSING_BASE=1` is explicitly set for a known local fallback.
   Diff PNG output must stay in ignored visual-artifact directories such as

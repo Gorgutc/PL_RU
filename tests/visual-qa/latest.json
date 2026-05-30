@@ -1,0 +1,103 @@
+{
+  "status": "PASS",
+  "taskScope": "codex/left-sidebar-shell workspace shell visual QA",
+  "references": [
+    "Committed current-render baseline because no external replacement PNG was provided for the workspace shell task.",
+    "tests/visual-qa/workspace-shell/map-rail-1920x1080.reference.png",
+    "tests/visual-qa/workspace-shell/map-rail-1920x768.reference.png",
+    "tests/visual-qa/workspace-shell/kick-panel-1920x1080.reference.png",
+    "tests/visual-qa/workspace-shell/stats-panel-1920x1080.reference.png",
+    "tests/visual-qa/workspace-shell/sat-panel-1920x1080.reference.png"
+  ],
+  "viewports": ["1920x1080", "1920x768"],
+  "states": ["map rail", "kick panel", "stats panel", "sat panel"],
+  "tolerance": {
+    "pixelDelta": 8,
+    "maxMismatchRatio": 0.02
+  },
+  "mismatchedAreas": [],
+  "domCssMetrics": {
+    "status": "PASS",
+    "assertions": [
+      "Header remains 48px tall.",
+      "Workspace shell starts at y=48 and fills remaining viewport height.",
+      "Compact rail remains 50px wide.",
+      "Wide side panels remain 300px wide.",
+      "Workspace map remains visible for map, kick, stats, and sat states."
+    ]
+  },
+  "pixelComparison": {
+    "status": "PASS",
+    "tool": "playwright-canvas-png-diff",
+    "cases": [
+      {
+        "name": "map-rail-1920x1080",
+        "viewport": "1920x1080",
+        "state": "map rail",
+        "referencePath": "tests/visual-qa/workspace-shell/map-rail-1920x1080.reference.png",
+        "actualPath": "test-results/visual-qa/workspace-shell/map-rail-1920x1080.actual.png",
+        "diffPath": "test-results/visual-qa/workspace-shell/map-rail-1920x1080.diff.png",
+        "capture": {
+          "url": "/",
+          "selector": "[data-testid=\"workspace-shell\"]",
+          "viewport": { "width": 1920, "height": 1080 }
+        }
+      },
+      {
+        "name": "map-rail-1920x768",
+        "viewport": "1920x768",
+        "state": "map rail",
+        "referencePath": "tests/visual-qa/workspace-shell/map-rail-1920x768.reference.png",
+        "actualPath": "test-results/visual-qa/workspace-shell/map-rail-1920x768.actual.png",
+        "diffPath": "test-results/visual-qa/workspace-shell/map-rail-1920x768.diff.png",
+        "capture": {
+          "url": "/",
+          "selector": "[data-testid=\"workspace-shell\"]",
+          "viewport": { "width": 1920, "height": 768 }
+        }
+      },
+      {
+        "name": "kick-panel-1920x1080",
+        "viewport": "1920x1080",
+        "state": "kick panel",
+        "referencePath": "tests/visual-qa/workspace-shell/kick-panel-1920x1080.reference.png",
+        "actualPath": "test-results/visual-qa/workspace-shell/kick-panel-1920x1080.actual.png",
+        "diffPath": "test-results/visual-qa/workspace-shell/kick-panel-1920x1080.diff.png",
+        "capture": {
+          "url": "/",
+          "selector": "[data-testid=\"workspace-shell\"]",
+          "viewport": { "width": 1920, "height": 1080 },
+          "actions": [{ "type": "click", "selector": "#praios-header-tab-kick" }]
+        }
+      },
+      {
+        "name": "stats-panel-1920x1080",
+        "viewport": "1920x1080",
+        "state": "stats panel",
+        "referencePath": "tests/visual-qa/workspace-shell/stats-panel-1920x1080.reference.png",
+        "actualPath": "test-results/visual-qa/workspace-shell/stats-panel-1920x1080.actual.png",
+        "diffPath": "test-results/visual-qa/workspace-shell/stats-panel-1920x1080.diff.png",
+        "capture": {
+          "url": "/",
+          "selector": "[data-testid=\"workspace-shell\"]",
+          "viewport": { "width": 1920, "height": 1080 },
+          "actions": [{ "type": "click", "selector": "#praios-header-tab-stats" }]
+        }
+      },
+      {
+        "name": "sat-panel-1920x1080",
+        "viewport": "1920x1080",
+        "state": "sat panel",
+        "referencePath": "tests/visual-qa/workspace-shell/sat-panel-1920x1080.reference.png",
+        "actualPath": "test-results/visual-qa/workspace-shell/sat-panel-1920x1080.actual.png",
+        "diffPath": "test-results/visual-qa/workspace-shell/sat-panel-1920x1080.diff.png",
+        "capture": {
+          "url": "/",
+          "selector": "[data-testid=\"workspace-shell\"]",
+          "viewport": { "width": 1920, "height": 1080 },
+          "actions": [{ "type": "click", "selector": "#praios-header-tab-sat" }]
+        }
+      }
+    ]
+  }
+}

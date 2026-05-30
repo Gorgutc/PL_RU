@@ -107,7 +107,8 @@ test.describe('PraiOS header', () => {
       'aria-labelledby',
       'praios-header-tab-sat',
     );
-    await expect(page.getByTestId('active-tab-stub')).toHaveText('4');
+    await expect(page.getByTestId('sat-side-panel')).toBeVisible();
+    await expect(page.getByTestId('workspace-left-area')).toHaveAttribute('data-tab', 'sat');
   });
 
   for (const width of COMPACT_WIDTHS) {

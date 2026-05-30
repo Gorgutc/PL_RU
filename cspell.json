@@ -39,6 +39,7 @@
     "lighthouserc",
     "networkidle",
     "praios",
-    "sfmono"
+    "sfmono",
+    "viewports"
   ]
 }
