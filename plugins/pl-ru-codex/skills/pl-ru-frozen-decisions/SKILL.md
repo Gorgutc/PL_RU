@@ -35,6 +35,18 @@ and `verify-frozen.ts`. Do not edit files when using this as a review skill.
   gates.
 - `.codex/agents/` keeps code-quality, component-reuse, duplicate/deadwood,
   frozen/instruction-drift, and visual QA roles.
+- Routing Decision and spawned subagent prompt/output contracts remain
+  documented for delegated/docs-sensitive/instruction/tooling work and stay
+  subordinate to `verify-frozen.ts`, the current user request, `AGENTS.md`,
+  Superpowers, and repo-local PL_RU skills.
+- Inline summaries remain insufficient when explicit spawned-agent evidence is
+  required.
+- External orchestration references remain reference-only: no Beads canonical
+  ledger, no raw external shell/python scripts as repo policy, no global startup
+  hooks, and no copied large templates without license/provenance review.
+- Explicit defers cannot override blockers such as frozen contract mismatch,
+  missing required visual QA, failing required roles, task-brief mismatch, or
+  missing `pnpm codex:ship` for finished delivery.
 - `pnpm check:visual` stays in the deep quality gate and requires visual QA
   evidence for UI-surface changes. It must fail closed when the base ref is
   unavailable, include staged/unstaged/untracked UI files, perform real PNG
