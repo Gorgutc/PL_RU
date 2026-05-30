@@ -68,6 +68,11 @@ Playwright config changed, it requires a visual QA evidence JSON at
 `tests/visual-qa/latest.json`, `reports/visual-qa/latest.json`, or the path in
 `VISUAL_QA_EVIDENCE`.
 
+For UI changes present in the base diff, the default CI evidence manifest must
+be committed at `tests/visual-qa/latest.json`. The ignored
+`reports/visual-qa/latest.json` path is only a local override when passed through
+`VISUAL_QA_EVIDENCE`; it must not be the implicit evidence source for a PR.
+
 That evidence must record PASS pixel comparison, reference PNG sources,
 viewports, states, tolerance, mismatched areas, and DOM/CSS metrics. A manifest
 alone is not enough: `pixelComparison.cases` must list local PNG pairs with
@@ -77,6 +82,12 @@ fails if dimensions, mismatch counts, or mismatch ratios exceed the allowed
 limits. `diffPath` must stay under ignored visual-artifact directories
 (`reports/visual-qa/` or `test-results/visual-qa/`) and must not overwrite a
 tracked file.
+
+Evidence cases may include `capture` metadata with `url`, `selector`,
+`viewport`, and click `actions`. When present, `pnpm check:visual` starts or
+reuses the app at `VISUAL_QA_BASE_URL` or `http://localhost:3000`, captures a
+fresh Playwright screenshot to `actualPath`, and then performs the PNG
+comparison against the committed `referencePath`.
 
 The base diff fails closed: if `VISUAL_QA_BASE_REF` is unavailable, the command
 fails instead of silently passing. Use `VISUAL_QA_ALLOW_MISSING_BASE=1` only for

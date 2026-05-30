@@ -28,6 +28,12 @@ dependency-cruiser, and package scripts.
 - `pnpm check:visual` must fail closed when the base ref is unavailable, include
   staged/unstaged/untracked UI files, and perform real PNG comparison from
   `pixelComparison.cases` before PASS.
+- For base-diff UI changes, the implicit CI manifest must be tracked at
+  `tests/visual-qa/latest.json`; ignored `reports/visual-qa/latest.json` is only
+  valid through an explicit `VISUAL_QA_EVIDENCE` override.
+- Screenshot-backed cases may include `capture` metadata so the guard can start
+  or reuse the app, capture a fresh `actualPath`, and compare it with the
+  committed `referencePath`.
 - Keep visual diff output constrained to ignored artifact folders such as
   `reports/visual-qa/` or `test-results/visual-qa/`.
 - Browser checks may require approved execution outside a restricted Windows

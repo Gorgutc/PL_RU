@@ -18,6 +18,13 @@ Use this for every UI/frontend change before delivery.
 - Record local `pixelComparison.cases` with `referencePath`, `actualPath`, and
   `diffPath` so `pnpm check:visual` can rerun the pixel comparison instead of
   trusting a self-reported manifest.
+- For UI changes in a PR/base diff, commit CI-visible evidence at
+  `tests/visual-qa/latest.json`; use ignored `reports/visual-qa/latest.json`
+  only through an explicit `VISUAL_QA_EVIDENCE` local override.
+- Prefer `capture` metadata for cases that should be reproducible in CI: record
+  the app URL, selector, viewport, and click actions so `pnpm check:visual`
+  captures a fresh `actualPath` before comparing it with the committed
+  `referencePath`.
 - Keep `diffPath` output under ignored visual-artifact directories such as
   `reports/visual-qa/` or `test-results/visual-qa/`; never point it at source,
   config, `.git/`, or any tracked file.

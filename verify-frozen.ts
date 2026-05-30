@@ -602,6 +602,12 @@ async function testAgentVisualQaContract() {
   if (!hasPhrase(frozen, 'reports/visual-qa/')) {
     missing.push('frozen-decisions visual artifact directory rule');
   }
+  if (!hasPhrase(frozen, 'default CI evidence must be a tracked `tests/visual-qa/latest.json`')) {
+    missing.push('frozen-decisions tracked visual evidence rule');
+  }
+  if (!hasPhrase(frozen, 'Visual evidence cases may include `capture` metadata')) {
+    missing.push('frozen-decisions visual capture rule');
+  }
 
   for (const [label, text] of [
     ['docs/agent/bootstrap.md', bootstrap],
@@ -642,6 +648,17 @@ async function testAgentVisualQaContract() {
   if (!hasPhrase(verification, 'must not overwrite a tracked file')) {
     missing.push('docs/agent/verification.md diff artifact safety rule');
   }
+  if (
+    !hasPhrase(
+      verification,
+      'default CI evidence manifest must be committed at `tests/visual-qa/latest.json`',
+    )
+  ) {
+    missing.push('docs/agent/verification.md tracked visual evidence rule');
+  }
+  if (!hasPhrase(verification, '`VISUAL_QA_BASE_URL` or `http://localhost:3000`')) {
+    missing.push('docs/agent/verification.md capture base-url rule');
+  }
 
   for (const [label, text] of [
     ['pl-ru-reuse-audit', reuseSkill],
@@ -669,11 +686,17 @@ async function testAgentVisualQaContract() {
   }
   for (const snippet of [
     'VISUAL_QA_EVIDENCE',
+    'VISUAL_QA_BASE_URL',
+    'trackedDefaultEvidencePath',
+    'selectEvidencePath',
+    'requireTrackedTestsManifest',
     'export const visualQaContract = Object.freeze({',
     "baseDiffFailureMode: 'fail-closed-unless-VISUAL_QA_ALLOW_MISSING_BASE'",
     "changeSources: ['base-diff', 'unstaged-worktree', 'staged-index', 'untracked-files']",
     "diffArtifactPathPrefixes: ['reports/visual-qa/', 'test-results/visual-qa/']",
     "pixelComparisonEngine: 'playwright-canvas-png-diff'",
+    "screenshotCaptureEngine: 'playwright-live-app-screenshot'",
+    'captureActualScreenshot',
     'pixelComparison',
     'pixelComparison.cases must list screenshot/reference PNG pairs',
     'referencePath',

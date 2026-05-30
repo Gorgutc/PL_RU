@@ -1,11 +1,14 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 const root = process.cwd();
-const defaultEvidencePaths = ['tests/visual-qa/latest.json', 'reports/visual-qa/latest.json'];
+const trackedDefaultEvidencePath = 'tests/visual-qa/latest.json';
+const defaultEvidencePaths = [trackedDefaultEvidencePath, 'reports/visual-qa/latest.json'];
 const baseRef = process.env.VISUAL_QA_BASE_REF ?? 'origin/main';
 const explicitEvidencePath = process.env.VISUAL_QA_EVIDENCE;
+const visualQaBaseUrl = process.env.VISUAL_QA_BASE_URL ?? 'http://localhost:3000';
 const forceRequired = process.env.VISUAL_QA_REQUIRED === '1';
 const allowMissingBaseRef = process.env.VISUAL_QA_ALLOW_MISSING_BASE === '1';
 
@@ -14,6 +17,7 @@ export const visualQaContract = Object.freeze({
   changeSources: ['base-diff', 'unstaged-worktree', 'staged-index', 'untracked-files'],
   diffArtifactPathPrefixes: ['reports/visual-qa/', 'test-results/visual-qa/'],
   pixelComparisonEngine: 'playwright-canvas-png-diff',
+  screenshotCaptureEngine: 'playwright-live-app-screenshot',
   requiredPixelCaseFields: ['name', 'viewport', 'state', 'referencePath', 'actualPath', 'diffPath'],
 });
 
@@ -48,7 +52,7 @@ function unique(files) {
   return [...new Set(files.map(normalizeFile))].sort((a, b) => a.localeCompare(b));
 }
 
-function getChangedFiles() {
+function getChangedFileSources() {
   const baseDiff = runGit(['diff', '--name-only', `${baseRef}...HEAD`], {
     allowFailure: allowMissingBaseRef,
   });
@@ -59,12 +63,22 @@ function getChangedFiles() {
     );
   }
 
-  return unique([
-    ...baseDiff.files,
-    ...runGit(['diff', '--name-only']).files,
-    ...runGit(['diff', '--name-only', '--cached']).files,
-    ...runGit(['ls-files', '--others', '--exclude-standard']).files,
-  ]);
+  const sources = {
+    'base-diff': baseDiff.files,
+    'unstaged-worktree': runGit(['diff', '--name-only']).files,
+    'staged-index': runGit(['diff', '--name-only', '--cached']).files,
+    'untracked-files': runGit(['ls-files', '--others', '--exclude-standard']).files,
+  };
+
+  return {
+    ...sources,
+    all: unique([
+      ...sources['base-diff'],
+      ...sources['unstaged-worktree'],
+      ...sources['staged-index'],
+      ...sources['untracked-files'],
+    ]),
+  };
 }
 
 function isUiSurface(file) {
@@ -76,9 +90,48 @@ function isUiSurface(file) {
   );
 }
 
-function findEvidencePath() {
-  const candidates = explicitEvidencePath ? [explicitEvidencePath] : defaultEvidencePaths;
-  return candidates.find((candidate) => existsSync(path.resolve(root, candidate))) ?? null;
+export function selectEvidencePath({
+  candidates = defaultEvidencePaths,
+  exists = (candidate) => existsSync(path.resolve(root, candidate)),
+  explicitEvidencePath,
+  isTrackedFile: isTracked = isTrackedFile,
+  requireTrackedTestsManifest = false,
+} = {}) {
+  const explicit = typeof explicitEvidencePath === 'string' && explicitEvidencePath.length > 0;
+  const selected = (explicit ? [explicitEvidencePath] : candidates).find((candidate) =>
+    exists(candidate),
+  );
+
+  if (selected == null) return null;
+
+  if (requireTrackedTestsManifest && !explicit) {
+    const normalizedSelected = normalizeFile(selected);
+
+    if (normalizedSelected !== trackedDefaultEvidencePath) {
+      throw new Error(
+        [
+          'base-diff UI changes require CI-visible visual evidence at',
+          trackedDefaultEvidencePath,
+          'or an explicit VISUAL_QA_EVIDENCE override;',
+          `default ignored evidence is not accepted: ${selected}`,
+        ].join(' '),
+      );
+    }
+    if (!isTracked(normalizedSelected)) {
+      throw new Error(
+        `base-diff UI changes require tracked visual evidence: ${trackedDefaultEvidencePath}`,
+      );
+    }
+  }
+
+  return selected;
+}
+
+function findEvidencePath({ requireTrackedTestsManifest = false } = {}) {
+  return selectEvidencePath({
+    explicitEvidencePath,
+    requireTrackedTestsManifest,
+  });
 }
 
 function readEvidence(file) {
@@ -124,7 +177,7 @@ function isTrackedFile(file) {
   }
 }
 
-function resolveDiffArtifactPath(file, label) {
+function resolveVisualArtifactPath(file, label) {
   const resolved = resolveWorkspacePath(file, label);
   const relative = relativeWorkspacePath(resolved);
   const allowed = visualQaContract.diffArtifactPathPrefixes.some((prefix) =>
@@ -141,6 +194,10 @@ function resolveDiffArtifactPath(file, label) {
   }
 
   return resolved;
+}
+
+function resolveDiffArtifactPath(file, label) {
+  return resolveVisualArtifactPath(file, label);
 }
 
 function getTolerance(evidence, testCase) {
@@ -169,7 +226,59 @@ function validateNumber(value, label, failures, { min = 0, max = Number.POSITIVE
   }
 }
 
-function validateEvidence(evidence) {
+function validateCapture(testCase, label, failures) {
+  if (testCase.capture == null) return;
+
+  const { capture } = testCase;
+
+  if (typeof capture !== 'object' || Array.isArray(capture)) {
+    failures.push(`${label}.capture must be an object`);
+    return;
+  }
+  if (typeof capture.url !== 'string' || capture.url.length === 0) {
+    failures.push(`${label}.capture.url is required`);
+  }
+  if (typeof capture.selector !== 'string' || capture.selector.length === 0) {
+    failures.push(`${label}.capture.selector is required`);
+  }
+  if (typeof capture.viewport !== 'object' || capture.viewport == null) {
+    failures.push(`${label}.capture.viewport is required`);
+  } else {
+    validateNumber(capture.viewport.width, `${label}.capture.viewport.width`, failures, {
+      min: 1,
+    });
+    validateNumber(capture.viewport.height, `${label}.capture.viewport.height`, failures, {
+      min: 1,
+    });
+  }
+  if (capture.actions != null && !Array.isArray(capture.actions)) {
+    failures.push(`${label}.capture.actions must be an array`);
+  }
+  if (Array.isArray(capture.actions)) {
+    capture.actions.forEach((action, actionIndex) => {
+      const actionLabel = `${label}.capture.actions[${actionIndex}]`;
+
+      if (action?.type !== 'click') failures.push(`${actionLabel}.type must be click`);
+      if (typeof action?.selector !== 'string' || action.selector.length === 0) {
+        failures.push(`${actionLabel}.selector is required`);
+      }
+      validateNumber(action?.waitAfterMs, `${actionLabel}.waitAfterMs`, failures, {
+        min: 0,
+        max: 30_000,
+      });
+    });
+  }
+
+  if (typeof testCase.actualPath === 'string' && testCase.actualPath.length > 0) {
+    try {
+      resolveVisualArtifactPath(testCase.actualPath, `${label}.actualPath`);
+    } catch (error) {
+      failures.push(error instanceof Error ? error.message : String(error));
+    }
+  }
+}
+
+export function validateEvidence(evidence) {
   const failures = [];
   const cases = evidence.pixelComparison?.cases;
   const fallbackAccepted = metricOnlyFallbackAccepted(evidence);
@@ -237,6 +346,7 @@ function validateEvidence(evidence) {
       validateNumber(tolerance.maxMismatchedPixels, `${label}.maxMismatchedPixels`, failures, {
         min: 0,
       });
+      validateCapture(testCase, label, failures);
     });
   }
 
@@ -379,6 +489,141 @@ async function comparePngPair(page, testCase, tolerance) {
   return failures;
 }
 
+async function isUrlReachable(url) {
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(2_000) });
+    return response.ok || response.status < 500;
+  } catch {
+    return false;
+  }
+}
+
+async function waitForUrl(url, timeoutMs = 120_000) {
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    if (await isUrlReachable(url)) return;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  throw new Error(`Timed out waiting for visual QA app at ${url}`);
+}
+
+function getPnpmCommand() {
+  return process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
+}
+
+function getDevServerCommand() {
+  if (process.platform === 'win32') {
+    return {
+      command: 'cmd.exe',
+      args: ['/d', '/s', '/c', `${getPnpmCommand()} dev`],
+    };
+  }
+
+  return {
+    command: getPnpmCommand(),
+    args: ['dev'],
+  };
+}
+
+function getPortFromBaseUrl(baseUrl) {
+  const parsed = new URL(baseUrl);
+  if (parsed.port) return parsed.port;
+  return parsed.protocol === 'https:' ? '443' : '3000';
+}
+
+function stopServer(server) {
+  if (server.exitCode != null || server.signalCode != null) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    const timeout = setTimeout(resolve, 5_000);
+    server.once('exit', () => {
+      clearTimeout(timeout);
+      resolve();
+    });
+    if (process.platform === 'win32') {
+      try {
+        execFileSync('taskkill', ['/pid', String(server.pid), '/T', '/F'], {
+          stdio: 'ignore',
+        });
+      } catch {
+        server.kill();
+      }
+      return;
+    }
+
+    server.kill();
+  });
+}
+
+async function ensureVisualQaServer(baseUrl) {
+  if (await isUrlReachable(baseUrl)) {
+    return { close: async () => undefined };
+  }
+
+  const output = [];
+  const devServerCommand = getDevServerCommand();
+  const server = spawn(devServerCommand.command, devServerCommand.args, {
+    cwd: root,
+    env: {
+      ...process.env,
+      PORT: getPortFromBaseUrl(baseUrl),
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+
+  server.stdout.on('data', (chunk) => output.push(chunk.toString()));
+  server.stderr.on('data', (chunk) => output.push(chunk.toString()));
+
+  try {
+    await waitForUrl(baseUrl);
+  } catch (error) {
+    await stopServer(server);
+    throw new Error(
+      [error instanceof Error ? error.message : String(error), output.join('').trim().slice(-2_000)]
+        .filter(Boolean)
+        .join('\n'),
+    );
+  }
+
+  return { close: () => stopServer(server) };
+}
+
+function resolveCaptureUrl(captureUrl, baseUrl) {
+  return new URL(captureUrl, baseUrl).toString();
+}
+
+async function performCaptureAction(page, action) {
+  if (action.type === 'click') {
+    await page.locator(action.selector).click();
+  }
+  if (action.waitAfterMs != null) {
+    await page.waitForTimeout(action.waitAfterMs);
+  }
+}
+
+async function captureActualScreenshot(page, testCase, baseUrl) {
+  if (testCase.capture == null) return;
+
+  const actualPath = resolveVisualArtifactPath(testCase.actualPath, `${testCase.name}.actualPath`);
+  mkdirSync(path.dirname(actualPath), { recursive: true });
+
+  await page.setViewportSize(testCase.capture.viewport);
+  await page.goto(resolveCaptureUrl(testCase.capture.url, baseUrl), {
+    waitUntil: 'domcontentloaded',
+  });
+
+  for (const action of testCase.capture.actions ?? []) {
+    await performCaptureAction(page, action);
+  }
+
+  const target = page.locator(testCase.capture.selector);
+  await target.waitFor({ state: 'visible' });
+  await target.screenshot({ path: actualPath });
+  console.log(`visual-qa: captured ${testCase.name} -> ${relativeWorkspacePath(actualPath)}`);
+}
+
 async function validatePixelComparison(evidence) {
   if (metricOnlyFallbackAccepted(evidence)) {
     console.log('visual-qa: metric-only fallback accepted by current user; pixel compare skipped');
@@ -386,25 +631,56 @@ async function validatePixelComparison(evidence) {
   }
 
   const { chromium } = await import('playwright');
-  const browser = await chromium.launch();
+  const cases = evidence.pixelComparison.cases;
+  const needsLiveCapture = cases.some((testCase) => testCase.capture != null);
+  const server = needsLiveCapture
+    ? await ensureVisualQaServer(visualQaBaseUrl)
+    : { close: async () => undefined };
+  let browser;
   const failures = [];
 
   try {
+    browser = await chromium.launch();
     const page = await browser.newPage();
 
-    for (const testCase of evidence.pixelComparison.cases) {
+    for (const testCase of cases) {
+      await captureActualScreenshot(page, testCase, visualQaBaseUrl);
       failures.push(...(await comparePngPair(page, testCase, getTolerance(evidence, testCase))));
     }
   } finally {
-    await browser.close();
+    await closeVisualQaResources({ browser, server });
   }
 
   return failures;
 }
 
-async function main() {
-  const changedFiles = getChangedFiles();
+export async function closeVisualQaResources({ browser, server }) {
+  const errors = [];
+
+  if (browser != null) {
+    try {
+      await browser.close();
+    } catch (error) {
+      errors.push(error);
+    }
+  }
+
+  try {
+    await server.close();
+  } catch (error) {
+    errors.push(error);
+  }
+
+  if (errors.length > 0) {
+    throw new AggregateError(errors, 'visual QA resource cleanup failed');
+  }
+}
+
+export async function main() {
+  const changedFileSources = getChangedFileSources();
+  const changedFiles = changedFileSources.all;
   const uiFiles = changedFiles.filter(isUiSurface);
+  const baseUiFiles = changedFileSources['base-diff'].filter(isUiSurface);
   const visualQaRequired = forceRequired || uiFiles.length > 0;
 
   if (!visualQaRequired) {
@@ -412,7 +688,9 @@ async function main() {
     process.exit(0);
   }
 
-  const evidencePath = findEvidencePath();
+  const evidencePath = findEvidencePath({
+    requireTrackedTestsManifest: baseUiFiles.length > 0,
+  });
 
   if (!evidencePath) {
     console.error(
@@ -441,7 +719,12 @@ async function main() {
   console.log(`visual-qa: PASS - ${evidencePath}`);
 }
 
-main().catch((error) => {
-  console.error(`visual-qa: FAIL - ${error instanceof Error ? error.message : String(error)}`);
-  process.exit(1);
-});
+const isDirectRun =
+  process.argv[1] != null && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectRun) {
+  main().catch((error) => {
+    console.error(`visual-qa: FAIL - ${error instanceof Error ? error.message : String(error)}`);
+    process.exit(1);
+  });
+}

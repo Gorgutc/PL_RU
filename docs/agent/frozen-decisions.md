@@ -129,6 +129,14 @@ mirrors the highest-risk checks so drift is caught by `pnpm verify`.
   `pixelComparison.cases` must list local `referencePath`, `actualPath`, and
   `diffPath` PNG artifacts, and the script must perform a real pixel comparison
   before reporting PASS.
+- For base-diff UI changes, default CI evidence must be a tracked
+  `tests/visual-qa/latest.json` manifest. Ignored `reports/visual-qa/latest.json`
+  evidence is only valid when explicitly selected through `VISUAL_QA_EVIDENCE`
+  for a local run.
+- Visual evidence cases may include `capture` metadata. When they do, the guard
+  must start or reuse the app, capture a fresh Playwright screenshot to
+  `actualPath`, then compare that fresh PNG against the committed
+  `referencePath`.
 - `pnpm check:visual` fails closed when the base ref is unavailable unless
   `VISUAL_QA_ALLOW_MISSING_BASE=1` is explicitly set for a known local fallback.
   Diff PNG output must stay in ignored visual-artifact directories such as
