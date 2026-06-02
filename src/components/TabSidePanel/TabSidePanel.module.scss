@@ -2,6 +2,7 @@
 
 .panel {
   display: flex;
+  box-sizing: border-box;
   flex-direction: column;
   justify-content: space-between;
   width: 100%;
@@ -14,16 +15,24 @@
   outline-offset: -0.0625rem;
 }
 
+.panel *,
+.panel *::before,
+.panel *::after {
+  box-sizing: border-box;
+}
+
 .panelBody {
+  width: 100%;
   min-height: 0;
   overflow: auto;
-  scrollbar-gutter: stable;
 }
 
 .panelHeader,
 .panelContent,
 .panelFooter {
   display: flex;
+  width: 100%;
+  min-width: 0;
   flex-direction: column;
   align-items: stretch;
 }
@@ -77,6 +86,8 @@
 .footerRow,
 .fieldGrid {
   display: grid;
+  width: 100%;
+  min-width: 0;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: t.$space-3;
 }
@@ -125,6 +136,7 @@
 .selectShell {
   position: relative;
   width: 100%;
+  min-width: 0;
 }
 
 .selectShellIcon.selectShellIcon {
@@ -142,6 +154,7 @@
 .textareaControl.textareaControl,
 .checkboxControl {
   width: 100%;
+  min-width: 0;
   min-height: t.$workspace-control-height;
   border-radius: t.$workspace-control-radius;
   outline: 0.0625rem solid t.$color-workspace-border;
@@ -152,6 +165,8 @@
 .selectControl.selectControl select,
 .inputElement.inputElement,
 .textareaControl.textareaControl {
+  width: 100%;
+  min-width: 0;
   min-height: t.$workspace-control-height;
   padding: 0.375rem 0.75rem;
   border: 0;
@@ -244,6 +259,8 @@
 
 .filterCard {
   display: flex;
+  width: 100%;
+  min-width: 0;
   flex-direction: column;
   gap: t.$space-2;
   padding: t.$space-2;

@@ -20,6 +20,69 @@ async function requireBox(locator: Locator) {
   return box;
 }
 
+async function expectPanelControlsAligned(page: Page, panelTestId: string) {
+  const panel = page.getByTestId(panelTestId);
+  await expect(panel).toBeVisible();
+
+  const footerButtons = panel.locator('footer button');
+  const panelLevelControls = panel.locator(
+    [
+      '.bp6-html-select',
+      '.bp5-html-select',
+      '.bp6-input-group',
+      '.bp5-input-group',
+      'textarea',
+    ].join(', '),
+  );
+  const containedCards = panel.locator('section[aria-label]');
+
+  const footerButtonCount = await footerButtons.count();
+  expect(footerButtonCount).toBeGreaterThan(0);
+
+  const footerRightEdges: number[] = [];
+  for (let index = 0; index < footerButtonCount; index += 1) {
+    const footerBox = await requireBox(footerButtons.nth(index));
+    footerRightEdges.push(Math.round(footerBox.x + footerBox.width));
+  }
+
+  const footerRight = Math.max(...footerRightEdges);
+  const panelBox = await requireBox(panel);
+  const panelMidpoint = panelBox.x + panelBox.width / 2;
+  const controlBoxes = await panelLevelControls.evaluateAll((elements) =>
+    elements
+      .filter((element) => !element.closest('section[aria-label]'))
+      .map((element) => {
+        const rect = element.getBoundingClientRect();
+        return { left: rect.x, right: rect.x + rect.width, y: rect.y };
+      }),
+  );
+  const cardBoxes = await containedCards.evaluateAll((elements) =>
+    elements.map((element) => {
+      const rect = element.getBoundingClientRect();
+      return { left: rect.x, right: rect.x + rect.width, y: rect.y };
+    }),
+  );
+  const alignmentBoxes = [...controlBoxes, ...cardBoxes];
+  const boxesByRow = new Map<number, typeof alignmentBoxes>();
+
+  expect(alignmentBoxes.length).toBeGreaterThan(0);
+
+  for (const box of alignmentBoxes) {
+    const rowKey = Math.round(box.y / 4) * 4;
+    boxesByRow.set(rowKey, [...(boxesByRow.get(rowKey) ?? []), box]);
+  }
+
+  for (const boxes of boxesByRow.values()) {
+    const controlRight = Math.round(Math.max(...boxes.map((box) => box.right)));
+    const leftOnlySingleColumn =
+      boxes.length === 1 && boxes[0].left < panelMidpoint && boxes[0].right < panelMidpoint + 1;
+
+    if (leftOnlySingleColumn) continue;
+
+    expect(Math.abs(controlRight - footerRight)).toBeLessThanOrEqual(1);
+  }
+}
+
 test.describe('PraiOS workspace shell', () => {
   test('renders below the fixed Header and lets the map fill remaining space', async ({ page }) => {
     const shell = await openWorkspace(page);
@@ -102,10 +165,38 @@ test.describe('PraiOS workspace shell', () => {
       await page.mouse.move(200, 200);
       await expect(firstButton).toHaveAttribute('aria-pressed', 'true');
       await expect(firstButton).toHaveCSS('background-color', 'rgb(41, 112, 255)');
+      await expect(firstButton).toHaveCSS('border-top-width', '0px');
+      await expect(firstButton).toHaveCSS('outline-style', 'none');
+      await expect(firstButton).toHaveCSS('box-shadow', 'none');
     });
   }
 
-  test('shows the probing placeholder side menu without replacing the map', async ({ page }) => {
+  test('aligns side-panel controls to the same right edge as footer actions', async ({ page }) => {
+    await openWorkspace(page);
+    const header = page.getByRole('banner');
+
+    await header.locator('#praios-header-tab-kick').click();
+    await expectPanelControlsAligned(page, 'kick-side-panel');
+
+    await header.locator('#praios-header-tab-stats').click();
+    await expectPanelControlsAligned(page, 'stats-side-panel');
+
+    await header.locator('#praios-header-tab-sat').click();
+    await expectPanelControlsAligned(page, 'sat-side-panel');
+  });
+
+  test('renders an interactive MapLibre map instead of the CSS placeholder', async ({ page }) => {
+    await openWorkspace(page);
+
+    const map = page.getByTestId('workspace-map');
+
+    await expect(map.locator('.maplibregl-canvas')).toBeVisible();
+    await expect(map.locator('.maplibregl-ctrl-zoom-in')).toBeVisible();
+    await expect(map.locator('.maplibregl-ctrl-zoom-out')).toBeVisible();
+    await expect(map.locator('.maplibregl-ctrl-attrib')).toContainText('OpenStreetMap');
+  });
+
+  test('shows the probing side menu without replacing the map', async ({ page }) => {
     await openWorkspace(page);
 
     await page.getByRole('banner').locator('#praios-header-tab-sat').click();

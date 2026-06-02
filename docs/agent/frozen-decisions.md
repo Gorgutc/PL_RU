@@ -118,15 +118,26 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   placeholder panel until the probing task gets its own full spec.
 - Left-rail buttons preserve the shared visual state contract: transparent rest,
   `#528bff` hover, `#2970ff` active, white icon color, and one uniform button
-  size.
+  size. Active rail buttons must not keep a persistent outline, border, or
+  shadow after pointer activation; keyboard `:focus-visible` remains for
+  non-active rail buttons.
+- Panel-level controls in `kick`, `stats`, and `sat` side panels align their
+  right edge to the same right edge as the footer action row, within a `1px` tolerance.
+  The shared `TabSidePanel` spacing contract owns this alignment.
 - The center workspace is a Blueprint `Card` map surface that fills
-  `minmax(0, 1fr)`. It is intentionally a CSS placeholder, not a real map and
-  not a Google Drive reference image, until a dedicated map task replaces it.
+  `minmax(0, 1fr)` and renders a real client-side `MapLibre GL JS` map.
+  MapLibre CSS is imported through `src/app/layout.tsx`.
+- The default map provider is OpenStreetMap raster tiles from
+  `https://tile.openstreetmap.org/{z}/{x}/{y}.png`, with visible OSM attribution
+  and MapLibre navigation controls. Do not add prefetching or
+  offline tile downloads. Provider URL, attribution, center, zoom, and style
+  settings stay centralized in `src/components/WorkspaceMap/mapConfig.ts` so a
+  future provider swap is localized.
 - Large panel controls reuse Blueprint primitives (`HTMLSelect`, `InputGroup`,
   `TextArea`, `Checkbox`, and `Button`) and take spacing, widths, colors, and
   sizes from `src/styles/_tokens.scss`.
 - The Header visual contract is not part of this shell contract and must not be
-  changed when extending the left side menu or map placeholder.
+  changed when extending the left side menu or real map.
 
 ## Quality Tooling
 

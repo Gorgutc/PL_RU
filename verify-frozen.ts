@@ -809,7 +809,9 @@ async function testAgentVisualQaContract() {
 // ─── B. Runtime (dev server) ─────────────────────────────────────────────────
 
 async function testWorkspaceShellContract() {
+  const pkg = JSON.parse(await readFile(path.join(ROOT, 'package.json'), 'utf8'));
   const tokens = await readFile(path.join(SRC, 'styles', '_tokens.scss'), 'utf8');
+  const layout = await readFile(path.join(SRC, 'app', 'layout.tsx'), 'utf8');
   const appShell = await readFile(path.join(SRC, 'components', 'AppShell', 'AppShell.tsx'), 'utf8');
   const appShellStyles = await readFile(
     path.join(SRC, 'components', 'AppShell', 'AppShell.module.scss'),
@@ -822,6 +824,10 @@ async function testWorkspaceShellContract() {
   );
   const workspaceMap = await readFile(
     path.join(SRC, 'components', 'WorkspaceMap', 'WorkspaceMap.tsx'),
+    'utf8',
+  );
+  const mapConfig = await readFile(
+    path.join(SRC, 'components', 'WorkspaceMap', 'mapConfig.ts'),
     'utf8',
   );
   const workspaceSpec = await readFile(
@@ -846,7 +852,12 @@ async function testWorkspaceShellContract() {
     if (actual !== expected) failures.push(`${token}=${actual ?? '(missing)'}`);
   }
 
+  if (!pkg.dependencies?.['maplibre-gl']) failures.push('package.json missing maplibre-gl');
+
   failures.push(
+    ...missingSnippets(layout, ["import 'maplibre-gl/dist/maplibre-gl.css';"]).map(
+      (snippet) => `layout.tsx missing ${snippet}`,
+    ),
     ...missingSnippets(appShell, [
       '<main',
       '<section',
@@ -887,12 +898,31 @@ async function testWorkspaceShellContract() {
     ]).map((snippet) => `TabSidePanel.tsx missing ${snippet}`),
     ...missingSnippets(workspaceMap, [
       'Card',
+      'maplibregl.Map',
+      'NavigationControl',
+      'AttributionControl',
+      'attributionControl: false',
       'data-testid="workspace-map"',
       'data-testid="workspace-map-card"',
+      'data-testid="workspace-map-canvas"',
     ]).map((snippet) => `WorkspaceMap.tsx missing ${snippet}`),
+    ...missingSnippets(mapConfig, [
+      'WORKSPACE_MAP_TILE_URL',
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      '&copy; OpenStreetMap contributors',
+      "type: 'raster'",
+      'tileSize: 256',
+      'WORKSPACE_MAP_CENTER',
+      'WORKSPACE_MAP_ZOOM',
+    ]).map((snippet) => `mapConfig.ts missing ${snippet}`),
     ...missingSnippets(workspaceSpec, [
       'keeps compact left rail anchored',
       'syncs tab-specific left panels with Header state',
+      'aligns side-panel controls to the same right edge as footer actions',
+      'renders an interactive MapLibre map instead of the CSS placeholder',
+      'maplibregl-canvas',
+      'maplibregl-ctrl-attrib',
+      'outline-style',
       'workspace-map-card',
       'left-rail-button-primary',
       'kick-side-panel',
@@ -904,13 +934,16 @@ async function testWorkspaceShellContract() {
       '## Workspace Shell And Left Sidebar',
       'compact left rail is fixed at `50px` wide',
       'Wide side panels are fixed at `300px` wide',
-      'CSS placeholder, not a real map',
+      'real client-side `MapLibre GL JS` map',
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      'visible OSM attribution',
+      'within a `1px` tolerance',
       'Header visual contract is not part of this shell contract',
     ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
   );
 
   record(
-    'A13: workspace shell, left sidebar, and map placeholder contract stay frozen',
+    'A13: workspace shell, left sidebar, and real map contract stay frozen',
     failures.length === 0,
     failures.length ? failures.slice(0, 10).join('; ') : undefined,
   );

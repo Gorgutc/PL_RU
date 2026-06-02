@@ -55,7 +55,10 @@
 
 .button.button[aria-pressed='true'],
 .button.button[aria-current='true'] {
+  border: 0;
   background: t.$color-workspace-button-active !important;
+  box-shadow: none !important;
+  outline: 0 !important;
 }
 
 .icon.icon {
@@ -65,7 +68,19 @@
   color: currentcolor !important;
 }
 
-.button:focus-visible {
+.button.button[aria-pressed='true']:focus,
+.button.button[aria-pressed='true']:focus-visible,
+.button.button[aria-current='true']:focus,
+.button.button[aria-current='true']:focus-visible {
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+.button.button:focus:not(:focus-visible) {
+  outline: 0 !important;
+}
+
+.button.button:focus-visible:not([aria-pressed='true'], [aria-current='true']) {
   outline: 0.125rem solid t.$color-header-text-on-color;
   outline-offset: -0.125rem;
 }

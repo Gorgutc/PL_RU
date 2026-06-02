@@ -20,101 +20,57 @@
   box-shadow: none;
 }
 
-.mapSurface {
-  position: relative;
+.mapCanvas {
   width: 100%;
   height: 100%;
+  background: t.$color-workspace-map-bg;
+}
+
+/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+.mapCanvas :global(.maplibregl-canvas) {
+  outline: none;
+}
+
+.mapCanvas :global(.maplibregl-ctrl-group) {
   overflow: hidden;
-  background:
-    linear-gradient(30deg, transparent 0 46%, t.$color-workspace-map-road 46% 47%, transparent 47%),
-    linear-gradient(
-      120deg,
-      transparent 0 58%,
-      t.$color-workspace-map-line 58% 59%,
-      transparent 59%
-    ),
-    linear-gradient(t.$color-workspace-map-grid 0.0625rem, transparent 0.0625rem),
-    linear-gradient(90deg, t.$color-workspace-map-grid 0.0625rem, transparent 0.0625rem),
-    t.$color-workspace-map-bg;
-  background-size:
-    100% 100%,
-    100% 100%,
-    4rem 4rem,
-    4rem 4rem,
-    auto;
+  border: 0.0625rem solid t.$color-workspace-border;
+  border-radius: t.$workspace-control-radius;
+  background: t.$color-workspace-panel-bg;
+  box-shadow: none;
 }
 
-.mapSurface::before,
-.mapSurface::after {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  content: '';
+.mapCanvas :global(.maplibregl-ctrl-group button) {
+  width: 1.75rem;
+  height: 1.75rem;
+  background-color: t.$color-workspace-panel-bg;
 }
 
-.mapSurface::before {
-  background:
-    radial-gradient(
-      circle at 22% 24%,
-      t.$color-workspace-map-line 0 0.125rem,
-      transparent 0.125rem
-    ),
-    radial-gradient(
-      circle at 62% 42%,
-      t.$color-workspace-map-line 0 0.125rem,
-      transparent 0.125rem
-    ),
-    radial-gradient(circle at 77% 72%, t.$color-workspace-map-line 0 0.125rem, transparent 0.125rem);
+.mapCanvas :global(.maplibregl-ctrl-group button + button) {
+  border-block-start: 0.0625rem solid t.$color-workspace-border;
 }
 
-.mapSurface::after {
-  border: 0.0625rem solid t.$color-workspace-map-line;
-  opacity: 0.75;
+.mapCanvas :global(.maplibregl-ctrl-group button:hover) {
+  background-color: t.$color-workspace-control-bg;
 }
 
-.routeMain,
-.routeSecondary {
-  position: absolute;
-  display: block;
-  height: 0.125rem;
-  border-radius: 999rem;
-  background: t.$color-workspace-button-hover;
-  opacity: 0.55;
-  transform-origin: center;
+.mapCanvas :global(.maplibregl-ctrl-group button:focus-visible) {
+  outline: 0.125rem solid t.$color-header-text-on-color;
+  outline-offset: -0.125rem;
 }
 
-.routeMain {
-  inset-block-start: 54%;
-  inset-inline-start: 16%;
-  width: 52%;
-  transform: rotate(-14deg);
+.mapCanvas :global(.maplibregl-ctrl-icon) {
+  filter: invert(1);
 }
 
-.routeSecondary {
-  inset-block-start: 39%;
-  inset-inline-start: 48%;
-  width: 30%;
-  transform: rotate(28deg);
+.mapCanvas :global(.maplibregl-ctrl-attrib) {
+  border-radius: t.$workspace-control-radius;
+  background: t.$color-workspace-panel-bg;
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
 }
 
-.marker,
-.markerSecondary {
-  position: absolute;
-  display: block;
-  width: 0.625rem;
-  height: 0.625rem;
-  border: 0.125rem solid t.$color-header-text-on-color;
-  border-radius: 999rem;
-  background: t.$color-workspace-button-active;
-  box-shadow: 0 0 0 0.25rem t.$color-workspace-map-line;
+.mapCanvas :global(.maplibregl-ctrl-attrib a) {
+  color: t.$color-header-text-on-color;
 }
-
-.marker {
-  inset-block-start: 48%;
-  inset-inline-start: 42%;
-}
-
-.markerSecondary {
-  inset-block-start: 34%;
-  inset-inline-start: 72%;
-}
+/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */

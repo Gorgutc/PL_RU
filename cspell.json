@@ -37,7 +37,10 @@
     "labelledby",
     "lighthouseci",
     "lighthouserc",
+    "maplibre",
+    "maplibregl",
     "networkidle",
+    "OpenStreetMap",
     "praios",
     "sfmono",
     "viewports"
