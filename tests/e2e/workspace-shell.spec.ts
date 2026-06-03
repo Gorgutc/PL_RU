@@ -83,6 +83,17 @@ async function expectPanelControlsAligned(page: Page, panelTestId: string) {
   }
 }
 
+async function tabUntilFocused(page: Page, locator: Locator, maxTabs = 40) {
+  for (let index = 0; index < maxTabs; index += 1) {
+    await page.keyboard.press('Tab');
+    const focused = await locator.evaluate((element) => element.contains(document.activeElement));
+
+    if (focused) return;
+  }
+
+  throw new Error('Expected target to receive keyboard focus');
+}
+
 test.describe('PraiOS workspace shell', () => {
   test('renders below the fixed Header and lets the map fill remaining space', async ({ page }) => {
     const shell = await openWorkspace(page);
@@ -197,6 +208,89 @@ test.describe('PraiOS workspace shell', () => {
 
     await header.locator('#praios-header-tab-sat').click();
     await expectPanelControlsAligned(page, 'sat-side-panel');
+  });
+
+  test('keeps launch checkbox controls compact without pointer focus outlines', async ({
+    page,
+  }) => {
+    await openWorkspace(page);
+    await page.getByRole('banner').locator('#praios-header-tab-kick').click();
+
+    const checkboxes = page.getByTestId('kick-side-panel').locator('.bp6-checkbox, .bp5-checkbox');
+
+    await expect(checkboxes).toHaveCount(2);
+
+    for (let index = 0; index < 2; index += 1) {
+      const checkbox = checkboxes.nth(index);
+      const metrics = await checkbox.evaluate((element) => {
+        const control = element.parentElement;
+        const indicator = element.querySelector('.bp6-control-indicator, .bp5-control-indicator');
+
+        if (!control || !indicator) throw new Error('Expected checkbox control and indicator');
+
+        const controlRect = control.getBoundingClientRect();
+        const checkboxRect = element.getBoundingClientRect();
+        const indicatorRect = indicator.getBoundingClientRect();
+
+        return {
+          checkboxWidth: checkboxRect.width,
+          controlRight: controlRect.right,
+          indicatorHeight: indicatorRect.height,
+          indicatorRight: indicatorRect.right,
+          indicatorWidth: indicatorRect.width,
+        };
+      });
+
+      expect(Math.round(metrics.checkboxWidth)).toBe(16);
+      expect(Math.round(metrics.indicatorWidth)).toBe(16);
+      expect(Math.round(metrics.indicatorHeight)).toBe(16);
+      expect(Math.abs(metrics.indicatorRight - (metrics.controlRight - 10))).toBeLessThanOrEqual(1);
+
+      await checkbox.click();
+      await expect(checkbox).toHaveCSS('outline-style', 'none');
+      await expect(checkbox.locator('.bp6-control-indicator, .bp5-control-indicator')).toHaveCSS(
+        'box-shadow',
+        'none',
+      );
+    }
+
+    const fullWidthFooterButton = page
+      .getByTestId('kick-side-panel')
+      .locator('footer button')
+      .last();
+    const panelBox = await requireBox(page.getByTestId('kick-side-panel'));
+    const fullWidthFooterButtonBox = await requireBox(fullWidthFooterButton);
+
+    expect(Math.round(fullWidthFooterButtonBox.x)).toBeGreaterThan(Math.round(panelBox.x));
+    expect(Math.round(fullWidthFooterButtonBox.x + fullWidthFooterButtonBox.width)).toBeLessThan(
+      Math.round(panelBox.x + panelBox.width),
+    );
+
+    await fullWidthFooterButton.click();
+    await expect(fullWidthFooterButton).toHaveCSS('outline-style', 'none');
+    await expect(fullWidthFooterButton).toHaveCSS('box-shadow', 'none');
+  });
+
+  test('preserves keyboard focus visibility for launch checkbox and footer actions', async ({
+    page,
+  }) => {
+    await openWorkspace(page);
+    await page.getByRole('banner').locator('#praios-header-tab-kick').click();
+
+    const panel = page.getByTestId('kick-side-panel');
+    const firstCheckbox = panel.locator('.bp6-checkbox, .bp5-checkbox').first();
+    const firstIndicator = firstCheckbox.locator('.bp6-control-indicator, .bp5-control-indicator');
+    const fullWidthFooterButton = panel.locator('footer button').last();
+
+    await page.locator('body').click();
+    await tabUntilFocused(page, firstCheckbox);
+    await expect(firstIndicator).toHaveCSS('outline-style', 'solid');
+    await expect(firstIndicator).toHaveCSS('box-shadow', 'none');
+
+    await page.locator('body').click();
+    await tabUntilFocused(page, fullWidthFooterButton);
+    await expect(fullWidthFooterButton).toHaveCSS('outline-style', 'none');
+    await expect(fullWidthFooterButton).not.toHaveCSS('box-shadow', 'none');
   });
 
   test('renders an interactive MapLibre map instead of the CSS placeholder', async ({ page }) => {

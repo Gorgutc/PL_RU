@@ -822,6 +822,10 @@ async function testWorkspaceShellContract() {
     path.join(SRC, 'components', 'TabSidePanel', 'TabSidePanel.tsx'),
     'utf8',
   );
+  const tabSidePanelStyles = await readFile(
+    path.join(SRC, 'components', 'TabSidePanel', 'TabSidePanel.module.scss'),
+    'utf8',
+  );
   const workspaceMap = await readFile(
     path.join(SRC, 'components', 'WorkspaceMap', 'WorkspaceMap.tsx'),
     'utf8',
@@ -896,6 +900,11 @@ async function testWorkspaceShellContract() {
       'Фильтры таблицы',
       'Зондирование',
     ]).map((snippet) => `TabSidePanel.tsx missing ${snippet}`),
+    ...missingSnippets(tabSidePanelStyles, [
+      '.checkbox.checkbox',
+      'input:focus-visible',
+      '.actionButton.actionButton:focus-visible',
+    ]).map((snippet) => `TabSidePanel.module.scss missing ${snippet}`),
     ...missingSnippets(workspaceMap, [
       'Card',
       'maplibregl.Map',
@@ -926,6 +935,10 @@ async function testWorkspaceShellContract() {
       'keeps compact left rail anchored',
       'syncs tab-specific left panels with Header state',
       'aligns side-panel controls to the same right edge as footer actions',
+      'keeps launch checkbox controls compact without pointer focus outlines',
+      'preserves keyboard focus visibility for launch checkbox and footer actions',
+      'indicatorRight - (metrics.controlRight - 10)',
+      'fullWidthFooterButton',
       'preserves keyboard focus on an active left rail button',
       'renders an interactive MapLibre map instead of the CSS placeholder',
       'maplibregl-canvas',
@@ -947,6 +960,10 @@ async function testWorkspaceShellContract() {
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       'expanded visible OSM',
       'within a `1px` tolerance',
+      'Launch checkbox rows keep a compact `16px` Blueprint indicator',
+      'pointer-click focus outline or shadow',
+      'keyboard focus remains visible',
+      'Footer action focus uses an inset ring',
       'Header visual contract is not part of this shell contract',
     ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
   );

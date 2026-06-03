@@ -124,6 +124,11 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 - Panel-level controls in `kick`, `stats`, and `sat` side panels align their
   right edge to the same right edge as the footer action row, within a `1px` tolerance.
   The shared `TabSidePanel` spacing contract owns this alignment.
+- Launch checkbox rows keep a compact `16px` Blueprint indicator aligned to
+  the same internal right inset as other controls and must not keep a
+  pointer-click focus outline or shadow; keyboard focus remains visible on the
+  indicator. Footer action focus uses an inset ring so button borders are not
+  clipped by the panel edge.
 - The center workspace is a Blueprint `Card` map surface that fills
   `minmax(0, 1fr)` and renders a real client-side `MapLibre GL JS` map.
   MapLibre CSS is imported through `src/app/layout.tsx`.
