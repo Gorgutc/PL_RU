@@ -58,7 +58,6 @@
   border: 0;
   background: t.$color-workspace-button-active !important;
   box-shadow: none !important;
-  outline: 0 !important;
 }
 
 .icon.icon {
@@ -68,19 +67,18 @@
   color: currentcolor !important;
 }
 
-.button.button[aria-pressed='true']:focus,
-.button.button[aria-pressed='true']:focus-visible,
-.button.button[aria-current='true']:focus,
-.button.button[aria-current='true']:focus-visible {
+.button.button[data-focus-source='pointer']:focus,
+.button.button[data-focus-source='pointer']:focus-visible {
   box-shadow: none !important;
   outline: 0 !important;
 }
 
-.button.button:focus:not(:focus-visible) {
+.button.button:focus:not(:focus-visible, [data-focus-source='keyboard']) {
   outline: 0 !important;
 }
 
-.button.button:focus-visible:not([aria-pressed='true'], [aria-current='true']) {
-  outline: 0.125rem solid t.$color-header-text-on-color;
+.button.button:focus-visible,
+.button.button[data-focus-source='keyboard']:focus {
+  outline: 0.125rem solid t.$color-header-text-on-color !important;
   outline-offset: -0.125rem;
 }

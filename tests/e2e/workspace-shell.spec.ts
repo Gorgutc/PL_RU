@@ -171,6 +171,20 @@ test.describe('PraiOS workspace shell', () => {
     });
   }
 
+  test('preserves keyboard focus on an active left rail button', async ({ page }) => {
+    await openWorkspace(page);
+    const firstButton = page.getByTestId('left-rail-button-primary');
+
+    await firstButton.click();
+    await firstButton.evaluate((button) => {
+      button.setAttribute('data-focus-source', 'keyboard');
+      button.focus();
+    });
+
+    await expect(firstButton).toHaveAttribute('aria-pressed', 'true');
+    await expect(firstButton).toHaveCSS('outline-style', 'solid');
+  });
+
   test('aligns side-panel controls to the same right edge as footer actions', async ({ page }) => {
     await openWorkspace(page);
     const header = page.getByRole('banner');
@@ -189,11 +203,14 @@ test.describe('PraiOS workspace shell', () => {
     await openWorkspace(page);
 
     const map = page.getByTestId('workspace-map');
+    const attribution = map.locator('.maplibregl-ctrl-attrib');
 
     await expect(map.locator('.maplibregl-canvas')).toBeVisible();
     await expect(map.locator('.maplibregl-ctrl-zoom-in')).toBeVisible();
     await expect(map.locator('.maplibregl-ctrl-zoom-out')).toBeVisible();
-    await expect(map.locator('.maplibregl-ctrl-attrib')).toContainText('OpenStreetMap');
+    await expect(attribution).toBeVisible();
+    await expect(attribution).toContainText('OpenStreetMap');
+    await expect(attribution).not.toHaveClass(/maplibregl-compact/);
   });
 
   test('shows the probing side menu without replacing the map', async ({ page }) => {

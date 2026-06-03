@@ -13,6 +13,15 @@ import {
 } from './mapConfig';
 import styles from './WorkspaceMap.module.scss';
 
+function isExpectedOsmTileError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+
+  return (
+    message.includes('https://tile.openstreetmap.org/') &&
+    /AJAXError|Failed to fetch|Failed to load/i.test(message)
+  );
+}
+
 export function WorkspaceMap() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -30,7 +39,12 @@ export function WorkspaceMap() {
     });
 
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
-    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+    map.addControl(new maplibregl.AttributionControl({ compact: false }), 'bottom-right');
+    map.on('error', (event) => {
+      if (isExpectedOsmTileError(event.error)) return;
+
+      throw event.error;
+    });
 
     return () => {
       map.remove();

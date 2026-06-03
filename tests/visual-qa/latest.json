@@ -36,7 +36,7 @@
       "Active left-rail buttons use blue fill without persistent outline, border, or shadow after pointer activation.",
       "Panel-level controls in kick, stats, and sat align to the footer action right edge within 1px, except intentional left-only single-column rows.",
       "Workspace map remains visible for map, kick, stats, and sat states.",
-      "Workspace map renders MapLibre canvas, zoom controls, and visible OpenStreetMap attribution."
+      "Workspace map renders MapLibre canvas, zoom controls, and expanded visible OpenStreetMap attribution."
     ]
   },
   "pixelComparison": {

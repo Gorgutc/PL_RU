@@ -110,6 +110,8 @@ Rules mirrored by `verify-frozen.ts` are binding:
 - A11: quality-tooling dedupe/shared-config contracts stay frozen.
 - A12: mandatory PL_RU subagent orchestration, component reuse, duplicate-code,
   exact-spec, and pixel-level visual QA gates stay documented.
+- A13: workspace shell, left sidebar, side-panel alignment, and real
+  MapLibre/OSM map contract stay frozen.
 
 Additional project rules:
 

@@ -119,8 +119,8 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 - Left-rail buttons preserve the shared visual state contract: transparent rest,
   `#528bff` hover, `#2970ff` active, white icon color, and one uniform button
   size. Active rail buttons must not keep a persistent outline, border, or
-  shadow after pointer activation; keyboard `:focus-visible` remains for
-  non-active rail buttons.
+  shadow after pointer activation; keyboard `:focus-visible` remains available
+  for active and non-active rail buttons.
 - Panel-level controls in `kick`, `stats`, and `sat` side panels align their
   right edge to the same right edge as the footer action row, within a `1px` tolerance.
   The shared `TabSidePanel` spacing contract owns this alignment.
@@ -128,8 +128,8 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   `minmax(0, 1fr)` and renders a real client-side `MapLibre GL JS` map.
   MapLibre CSS is imported through `src/app/layout.tsx`.
 - The default map provider is OpenStreetMap raster tiles from
-  `https://tile.openstreetmap.org/{z}/{x}/{y}.png`, with visible OSM attribution
-  and MapLibre navigation controls. Do not add prefetching or
+  `https://tile.openstreetmap.org/{z}/{x}/{y}.png`, with expanded visible OSM
+  attribution and MapLibre navigation controls. Do not add prefetching or
   offline tile downloads. Provider URL, attribution, center, zoom, and style
   settings stay centralized in `src/components/WorkspaceMap/mapConfig.ts` so a
   future provider swap is localized.
