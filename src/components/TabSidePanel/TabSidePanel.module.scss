@@ -183,6 +183,49 @@
   padding-inline-end: 2rem;
 }
 
+.dateTimeShell {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.dateTimeElement.dateTimeElement {
+  font-variant-numeric: tabular-nums;
+}
+
+.dateTimeWithIconElement.dateTimeWithIconElement {
+  padding-inline-start: 2rem;
+}
+
+.compactDateTimeElement.compactDateTimeElement {
+  padding-inline: 0.25rem;
+  font-size: t.$fs-header-filter;
+}
+
+.dateTimeCalendarIcon.dateTimeCalendarIcon {
+  color: t.$color-header-text-on-color !important;
+  pointer-events: none;
+}
+
+.nativeDateTimeInput {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: 1.75rem;
+  min-width: 1.75rem;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color-scheme: dark;
+  cursor: pointer;
+  opacity: 0.01;
+}
+
+.nativeDateTimeInputWithIcon {
+  inset-inline: 0 auto;
+}
+
 .selectControl.selectControl > span {
   display: none;
 }

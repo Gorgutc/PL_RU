@@ -23,6 +23,13 @@ type SelectFieldConfig = {
   placeholder?: boolean;
 };
 
+type EditableDropdownFieldConfig = SelectFieldConfig & {
+  options?: readonly string[];
+  testId: string;
+};
+
+const DEFAULT_DROPDOWN_OPTIONS = ['Тест 1', 'Тест 2', 'Тест 3'] as const;
+
 function cx(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(' ');
 }
@@ -103,47 +110,90 @@ function SelectControl({ value, placeholder }: { value: string; placeholder?: bo
   );
 }
 
-function InputControl({ value, placeholder }: { value: string; placeholder?: boolean }) {
+function EditableDropdownControl({
+  options = DEFAULT_DROPDOWN_OPTIONS,
+  placeholder,
+  testId,
+  value,
+}: {
+  options?: readonly string[];
+  placeholder?: boolean;
+  testId: string;
+  value: string;
+}) {
   const labelledBy = useFieldLabelId();
+  const listId = useId();
 
   return (
-    <InputGroup
-      aria-labelledby={labelledBy}
-      className={cx(styles.inputControl, placeholder && styles.placeholderControl)}
-      defaultValue={value}
-      inputClassName={cx(styles.inputElement, placeholder && styles.placeholderElement)}
-      readOnly
-      rightElement={<Icon className={styles.controlIcon} icon="chevron-down" size={16} />}
-    />
+    <>
+      <InputGroup
+        aria-autocomplete="list"
+        aria-labelledby={labelledBy}
+        className={cx(styles.inputControl, placeholder && styles.placeholderControl)}
+        data-testid={testId}
+        defaultValue={placeholder ? undefined : value}
+        inputClassName={cx(styles.inputElement, placeholder && styles.placeholderElement)}
+        list={listId}
+        placeholder={placeholder ? value : undefined}
+        rightElement={<Icon className={styles.controlIcon} icon="chevron-down" size={16} />}
+      />
+      <datalist data-testid={`${testId}-options`} id={listId}>
+        {options.map((option) => (
+          <option key={option} value={option} />
+        ))}
+      </datalist>
+    </>
   );
 }
 
-function DateControl({ value }: { value: string }) {
+function DateTimeControl({
+  calendarIcon,
+  compact,
+  dark,
+  displayValue,
+  nativeValue,
+  testId,
+}: {
+  calendarIcon?: boolean;
+  compact?: boolean;
+  dark?: boolean;
+  displayValue: string;
+  nativeValue: string;
+  testId: string;
+}) {
   const labelledBy = useFieldLabelId();
 
   return (
-    <InputGroup
-      aria-labelledby={labelledBy}
-      className={styles.inputControl}
-      defaultValue={value}
-      inputClassName={styles.inputElement}
-      readOnly
-    />
-  );
-}
-
-function DateTimeControl({ value }: { value: string }) {
-  const labelledBy = useFieldLabelId();
-
-  return (
-    <InputGroup
-      aria-labelledby={labelledBy}
-      className={styles.darkInputControl}
-      defaultValue={value}
-      inputClassName={styles.inputElement}
-      leftElement={<Icon className={styles.controlIcon} icon="calendar" size={16} />}
-      readOnly
-    />
+    <div className={styles.dateTimeShell}>
+      <InputGroup
+        aria-labelledby={labelledBy}
+        className={dark ? styles.darkInputControl : styles.inputControl}
+        data-testid={testId}
+        defaultValue={displayValue}
+        inputClassName={cx(
+          styles.inputElement,
+          styles.dateTimeElement,
+          calendarIcon && styles.dateTimeWithIconElement,
+          compact && styles.compactDateTimeElement,
+        )}
+        leftElement={
+          calendarIcon ? (
+            <Icon className={styles.dateTimeCalendarIcon} icon="calendar" size={14} />
+          ) : undefined
+        }
+        type="text"
+      />
+      <input
+        aria-label="Открыть календарь"
+        className={cx(
+          styles.nativeDateTimeInput,
+          calendarIcon && styles.nativeDateTimeInputWithIcon,
+        )}
+        data-testid={`${testId}-calendar`}
+        defaultValue={nativeValue}
+        type="datetime-local"
+      />
+    </div>
   );
 }
 
@@ -163,16 +213,17 @@ function CheckboxControl({ value }: { value: string }) {
   );
 }
 
-function CommentControl() {
+function CommentControl({ editable, testId }: { editable?: boolean; testId?: string }) {
   const labelledBy = useFieldLabelId();
 
   return (
     <TextArea
       aria-labelledby={labelledBy}
       className={styles.textareaControl}
+      data-testid={testId}
       fill
       placeholder="Напишите здесь любую информацию, которую сочтете важным"
-      readOnly
+      readOnly={!editable}
     />
   );
 }
@@ -183,6 +234,23 @@ function FieldGrid({ fields }: { fields: readonly SelectFieldConfig[] }) {
       {fields.map((field) => (
         <Field key={field.label} label={field.label}>
           <SelectControl value={field.value} placeholder={field.placeholder} />
+        </Field>
+      ))}
+    </div>
+  );
+}
+
+function EditableDropdownFieldGrid({ fields }: { fields: readonly EditableDropdownFieldConfig[] }) {
+  return (
+    <div className={styles.fieldGrid}>
+      {fields.map((field) => (
+        <Field key={field.label} label={field.label}>
+          <EditableDropdownControl
+            options={field.options}
+            placeholder={field.placeholder}
+            testId={field.testId}
+            value={field.value}
+          />
         </Field>
       ))}
     </div>
@@ -252,56 +320,87 @@ function KickPanel() {
       testId="kick-side-panel"
       title="Создание параметров для пуска"
     >
-      <FieldGrid
+      <EditableDropdownFieldGrid
         fields={[
-          { label: 'Тип точки', value: 'Все точки' },
-          { label: 'Точка пуска', value: 'Все' },
+          {
+            label: 'Тип точки',
+            options: ['Все точки', 'Тестовая точка 1', 'Тестовая точка 2'],
+            testId: 'kick-combobox-point-type',
+            value: 'Все точки',
+          },
+          {
+            label: 'Точка пуска',
+            options: ['Все', 'Пуск 1', 'Пуск 2'],
+            testId: 'kick-combobox-launch-point',
+            value: 'Все',
+          },
         ]}
       />
       <SectionDivider />
       <div className={styles.fieldGrid}>
         <Field label="1. Номер расчета">
-          <InputControl value="Введите" placeholder />
+          <EditableDropdownControl
+            placeholder
+            testId="kick-combobox-calculation-number"
+            value="Введите"
+          />
         </Field>
         <Field label="2. Тип изделия">
-          <InputControl value="Укажите тип" placeholder />
+          <EditableDropdownControl
+            placeholder
+            testId="kick-combobox-product-type"
+            value="Укажите тип"
+          />
         </Field>
         <Field label="3. Номер изделия">
-          <InputControl value="Введите" placeholder />
+          <EditableDropdownControl
+            placeholder
+            testId="kick-combobox-product-number"
+            value="Введите"
+          />
         </Field>
         <Field label="4. Дата и время пуска">
-          <DateControl value="02.05.2026 | 16:31" />
+          <DateTimeControl
+            compact
+            displayValue="02.05.2026 | 16:31"
+            nativeValue="2026-05-02T16:31"
+            testId="kick-launch-datetime"
+          />
         </Field>
         <Field label="5. Номер ПЗ">
-          <InputControl value="Укажите" placeholder />
+          <EditableDropdownControl placeholder testId="kick-combobox-pz-number" value="Укажите" />
         </Field>
         <Field label="6. Борщ">
           <CheckboxControl value="Есть" />
         </Field>
         <Field label="7. Тип БЧ">
-          <InputControl value="Укажите тип" placeholder />
+          <EditableDropdownControl
+            placeholder
+            testId="kick-combobox-warhead-type"
+            value="Укажите тип"
+          />
         </Field>
         <Field label="8. Пампушка">
-          <InputControl value="Выберите" placeholder />
+          <EditableDropdownControl placeholder testId="kick-combobox-pampushka" value="Выберите" />
         </Field>
         <Field label="9. Вилка">
-          <InputControl value="Выберите" placeholder />
+          <EditableDropdownControl placeholder testId="kick-combobox-fork" value="Выберите" />
         </Field>
         <Field label="10. Редиска">
-          <InputControl value="Выберите" placeholder />
+          <EditableDropdownControl placeholder testId="kick-combobox-radish" value="Выберите" />
         </Field>
         <Field label="11. Камера">
-          <InputControl value="Выберите" placeholder />
+          <EditableDropdownControl placeholder testId="kick-combobox-camera" value="Выберите" />
         </Field>
         <Field label="12. Падение на старте">
           <CheckboxControl value="Падение" />
         </Field>
       </div>
       <Field label="14. Интерес">
-        <InputControl value="Прочее" placeholder />
+        <EditableDropdownControl testId="kick-combobox-interest" value="Прочее" />
       </Field>
       <Field label="15. Комментарий">
-        <CommentControl />
+        <CommentControl editable testId="kick-comment" />
       </Field>
     </PanelChrome>
   );
@@ -311,10 +410,22 @@ function LaunchDayCard() {
   return (
     <section className={styles.filterCard} aria-label="Пусковые сутки">
       <Field label="Начало отсчета">
-        <DateTimeControl value="24-04-2025   l   00:00" />
+        <DateTimeControl
+          calendarIcon
+          dark
+          displayValue="24-04-2025 | 00:00"
+          nativeValue="2025-04-24T00:00"
+          testId="stats-start-datetime"
+        />
       </Field>
       <Field label="Окончание отсчета">
-        <DateTimeControl value="24-04-2025   l   00:00" />
+        <DateTimeControl
+          calendarIcon
+          dark
+          displayValue="24-04-2025 | 00:00"
+          nativeValue="2025-04-24T00:00"
+          testId="stats-end-datetime"
+        />
       </Field>
       <ActionButton outlineAccent>Текущие пусковые сутки (16:00-16:00)</ActionButton>
     </section>

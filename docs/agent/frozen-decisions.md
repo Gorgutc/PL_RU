@@ -124,6 +124,20 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 - Panel-level controls in `kick`, `stats`, and `sat` side panels align their
   right edge to the same right edge as the footer action row, within a `1px` tolerance.
   The shared `TabSidePanel` spacing contract owns this alignment.
+- Launch-parameter dropdown-like fields use the shared editable dropdown
+  control: Blueprint `InputGroup` plus a native `datalist` with 2-3 temporary
+  option stubs. The control stays text-editable while preserving dropdown
+  suggestions for `Тип точки`, `Точка пуска`, `Номер расчета`, `Тип изделия`,
+  `Номер изделия`, `Номер ПЗ`, `Тип БЧ`, `Пампушка`, `Вилка`, `Редиска`,
+  `Камера`, and `Интерес`.
+- Launch comments are editable `TextArea` controls. Launch date/time and the
+  statistics `Начало отсчета` / `Окончание отсчета` period fields use editable
+  visible text inputs in the reference format (`02.05.2026 | 16:31` for launch,
+  `24-04-2025 | 00:00` for statistics) plus a native `datetime-local` calendar
+  input kept inside the shared control for the calendar affordance.
+- The probing (`sat`) comment control must not inherit the launch-specific
+  editable `kick-comment` selector or behavior unless a future task explicitly
+  changes that contract.
 - Launch checkbox rows keep a compact `16px` Blueprint indicator aligned to
   the same internal right inset as other controls and must not keep a
   pointer-click focus outline or shadow; keyboard focus remains visible on the

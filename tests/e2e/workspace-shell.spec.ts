@@ -3,6 +3,20 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 const HEADER_HEIGHT = 48;
 const VIEWPORT_WIDTH = 1920;
 const RAIL_HEIGHTS = [768, 900, 1080, 1200, 1440, 2160] as const;
+const KICK_EDITABLE_DROPDOWN_IDS = [
+  'kick-combobox-point-type',
+  'kick-combobox-launch-point',
+  'kick-combobox-calculation-number',
+  'kick-combobox-product-type',
+  'kick-combobox-product-number',
+  'kick-combobox-pz-number',
+  'kick-combobox-warhead-type',
+  'kick-combobox-pampushka',
+  'kick-combobox-fork',
+  'kick-combobox-radish',
+  'kick-combobox-camera',
+  'kick-combobox-interest',
+] as const;
 
 async function openWorkspace(page: Page, height = 1080) {
   await page.setViewportSize({ width: VIEWPORT_WIDTH, height });
@@ -92,6 +106,60 @@ async function tabUntilFocused(page: Page, locator: Locator, maxTabs = 40) {
   }
 
   throw new Error('Expected target to receive keyboard focus');
+}
+
+async function expectInputTextFits(locator: Locator, displayValue: string) {
+  const metrics = await locator.evaluate((element, value) => {
+    const input = element as HTMLInputElement;
+    const style = window.getComputedStyle(input);
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    if (!context) throw new Error('Expected a canvas context for text measurement');
+
+    context.font = [
+      style.fontStyle,
+      style.fontVariant,
+      style.fontWeight,
+      style.fontSize,
+      style.fontFamily,
+    ].join(' ');
+
+    return {
+      clientWidth: input.clientWidth,
+      paddingLeft: Number.parseFloat(style.paddingLeft) || 0,
+      paddingRight: Number.parseFloat(style.paddingRight) || 0,
+      textWidth: context.measureText(value).width,
+    };
+  }, displayValue);
+
+  const reservedPickerWidth = 14;
+  const requiredWidth =
+    metrics.textWidth + metrics.paddingLeft + metrics.paddingRight + reservedPickerWidth;
+
+  expect(requiredWidth).toBeLessThanOrEqual(metrics.clientWidth);
+}
+
+async function expectCalendarInputUsable(locator: Locator) {
+  const metrics = await locator.evaluate((element) => {
+    const input = element as HTMLInputElement;
+    const rect = input.getBoundingClientRect();
+    const style = window.getComputedStyle(input);
+
+    return {
+      ariaHidden: input.getAttribute('aria-hidden'),
+      height: rect.height,
+      pointerEvents: style.pointerEvents,
+      tabIndex: input.tabIndex,
+      width: rect.width,
+    };
+  });
+
+  expect(metrics.ariaHidden).toBeNull();
+  expect(metrics.pointerEvents).not.toBe('none');
+  expect(metrics.tabIndex).toBeGreaterThanOrEqual(0);
+  expect(metrics.width).toBeGreaterThanOrEqual(16);
+  expect(metrics.height).toBeGreaterThanOrEqual(16);
 }
 
 test.describe('PraiOS workspace shell', () => {
@@ -293,6 +361,85 @@ test.describe('PraiOS workspace shell', () => {
     await expect(fullWidthFooterButton).not.toHaveCSS('box-shadow', 'none');
   });
 
+  test('makes launch dropdown fields editable with option stubs', async ({ page }) => {
+    await openWorkspace(page);
+    await page.getByRole('banner').locator('#praios-header-tab-kick').click();
+
+    const panel = page.getByTestId('kick-side-panel');
+
+    for (const [index, testId] of KICK_EDITABLE_DROPDOWN_IDS.entries()) {
+      const input = panel.getByTestId(testId);
+      const optionList = panel.getByTestId(`${testId}-options`);
+
+      await expect(input).toBeVisible();
+      expect(await input.evaluate((element) => (element as HTMLInputElement).readOnly)).toBe(false);
+      await expect(input).toHaveAttribute('list', /.+/);
+
+      const optionCount = await optionList.locator('option').count();
+      expect(optionCount).toBeGreaterThanOrEqual(2);
+      expect(optionCount).toBeLessThanOrEqual(3);
+
+      const value = `Проверка ${index + 1}`;
+      await input.fill(value);
+      await expect(input).toHaveValue(value);
+    }
+  });
+
+  test('makes launch comment and date fields editable', async ({ page }) => {
+    await openWorkspace(page);
+    await page.getByRole('banner').locator('#praios-header-tab-kick').click();
+
+    const panel = page.getByTestId('kick-side-panel');
+    const launchDate = panel.getByTestId('kick-launch-datetime');
+    const launchCalendar = panel.getByTestId('kick-launch-datetime-calendar');
+    const comment = panel.getByTestId('kick-comment');
+
+    await expect(launchDate).toHaveAttribute('type', 'text');
+    await expect(launchDate).toHaveValue('02.05.2026 | 16:31');
+    expect(await launchDate.evaluate((element) => (element as HTMLInputElement).readOnly)).toBe(
+      false,
+    );
+    await launchDate.fill('03.05.2026 | 12:45');
+    await expect(launchDate).toHaveValue('03.05.2026 | 12:45');
+    await expect(launchCalendar).toHaveAttribute('type', 'datetime-local');
+    await expectCalendarInputUsable(launchCalendar);
+
+    expect(await comment.evaluate((element) => (element as HTMLTextAreaElement).readOnly)).toBe(
+      false,
+    );
+    await comment.fill('Тестовый комментарий');
+    await expect(comment).toHaveValue('Тестовый комментарий');
+  });
+
+  test('fits the launch date-time value in the narrow launch field', async ({ page }) => {
+    await openWorkspace(page);
+    await page.getByRole('banner').locator('#praios-header-tab-kick').click();
+
+    await expectInputTextFits(page.getByTestId('kick-launch-datetime'), '02.05.2026 | 16:31');
+  });
+
+  test('uses editable date-time controls in statistics period filters', async ({ page }) => {
+    await openWorkspace(page);
+    await page.getByRole('banner').locator('#praios-header-tab-stats').click();
+
+    const panel = page.getByTestId('stats-side-panel');
+
+    for (const [testId, value] of [
+      ['stats-start-datetime', '25-04-2025 | 01:15'],
+      ['stats-end-datetime', '26-04-2025 | 02:30'],
+    ] as const) {
+      const input = panel.getByTestId(testId);
+      const calendar = panel.getByTestId(`${testId}-calendar`);
+
+      await expect(input).toHaveAttribute('type', 'text');
+      expect(await input.evaluate((element) => (element as HTMLInputElement).readOnly)).toBe(false);
+      await input.fill(value);
+      await expect(input).toHaveValue(value);
+      await expect(calendar).toHaveAttribute('type', 'datetime-local');
+      await expectCalendarInputUsable(calendar);
+    }
+  });
+
   test('renders an interactive MapLibre map instead of the CSS placeholder', async ({ page }) => {
     await openWorkspace(page);
 
@@ -317,5 +464,19 @@ test.describe('PraiOS workspace shell', () => {
     await expect(satPanel).toBeVisible();
     await expect(page.getByTestId('workspace-map')).toBeVisible();
     await expect(satPanel.getByText('Зондирование')).toBeVisible();
+  });
+
+  test('keeps probing comment separate from the editable launch comment', async ({ page }) => {
+    await openWorkspace(page);
+    await page.getByRole('banner').locator('#praios-header-tab-sat').click();
+
+    const satPanel = page.getByTestId('sat-side-panel');
+    const comment = satPanel.locator('textarea');
+
+    await expect(satPanel.locator('[data-testid="kick-comment"]')).toHaveCount(0);
+    await expect(comment).toHaveCount(1);
+    expect(await comment.evaluate((element) => (element as HTMLTextAreaElement).readOnly)).toBe(
+      true,
+    );
   });
 });
