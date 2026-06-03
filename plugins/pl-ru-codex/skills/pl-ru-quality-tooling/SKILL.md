@@ -34,7 +34,8 @@ dependency-cruiser, and package scripts.
 - Screenshot-backed cases may include `capture` metadata so the guard can start
   or reuse the app, capture a fresh `actualPath`, and compare it with the
   committed `referencePath`.
-- Keep visual diff output constrained to ignored artifact folders such as
-  `reports/visual-qa/` or `test-results/visual-qa/`.
+- Keep final visual actual/diff output constrained to ignored
+  `reports/visual-qa/`. Do not use `test-results/visual-qa/` for tracked PR
+  evidence because Playwright can clear it before handoff or subagent review.
 - Browser checks may require approved execution outside a restricted Windows
   sandbox.

@@ -230,12 +230,7 @@
   display: none;
 }
 
-.controlIcon.controlIcon {
-  color: t.$color-header-text-on-color !important;
-}
-
-.placeholderControl.placeholderControl select,
-.placeholderElement.placeholderElement {
+.placeholderControl.placeholderControl select {
   color: t.$color-workspace-placeholder !important;
 }
 

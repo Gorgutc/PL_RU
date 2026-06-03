@@ -19,16 +19,11 @@ type FieldProps = {
 
 type SelectFieldConfig = {
   label: string;
+  options?: readonly string[];
+  testId?: string;
   value: string;
   placeholder?: boolean;
 };
-
-type EditableDropdownFieldConfig = SelectFieldConfig & {
-  options?: readonly string[];
-  testId: string;
-};
-
-const DEFAULT_DROPDOWN_OPTIONS = ['Тест 1', 'Тест 2', 'Тест 3'] as const;
 
 function cx(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(' ');
@@ -93,7 +88,17 @@ function Field({ label, children, hidden }: FieldProps) {
   );
 }
 
-function SelectControl({ value, placeholder }: { value: string; placeholder?: boolean }) {
+function SelectControl({
+  options,
+  placeholder,
+  testId,
+  value,
+}: {
+  options?: readonly string[];
+  placeholder?: boolean;
+  testId?: string;
+  value: string;
+}) {
   const labelledBy = useFieldLabelId();
 
   return (
@@ -101,48 +106,13 @@ function SelectControl({ value, placeholder }: { value: string; placeholder?: bo
       <HTMLSelect
         aria-labelledby={labelledBy}
         className={cx(styles.selectControl, placeholder && styles.placeholderControl)}
+        data-testid={testId}
         defaultValue={value}
         fill
-        options={[value]}
+        options={options ?? [value]}
       />
       <Icon className={styles.selectShellIcon} icon="chevron-down" size={16} />
     </div>
-  );
-}
-
-function EditableDropdownControl({
-  options = DEFAULT_DROPDOWN_OPTIONS,
-  placeholder,
-  testId,
-  value,
-}: {
-  options?: readonly string[];
-  placeholder?: boolean;
-  testId: string;
-  value: string;
-}) {
-  const labelledBy = useFieldLabelId();
-  const listId = useId();
-
-  return (
-    <>
-      <InputGroup
-        aria-autocomplete="list"
-        aria-labelledby={labelledBy}
-        className={cx(styles.inputControl, placeholder && styles.placeholderControl)}
-        data-testid={testId}
-        defaultValue={placeholder ? undefined : value}
-        inputClassName={cx(styles.inputElement, placeholder && styles.placeholderElement)}
-        list={listId}
-        placeholder={placeholder ? value : undefined}
-        rightElement={<Icon className={styles.controlIcon} icon="chevron-down" size={16} />}
-      />
-      <datalist data-testid={`${testId}-options`} id={listId}>
-        {options.map((option) => (
-          <option key={option} value={option} />
-        ))}
-      </datalist>
-    </>
   );
 }
 
@@ -233,19 +203,7 @@ function FieldGrid({ fields }: { fields: readonly SelectFieldConfig[] }) {
     <div className={styles.fieldGrid}>
       {fields.map((field) => (
         <Field key={field.label} label={field.label}>
-          <SelectControl value={field.value} placeholder={field.placeholder} />
-        </Field>
-      ))}
-    </div>
-  );
-}
-
-function EditableDropdownFieldGrid({ fields }: { fields: readonly EditableDropdownFieldConfig[] }) {
-  return (
-    <div className={styles.fieldGrid}>
-      {fields.map((field) => (
-        <Field key={field.label} label={field.label}>
-          <EditableDropdownControl
+          <SelectControl
             options={field.options}
             placeholder={field.placeholder}
             testId={field.testId}
@@ -320,18 +278,18 @@ function KickPanel() {
       testId="kick-side-panel"
       title="Создание параметров для пуска"
     >
-      <EditableDropdownFieldGrid
+      <FieldGrid
         fields={[
           {
             label: 'Тип точки',
             options: ['Все точки', 'Тестовая точка 1', 'Тестовая точка 2'],
-            testId: 'kick-combobox-point-type',
+            testId: 'kick-select-point-type',
             value: 'Все точки',
           },
           {
             label: 'Точка пуска',
             options: ['Все', 'Пуск 1', 'Пуск 2'],
-            testId: 'kick-combobox-launch-point',
+            testId: 'kick-select-launch-point',
             value: 'Все',
           },
         ]}
@@ -339,25 +297,13 @@ function KickPanel() {
       <SectionDivider />
       <div className={styles.fieldGrid}>
         <Field label="1. Номер расчета">
-          <EditableDropdownControl
-            placeholder
-            testId="kick-combobox-calculation-number"
-            value="Введите"
-          />
+          <SelectControl placeholder testId="kick-select-calculation-number" value="Введите" />
         </Field>
         <Field label="2. Тип изделия">
-          <EditableDropdownControl
-            placeholder
-            testId="kick-combobox-product-type"
-            value="Укажите тип"
-          />
+          <SelectControl placeholder testId="kick-select-product-type" value="Укажите тип" />
         </Field>
         <Field label="3. Номер изделия">
-          <EditableDropdownControl
-            placeholder
-            testId="kick-combobox-product-number"
-            value="Введите"
-          />
+          <SelectControl placeholder testId="kick-select-product-number" value="Введите" />
         </Field>
         <Field label="4. Дата и время пуска">
           <DateTimeControl
@@ -368,36 +314,32 @@ function KickPanel() {
           />
         </Field>
         <Field label="5. Номер ПЗ">
-          <EditableDropdownControl placeholder testId="kick-combobox-pz-number" value="Укажите" />
+          <SelectControl placeholder testId="kick-select-pz-number" value="Укажите" />
         </Field>
         <Field label="6. Борщ">
           <CheckboxControl value="Есть" />
         </Field>
         <Field label="7. Тип БЧ">
-          <EditableDropdownControl
-            placeholder
-            testId="kick-combobox-warhead-type"
-            value="Укажите тип"
-          />
+          <SelectControl placeholder testId="kick-select-warhead-type" value="Укажите тип" />
         </Field>
         <Field label="8. Пампушка">
-          <EditableDropdownControl placeholder testId="kick-combobox-pampushka" value="Выберите" />
+          <SelectControl placeholder testId="kick-select-pampushka" value="Выберите" />
         </Field>
         <Field label="9. Вилка">
-          <EditableDropdownControl placeholder testId="kick-combobox-fork" value="Выберите" />
+          <SelectControl placeholder testId="kick-select-fork" value="Выберите" />
         </Field>
         <Field label="10. Редиска">
-          <EditableDropdownControl placeholder testId="kick-combobox-radish" value="Выберите" />
+          <SelectControl placeholder testId="kick-select-radish" value="Выберите" />
         </Field>
         <Field label="11. Камера">
-          <EditableDropdownControl placeholder testId="kick-combobox-camera" value="Выберите" />
+          <SelectControl placeholder testId="kick-select-camera" value="Выберите" />
         </Field>
         <Field label="12. Падение на старте">
           <CheckboxControl value="Падение" />
         </Field>
       </div>
       <Field label="14. Интерес">
-        <EditableDropdownControl testId="kick-combobox-interest" value="Прочее" />
+        <SelectControl testId="kick-select-interest" value="Прочее" />
       </Field>
       <Field label="15. Комментарий">
         <CommentControl editable testId="kick-comment" />

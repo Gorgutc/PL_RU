@@ -79,15 +79,25 @@ alone is not enough: `pixelComparison.cases` must list local PNG pairs with
 `referencePath`, `actualPath`, and `diffPath`. The check loads those PNGs through
 Playwright, compares pixels with the recorded tolerance, writes a diff PNG, and
 fails if dimensions, mismatch counts, or mismatch ratios exceed the allowed
-limits. `diffPath` must stay under ignored visual-artifact directories
-(`reports/visual-qa/` or `test-results/visual-qa/`) and must not overwrite a
-tracked file.
+limits. Final `actualPath` and `diffPath` artifacts for tracked PR evidence,
+handoff, and subagents must stay under ignored `reports/visual-qa/` and must not
+overwrite a tracked file. Do not point tracked evidence at
+`test-results/visual-qa/`; Playwright clears that directory during browser test
+runs, so it is not durable enough for handoff.
 
 Evidence cases may include `capture` metadata with `url`, `selector`,
 `viewport`, and click `actions`. When present, `pnpm check:visual` starts or
 reuses the app at `VISUAL_QA_BASE_URL` or `http://localhost:3000`, captures a
 fresh Playwright screenshot to `actualPath`, and then performs the PNG
-comparison against the committed `referencePath`.
+comparison against the committed `referencePath`. Workspace/map captures wait
+for a visible MapLibre canvas, attribution, and zoom controls before
+screenshotting. If the canvas is blank, the guard retries capture once and then
+fails with the affected case name instead of retrying indefinitely.
+
+If a visual QA agent or local reviewer cannot find the expected
+`reports/visual-qa/` artifacts, run `pnpm.cmd check:visual` once. If artifacts
+are still absent or mismatch after that run, return FAIL with the missing paths
+and reason; do not loop.
 
 The base diff fails closed: if `VISUAL_QA_BASE_REF` is unavailable, the command
 fails instead of silently passing. Use `VISUAL_QA_ALLOW_MISSING_BASE=1` only for

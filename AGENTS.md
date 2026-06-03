@@ -89,9 +89,10 @@ and pair the image diff with DOM/CSS metric assertions for spacing, sizes,
 colors, and responsive behavior. Do not rely on eyeballing alone. If a reference
 PNG is inaccessible, say so explicitly and block delivery unless the current
 user request accepts a metric-only fallback. Visual diff output must stay in
-ignored artifact folders such as `reports/visual-qa/` or
-`test-results/visual-qa/`; do not point it at source, config, docs, `.git/`, or
-tracked files.
+ignored `reports/visual-qa/`; do not point it at `test-results/visual-qa/`,
+source, config, docs, `.git/`, or tracked files. If visual artifacts are missing,
+run `pnpm.cmd check:visual` once; if they are still missing or mismatched,
+return FAIL with the paths and reason instead of entering a retry loop.
 
 ## Frozen Rules
 

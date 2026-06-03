@@ -3,19 +3,19 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 const HEADER_HEIGHT = 48;
 const VIEWPORT_WIDTH = 1920;
 const RAIL_HEIGHTS = [768, 900, 1080, 1200, 1440, 2160] as const;
-const KICK_EDITABLE_DROPDOWN_IDS = [
-  'kick-combobox-point-type',
-  'kick-combobox-launch-point',
-  'kick-combobox-calculation-number',
-  'kick-combobox-product-type',
-  'kick-combobox-product-number',
-  'kick-combobox-pz-number',
-  'kick-combobox-warhead-type',
-  'kick-combobox-pampushka',
-  'kick-combobox-fork',
-  'kick-combobox-radish',
-  'kick-combobox-camera',
-  'kick-combobox-interest',
+const KICK_SELECT_IDS = [
+  'kick-select-point-type',
+  'kick-select-launch-point',
+  'kick-select-calculation-number',
+  'kick-select-product-type',
+  'kick-select-product-number',
+  'kick-select-pz-number',
+  'kick-select-warhead-type',
+  'kick-select-pampushka',
+  'kick-select-fork',
+  'kick-select-radish',
+  'kick-select-camera',
+  'kick-select-interest',
 ] as const;
 
 async function openWorkspace(page: Page, height = 1080) {
@@ -160,6 +160,21 @@ async function expectCalendarInputUsable(locator: Locator) {
   expect(metrics.tabIndex).toBeGreaterThanOrEqual(0);
   expect(metrics.width).toBeGreaterThanOrEqual(16);
   expect(metrics.height).toBeGreaterThanOrEqual(16);
+}
+
+async function readSelectMetrics(locator: Locator) {
+  return locator.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const style = window.getComputedStyle(element);
+
+    return {
+      height: Math.round(rect.height),
+      paddingBottom: style.paddingBottom,
+      paddingLeft: style.paddingLeft,
+      paddingRight: style.paddingRight,
+      paddingTop: style.paddingTop,
+    };
+  });
 }
 
 test.describe('PraiOS workspace shell', () => {
@@ -361,27 +376,39 @@ test.describe('PraiOS workspace shell', () => {
     await expect(fullWidthFooterButton).not.toHaveCSS('box-shadow', 'none');
   });
 
-  test('makes launch dropdown fields editable with option stubs', async ({ page }) => {
+  test('uses the shared native select dropdown contract for launch selection fields', async ({
+    page,
+  }) => {
     await openWorkspace(page);
     await page.getByRole('banner').locator('#praios-header-tab-kick').click();
 
     const panel = page.getByTestId('kick-side-panel');
+    const statsSelect = page.getByTestId('stats-side-panel').locator('select').first();
+    const launchSelectMetrics = [];
 
-    for (const [index, testId] of KICK_EDITABLE_DROPDOWN_IDS.entries()) {
-      const input = panel.getByTestId(testId);
-      const optionList = panel.getByTestId(`${testId}-options`);
+    await expect(panel.locator('input[aria-autocomplete], input[list], datalist')).toHaveCount(0);
+    await expect(panel.locator('[data-testid^="kick-combobox"]')).toHaveCount(0);
 
-      await expect(input).toBeVisible();
-      expect(await input.evaluate((element) => (element as HTMLInputElement).readOnly)).toBe(false);
-      await expect(input).toHaveAttribute('list', /.+/);
+    for (const testId of KICK_SELECT_IDS) {
+      const select = panel.getByTestId(testId);
 
-      const optionCount = await optionList.locator('option').count();
-      expect(optionCount).toBeGreaterThanOrEqual(2);
-      expect(optionCount).toBeLessThanOrEqual(3);
+      await expect(select).toBeVisible();
+      await expect(select).toHaveJSProperty('tagName', 'SELECT');
+      await expect(select).not.toHaveAttribute('aria-autocomplete');
+      await expect(select).not.toHaveAttribute('list');
 
-      const value = `Проверка ${index + 1}`;
-      await input.fill(value);
-      await expect(input).toHaveValue(value);
+      const optionCount = await select.locator('option').count();
+      expect(optionCount).toBeGreaterThanOrEqual(1);
+
+      launchSelectMetrics.push(await readSelectMetrics(select));
+    }
+
+    await page.getByRole('banner').locator('#praios-header-tab-stats').click();
+    await expect(statsSelect).toBeVisible();
+    const statsSelectMetrics = await readSelectMetrics(statsSelect);
+
+    for (const metrics of launchSelectMetrics) {
+      expect(metrics).toEqual(statsSelectMetrics);
     }
   });
 

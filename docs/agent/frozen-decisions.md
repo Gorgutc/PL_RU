@@ -124,12 +124,11 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 - Panel-level controls in `kick`, `stats`, and `sat` side panels align their
   right edge to the same right edge as the footer action row, within a `1px` tolerance.
   The shared `TabSidePanel` spacing contract owns this alignment.
-- Launch-parameter dropdown-like fields use the shared editable dropdown
-  control: Blueprint `InputGroup` plus a native `datalist` with 2-3 temporary
-  option stubs. The control stays text-editable while preserving dropdown
-  suggestions for `Тип точки`, `Точка пуска`, `Номер расчета`, `Тип изделия`,
-  `Номер изделия`, `Номер ПЗ`, `Тип БЧ`, `Пампушка`, `Вилка`, `Редиска`,
-  `Камера`, and `Интерес`.
+- Launch-parameter selection fields use the shared simple dropdown control:
+  Blueprint `HTMLSelect` rendering a native `<select>`, matching the existing
+  `stats` and `sat` side-panel visual contract. `kick`, `stats`, and `sat`
+  selection fields must not use `InputGroup` plus `datalist`, `aria-autocomplete`,
+  the native `list` attribute, or `kick-combobox-*` test IDs.
 - Launch comments are editable `TextArea` controls. Launch date/time and the
   statistics `Начало отсчета` / `Окончание отсчета` period fields use editable
   visible text inputs in the reference format (`02.05.2026 | 16:31` for launch,
@@ -187,6 +186,9 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   `referencePath`.
 - `pnpm check:visual` fails closed when the base ref is unavailable unless
   `VISUAL_QA_ALLOW_MISSING_BASE=1` is explicitly set for a known local fallback.
-  Diff PNG output must stay in ignored visual-artifact directories such as
-  `reports/visual-qa/` or `test-results/visual-qa/`, and must never overwrite a
-  tracked source, config, or Git file.
+  Final actual and diff PNG output for PR handoff and subagents must stay under
+  ignored `reports/visual-qa/`. Tracked evidence must not point final artifacts
+  at `test-results/visual-qa/` because Playwright clears that directory. Visual
+  capture waits for visible MapLibre canvas, attribution, and zoom controls
+  before screenshotting; if the canvas is blank, the guard retries capture once,
+  then returns FAIL instead of looping.
