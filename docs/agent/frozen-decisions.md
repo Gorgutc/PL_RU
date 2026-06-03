@@ -118,15 +118,44 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   placeholder panel until the probing task gets its own full spec.
 - Left-rail buttons preserve the shared visual state contract: transparent rest,
   `#528bff` hover, `#2970ff` active, white icon color, and one uniform button
-  size.
+  size. Active rail buttons must not keep a persistent outline, border, or
+  shadow after pointer activation; keyboard `:focus-visible` remains available
+  for active and non-active rail buttons.
+- Panel-level controls in `kick`, `stats`, and `sat` side panels align their
+  right edge to the same right edge as the footer action row, within a `1px` tolerance.
+  The shared `TabSidePanel` spacing contract owns this alignment.
+- Launch-parameter selection fields use the shared simple dropdown control:
+  Blueprint `HTMLSelect` rendering a native `<select>`, matching the existing
+  `stats` and `sat` side-panel visual contract. `kick`, `stats`, and `sat`
+  selection fields must not use `InputGroup` plus `datalist`, `aria-autocomplete`,
+  the native `list` attribute, or `kick-combobox-*` test IDs.
+- Launch comments are editable `TextArea` controls. Launch date/time and the
+  statistics `Начало отсчета` / `Окончание отсчета` period fields use editable
+  visible text inputs in the reference format (`02.05.2026 | 16:31` for launch,
+  `24-04-2025 | 00:00` for statistics) plus a native `datetime-local` calendar
+  input kept inside the shared control for the calendar affordance.
+- The probing (`sat`) comment control must not inherit the launch-specific
+  editable `kick-comment` selector or behavior unless a future task explicitly
+  changes that contract.
+- Launch checkbox rows keep a compact `16px` Blueprint indicator aligned to
+  the same internal right inset as other controls and must not keep a
+  pointer-click focus outline or shadow; keyboard focus remains visible on the
+  indicator. Footer action focus uses an inset ring so button borders are not
+  clipped by the panel edge.
 - The center workspace is a Blueprint `Card` map surface that fills
-  `minmax(0, 1fr)`. It is intentionally a CSS placeholder, not a real map and
-  not a Google Drive reference image, until a dedicated map task replaces it.
+  `minmax(0, 1fr)` and renders a real client-side `MapLibre GL JS` map.
+  MapLibre CSS is imported through `src/app/layout.tsx`.
+- The default map provider is OpenStreetMap raster tiles from
+  `https://tile.openstreetmap.org/{z}/{x}/{y}.png`, with expanded visible OSM
+  attribution and MapLibre navigation controls. Do not add prefetching or
+  offline tile downloads. Provider URL, attribution, center, zoom, and style
+  settings stay centralized in `src/components/WorkspaceMap/mapConfig.ts` so a
+  future provider swap is localized.
 - Large panel controls reuse Blueprint primitives (`HTMLSelect`, `InputGroup`,
   `TextArea`, `Checkbox`, and `Button`) and take spacing, widths, colors, and
   sizes from `src/styles/_tokens.scss`.
 - The Header visual contract is not part of this shell contract and must not be
-  changed when extending the left side menu or map placeholder.
+  changed when extending the left side menu or real map.
 
 ## Quality Tooling
 
@@ -157,6 +186,9 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   `referencePath`.
 - `pnpm check:visual` fails closed when the base ref is unavailable unless
   `VISUAL_QA_ALLOW_MISSING_BASE=1` is explicitly set for a known local fallback.
-  Diff PNG output must stay in ignored visual-artifact directories such as
-  `reports/visual-qa/` or `test-results/visual-qa/`, and must never overwrite a
-  tracked source, config, or Git file.
+  Final actual and diff PNG output for PR handoff and subagents must stay under
+  ignored `reports/visual-qa/`. Tracked evidence must not point final artifacts
+  at `test-results/visual-qa/` because Playwright clears that directory. Visual
+  capture waits for visible MapLibre canvas, attribution, and zoom controls
+  before screenshotting; if the canvas is blank, the guard retries capture once,
+  then returns FAIL instead of looping.

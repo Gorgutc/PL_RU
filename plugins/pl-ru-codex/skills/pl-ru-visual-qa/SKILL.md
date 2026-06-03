@@ -25,9 +25,17 @@ Use this for every UI/frontend change before delivery.
   the app URL, selector, viewport, and click actions so `pnpm check:visual`
   captures a fresh `actualPath` before comparing it with the committed
   `referencePath`.
-- Keep `diffPath` output under ignored visual-artifact directories such as
-  `reports/visual-qa/` or `test-results/visual-qa/`; never point it at source,
-  config, `.git/`, or any tracked file.
+- Keep final `actualPath` and `diffPath` output under ignored
+  `reports/visual-qa/`; never point it at `test-results/visual-qa/`, source,
+  config, `.git/`, or any tracked file. Playwright clears `test-results/`, so it
+  is not durable handoff evidence.
+- If expected visual artifacts are absent in the working copy, run
+  `pnpm.cmd check:visual` once and inspect `reports/visual-qa/`. If artifacts are
+  still absent or mismatch after that one run, return FAIL with paths and reason
+  instead of entering a retry loop.
+- Workspace/map captures must wait for visible MapLibre canvas, attribution, and
+  zoom controls. If the canvas is blank, one capture retry is allowed; a second
+  blank capture is FAIL.
 - Pair pixel comparison with DOM/CSS metric assertions for sizes, spacing,
   border radii, colors, offsets, responsive behavior, accessible states, focus,
   and keyboard dismissal.
@@ -48,7 +56,7 @@ visual-qa: PASS
 - tolerance: ...
 - mismatched areas: none above tolerance
 - DOM/CSS metrics: PASS
-- artifacts: reports/visual-qa/... actual/reference/diff PNGs listed in latest.json
+- artifacts: reports/visual-qa/... actual/diff PNGs listed in latest.json; references stay in committed or external referencePath sources
 ```
 
 or:

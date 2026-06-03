@@ -782,9 +782,12 @@ async function testAgentVisualQaContract() {
     'export const visualQaContract = Object.freeze({',
     "baseDiffFailureMode: 'fail-closed-unless-VISUAL_QA_ALLOW_MISSING_BASE'",
     "changeSources: ['base-diff', 'unstaged-worktree', 'staged-index', 'untracked-files']",
-    "diffArtifactPathPrefixes: ['reports/visual-qa/', 'test-results/visual-qa/']",
+    "diffArtifactPathPrefixes: ['reports/visual-qa/']",
     "pixelComparisonEngine: 'playwright-canvas-png-diff'",
     "screenshotCaptureEngine: 'playwright-live-app-screenshot'",
+    'getCaptureReadinessSelectors',
+    'Playwright clears test-results/visual-qa/',
+    'MapLibre canvas stayed blank after one capture retry',
     'captureActualScreenshot',
     'pixelComparison',
     'pixelComparison.cases must list screenshot/reference PNG pairs',
@@ -809,7 +812,9 @@ async function testAgentVisualQaContract() {
 // ─── B. Runtime (dev server) ─────────────────────────────────────────────────
 
 async function testWorkspaceShellContract() {
+  const pkg = JSON.parse(await readFile(path.join(ROOT, 'package.json'), 'utf8'));
   const tokens = await readFile(path.join(SRC, 'styles', '_tokens.scss'), 'utf8');
+  const layout = await readFile(path.join(SRC, 'app', 'layout.tsx'), 'utf8');
   const appShell = await readFile(path.join(SRC, 'components', 'AppShell', 'AppShell.tsx'), 'utf8');
   const appShellStyles = await readFile(
     path.join(SRC, 'components', 'AppShell', 'AppShell.module.scss'),
@@ -820,8 +825,16 @@ async function testWorkspaceShellContract() {
     path.join(SRC, 'components', 'TabSidePanel', 'TabSidePanel.tsx'),
     'utf8',
   );
+  const tabSidePanelStyles = await readFile(
+    path.join(SRC, 'components', 'TabSidePanel', 'TabSidePanel.module.scss'),
+    'utf8',
+  );
   const workspaceMap = await readFile(
     path.join(SRC, 'components', 'WorkspaceMap', 'WorkspaceMap.tsx'),
+    'utf8',
+  );
+  const mapConfig = await readFile(
+    path.join(SRC, 'components', 'WorkspaceMap', 'mapConfig.ts'),
     'utf8',
   );
   const workspaceSpec = await readFile(
@@ -846,7 +859,24 @@ async function testWorkspaceShellContract() {
     if (actual !== expected) failures.push(`${token}=${actual ?? '(missing)'}`);
   }
 
+  if (!pkg.dependencies?.['maplibre-gl']) failures.push('package.json missing maplibre-gl');
+  for (const forbidden of [
+    '<datalist',
+    'aria-autocomplete',
+    'list={',
+    'kick-combobox',
+    'EditableDropdownControl',
+    'EditableDropdownFieldGrid',
+  ]) {
+    if (tabSidePanel.includes(forbidden)) {
+      failures.push(`TabSidePanel.tsx must not include ${forbidden}`);
+    }
+  }
+
   failures.push(
+    ...missingSnippets(layout, ["import 'maplibre-gl/dist/maplibre-gl.css';"]).map(
+      (snippet) => `layout.tsx missing ${snippet}`,
+    ),
     ...missingSnippets(appShell, [
       '<main',
       '<section',
@@ -878,6 +908,27 @@ async function testWorkspaceShellContract() {
       'InputGroup',
       'TextArea',
       'Checkbox',
+      'type="datetime-local"',
+      'type="text"',
+      '-calendar',
+      'aria-label="Открыть календарь"',
+      '02.05.2026 | 16:31',
+      '24-04-2025 | 00:00',
+      'kick-comment',
+      'kick-select-point-type',
+      'kick-select-launch-point',
+      'testId="kick-select-calculation-number"',
+      'testId="kick-select-product-type"',
+      'testId="kick-select-product-number"',
+      'testId="kick-select-pz-number"',
+      'testId="kick-select-warhead-type"',
+      'testId="kick-select-pampushka"',
+      'testId="kick-select-fork"',
+      'testId="kick-select-radish"',
+      'testId="kick-select-camera"',
+      'testId="kick-select-interest"',
+      'testId="stats-start-datetime"',
+      'testId="stats-end-datetime"',
       'testId="kick-side-panel"',
       'testId="stats-side-panel"',
       'testId="sat-side-panel"',
@@ -885,14 +936,61 @@ async function testWorkspaceShellContract() {
       'Фильтры таблицы',
       'Зондирование',
     ]).map((snippet) => `TabSidePanel.tsx missing ${snippet}`),
+    ...missingSnippets(tabSidePanelStyles, [
+      '.checkbox.checkbox',
+      'input:focus-visible',
+      '.actionButton.actionButton:focus-visible',
+    ]).map((snippet) => `TabSidePanel.module.scss missing ${snippet}`),
     ...missingSnippets(workspaceMap, [
       'Card',
+      'maplibregl.Map',
+      'NavigationControl',
+      'AttributionControl',
+      'attributionControl: false',
+      'compact: false',
+      'center:',
+      'maxZoom:',
+      'minZoom:',
+      'zoom:',
       'data-testid="workspace-map"',
       'data-testid="workspace-map-card"',
+      'data-testid="workspace-map-canvas"',
     ]).map((snippet) => `WorkspaceMap.tsx missing ${snippet}`),
+    ...missingSnippets(mapConfig, [
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      '&copy; OpenStreetMap contributors',
+      'version: 8',
+      'sources:',
+      'tiles: [',
+      'attribution:',
+      "type: 'raster'",
+      'tileSize: 256',
+      'layers:',
+    ]).map((snippet) => `mapConfig.ts missing ${snippet}`),
     ...missingSnippets(workspaceSpec, [
       'keeps compact left rail anchored',
       'syncs tab-specific left panels with Header state',
+      'aligns side-panel controls to the same right edge as footer actions',
+      'keeps launch checkbox controls compact without pointer focus outlines',
+      'preserves keyboard focus visibility for launch checkbox and footer actions',
+      'uses the shared native select dropdown contract for launch selection fields',
+      'KICK_SELECT_IDS',
+      'input[aria-autocomplete], input[list], datalist',
+      '[data-testid^="kick-combobox"]',
+      'makes launch comment and date fields editable',
+      'fits the launch date-time value in the narrow launch field',
+      'uses editable date-time controls in statistics period filters',
+      'expectCalendarInputUsable',
+      'kick-launch-datetime-calendar',
+      'keeps probing comment separate from the editable launch comment',
+      'indicatorRight - (metrics.controlRight - 10)',
+      'fullWidthFooterButton',
+      'preserves keyboard focus on an active left rail button',
+      'renders an interactive MapLibre map instead of the CSS placeholder',
+      'maplibregl-canvas',
+      'maplibregl-ctrl-attrib',
+      'maplibregl-compact',
+      'outline-style',
       'workspace-map-card',
       'left-rail-button-primary',
       'kick-side-panel',
@@ -904,13 +1002,28 @@ async function testWorkspaceShellContract() {
       '## Workspace Shell And Left Sidebar',
       'compact left rail is fixed at `50px` wide',
       'Wide side panels are fixed at `300px` wide',
-      'CSS placeholder, not a real map',
+      'real client-side `MapLibre GL JS` map',
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      'expanded visible OSM',
+      'within a `1px` tolerance',
+      'shared simple dropdown control',
+      'Blueprint `HTMLSelect` rendering a native `<select>`',
+      '`kick`, `stats`, and `sat`',
+      '`InputGroup` plus `datalist`',
+      'Launch comments are editable `TextArea`',
+      'visible text inputs in the reference format',
+      'native `datetime-local` calendar',
+      'probing (`sat`) comment control',
+      'Launch checkbox rows keep a compact `16px` Blueprint indicator',
+      'pointer-click focus outline or shadow',
+      'keyboard focus remains visible',
+      'Footer action focus uses an inset ring',
       'Header visual contract is not part of this shell contract',
     ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
   );
 
   record(
-    'A13: workspace shell, left sidebar, and map placeholder contract stay frozen',
+    'A13: workspace shell, left sidebar, and real map contract stay frozen',
     failures.length === 0,
     failures.length ? failures.slice(0, 10).join('; ') : undefined,
   );

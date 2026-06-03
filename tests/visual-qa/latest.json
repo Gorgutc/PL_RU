@@ -1,8 +1,18 @@
 {
   "status": "PASS",
-  "taskScope": "codex/left-sidebar-shell workspace shell visual QA",
+  "taskScope": "codex/left-sidebar-map-fixes left rail, side panels, and MapLibre map visual QA",
   "references": [
-    "Committed current-render baseline because no external replacement PNG was provided for the workspace shell task.",
+    "Google Drive: button_rest.png",
+    "Google Drive: button_hover.png",
+    "Google Drive: button_active.png",
+    "Google Drive: Боковая навигация_map_1080px.png",
+    "Google Drive: Боковая навигация - Введение пусков заведение_1080px.png",
+    "Google Drive: Боковая навигация_Статистика_1080px.png",
+    "Google Drive: Общий вид_зондирование.png",
+    "Google Drive: Общий вид_введение пусков.png",
+    "Google Drive: Общий вид статистика_статистика.png",
+    "Google Drive: Общий вид_статистика_таблица.png",
+    "Committed current-render baseline refreshed after the approved MapLibre + OSM replacement.",
     "tests/visual-qa/workspace-shell/map-rail-1920x1080.reference.png",
     "tests/visual-qa/workspace-shell/map-rail-1920x768.reference.png",
     "tests/visual-qa/workspace-shell/kick-panel-1920x1080.reference.png",
@@ -23,7 +33,10 @@
       "Workspace shell starts at y=48 and fills remaining viewport height.",
       "Compact rail remains 50px wide.",
       "Wide side panels remain 300px wide.",
-      "Workspace map remains visible for map, kick, stats, and sat states."
+      "Active left-rail buttons use blue fill without persistent outline, border, or shadow after pointer activation.",
+      "Panel-level controls in kick, stats, and sat align to the footer action right edge within 1px, except intentional left-only single-column rows.",
+      "Workspace map remains visible for map, kick, stats, and sat states.",
+      "Workspace map renders MapLibre canvas, zoom controls, and expanded visible OpenStreetMap attribution."
     ]
   },
   "pixelComparison": {
@@ -35,12 +48,13 @@
         "viewport": "1920x1080",
         "state": "map rail",
         "referencePath": "tests/visual-qa/workspace-shell/map-rail-1920x1080.reference.png",
-        "actualPath": "test-results/visual-qa/workspace-shell/map-rail-1920x1080.actual.png",
-        "diffPath": "test-results/visual-qa/workspace-shell/map-rail-1920x1080.diff.png",
+        "actualPath": "reports/visual-qa/workspace-shell/map-rail-1920x1080.actual.png",
+        "diffPath": "reports/visual-qa/workspace-shell/map-rail-1920x1080.diff.png",
         "capture": {
           "url": "/",
           "selector": "[data-testid=\"workspace-shell\"]",
-          "viewport": { "width": 1920, "height": 1080 }
+          "viewport": { "width": 1920, "height": 1080 },
+          "actions": [{ "type": "click", "selector": "body", "waitAfterMs": 3000 }]
         }
       },
       {
@@ -48,12 +62,13 @@
         "viewport": "1920x768",
         "state": "map rail",
         "referencePath": "tests/visual-qa/workspace-shell/map-rail-1920x768.reference.png",
-        "actualPath": "test-results/visual-qa/workspace-shell/map-rail-1920x768.actual.png",
-        "diffPath": "test-results/visual-qa/workspace-shell/map-rail-1920x768.diff.png",
+        "actualPath": "reports/visual-qa/workspace-shell/map-rail-1920x768.actual.png",
+        "diffPath": "reports/visual-qa/workspace-shell/map-rail-1920x768.diff.png",
         "capture": {
           "url": "/",
           "selector": "[data-testid=\"workspace-shell\"]",
-          "viewport": { "width": 1920, "height": 768 }
+          "viewport": { "width": 1920, "height": 768 },
+          "actions": [{ "type": "click", "selector": "body", "waitAfterMs": 3000 }]
         }
       },
       {
@@ -61,13 +76,20 @@
         "viewport": "1920x1080",
         "state": "kick panel",
         "referencePath": "tests/visual-qa/workspace-shell/kick-panel-1920x1080.reference.png",
-        "actualPath": "test-results/visual-qa/workspace-shell/kick-panel-1920x1080.actual.png",
-        "diffPath": "test-results/visual-qa/workspace-shell/kick-panel-1920x1080.diff.png",
+        "actualPath": "reports/visual-qa/workspace-shell/kick-panel-1920x1080.actual.png",
+        "diffPath": "reports/visual-qa/workspace-shell/kick-panel-1920x1080.diff.png",
         "capture": {
           "url": "/",
           "selector": "[data-testid=\"workspace-shell\"]",
           "viewport": { "width": 1920, "height": 1080 },
-          "actions": [{ "type": "click", "selector": "#praios-header-tab-kick" }]
+          "actions": [
+            {
+              "type": "click",
+              "selector": "[data-testid=\"workspace-shell\"]",
+              "waitAfterMs": 1000
+            },
+            { "type": "click", "selector": "#praios-header-tab-kick", "waitAfterMs": 3000 }
+          ]
         }
       },
       {
@@ -75,13 +97,20 @@
         "viewport": "1920x1080",
         "state": "stats panel",
         "referencePath": "tests/visual-qa/workspace-shell/stats-panel-1920x1080.reference.png",
-        "actualPath": "test-results/visual-qa/workspace-shell/stats-panel-1920x1080.actual.png",
-        "diffPath": "test-results/visual-qa/workspace-shell/stats-panel-1920x1080.diff.png",
+        "actualPath": "reports/visual-qa/workspace-shell/stats-panel-1920x1080.actual.png",
+        "diffPath": "reports/visual-qa/workspace-shell/stats-panel-1920x1080.diff.png",
         "capture": {
           "url": "/",
           "selector": "[data-testid=\"workspace-shell\"]",
           "viewport": { "width": 1920, "height": 1080 },
-          "actions": [{ "type": "click", "selector": "#praios-header-tab-stats" }]
+          "actions": [
+            {
+              "type": "click",
+              "selector": "[data-testid=\"workspace-shell\"]",
+              "waitAfterMs": 1000
+            },
+            { "type": "click", "selector": "#praios-header-tab-stats", "waitAfterMs": 3000 }
+          ]
         }
       },
       {
@@ -89,13 +118,20 @@
         "viewport": "1920x1080",
         "state": "sat panel",
         "referencePath": "tests/visual-qa/workspace-shell/sat-panel-1920x1080.reference.png",
-        "actualPath": "test-results/visual-qa/workspace-shell/sat-panel-1920x1080.actual.png",
-        "diffPath": "test-results/visual-qa/workspace-shell/sat-panel-1920x1080.diff.png",
+        "actualPath": "reports/visual-qa/workspace-shell/sat-panel-1920x1080.actual.png",
+        "diffPath": "reports/visual-qa/workspace-shell/sat-panel-1920x1080.diff.png",
         "capture": {
           "url": "/",
           "selector": "[data-testid=\"workspace-shell\"]",
           "viewport": { "width": 1920, "height": 1080 },
-          "actions": [{ "type": "click", "selector": "#praios-header-tab-sat" }]
+          "actions": [
+            {
+              "type": "click",
+              "selector": "[data-testid=\"workspace-shell\"]",
+              "waitAfterMs": 1000
+            },
+            { "type": "click", "selector": "#praios-header-tab-sat", "waitAfterMs": 3000 }
+          ]
         }
       }
     ]

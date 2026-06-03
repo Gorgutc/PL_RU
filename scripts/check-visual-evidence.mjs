@@ -15,7 +15,7 @@ const allowMissingBaseRef = process.env.VISUAL_QA_ALLOW_MISSING_BASE === '1';
 export const visualQaContract = Object.freeze({
   baseDiffFailureMode: 'fail-closed-unless-VISUAL_QA_ALLOW_MISSING_BASE',
   changeSources: ['base-diff', 'unstaged-worktree', 'staged-index', 'untracked-files'],
-  diffArtifactPathPrefixes: ['reports/visual-qa/', 'test-results/visual-qa/'],
+  diffArtifactPathPrefixes: ['reports/visual-qa/'],
   pixelComparisonEngine: 'playwright-canvas-png-diff',
   screenshotCaptureEngine: 'playwright-live-app-screenshot',
   requiredPixelCaseFields: ['name', 'viewport', 'state', 'referencePath', 'actualPath', 'diffPath'],
@@ -164,6 +164,14 @@ function relativeWorkspacePath(file) {
   return normalizeFile(path.relative(root, file));
 }
 
+function isTrackedDefaultEvidencePath(file) {
+  return normalizeFile(file) === trackedDefaultEvidencePath;
+}
+
+function usesPlaywrightTestResultsPath(file) {
+  return typeof file === 'string' && normalizeFile(file).startsWith('test-results/visual-qa/');
+}
+
 function isTrackedFile(file) {
   try {
     execFileSync('git', ['ls-files', '--error-unmatch', '--', file], {
@@ -278,7 +286,21 @@ function validateCapture(testCase, label, failures) {
   }
 }
 
-export function validateEvidence(evidence) {
+export function getCaptureReadinessSelectors(testCase) {
+  const selector = testCase.capture?.selector;
+
+  if (typeof selector !== 'string') return [];
+  if (!selector.includes('workspace-shell') && !selector.includes('workspace-map')) return [];
+
+  return [
+    '[data-testid="workspace-map"] .maplibregl-canvas',
+    '[data-testid="workspace-map"] .maplibregl-ctrl-attrib',
+    '[data-testid="workspace-map"] .maplibregl-ctrl-zoom-in',
+    '[data-testid="workspace-map"] .maplibregl-ctrl-zoom-out',
+  ];
+}
+
+export function validateEvidence(evidence, { evidencePath } = {}) {
   const failures = [];
   const cases = evidence.pixelComparison?.cases;
   const fallbackAccepted = metricOnlyFallbackAccepted(evidence);
@@ -323,6 +345,15 @@ export function validateEvidence(evidence) {
           failures.push(`${label}.${key} is required`);
         }
       }
+      if (
+        isTrackedDefaultEvidencePath(evidencePath ?? '') &&
+        (usesPlaywrightTestResultsPath(testCase.actualPath) ||
+          usesPlaywrightTestResultsPath(testCase.diffPath))
+      ) {
+        failures.push(
+          `${label}.actualPath/diffPath must use reports/visual-qa/ for tracked PR evidence; Playwright clears test-results/visual-qa/, so it is not durable enough for handoff or subagents`,
+        );
+      }
       if (typeof testCase.diffPath === 'string' && testCase.diffPath.length > 0) {
         try {
           resolveDiffArtifactPath(testCase.diffPath, `${label}.diffPath`);
@@ -357,6 +388,144 @@ function imageDataUrl(file) {
   return `data:image/png;base64,${readFileSync(file).toString('base64')}`;
 }
 
+export function createPngAnalysisProbe() {
+  return async ({ actualDataUrl, operation, pixelDelta, referenceDataUrl, region }) => {
+    function loadImage(source) {
+      return new Promise((resolve, reject) => {
+        const image = new globalThis.Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error(`Unable to decode PNG: ${source.slice(0, 32)}`));
+        image.src = source;
+      });
+    }
+
+    function readImageData(image, width, height, crop) {
+      const canvas = globalThis.document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+
+      if (context == null) throw new Error('Unable to create PNG analysis canvas context');
+
+      context.clearRect(0, 0, width, height);
+      context.drawImage(image, 0, 0);
+
+      if (crop == null) return context.getImageData(0, 0, width, height).data;
+
+      return context.getImageData(crop.x, crop.y, crop.width, crop.height).data;
+    }
+
+    function pixelsAreUniform(data, width, height) {
+      if (data.length < 4 || width <= 0 || height <= 0) return true;
+
+      const sampleCount = Math.min(400, width * height);
+      const step = Math.max(1, Math.floor((width * height) / sampleCount));
+      const firstPixel = `${data[0]}:${data[1]}:${data[2]}:${data[3]}`;
+
+      for (let pixel = step; pixel < width * height; pixel += step) {
+        const offset = pixel * 4;
+        const currentPixel = `${data[offset]}:${data[offset + 1]}:${data[offset + 2]}:${data[offset + 3]}`;
+
+        if (currentPixel !== firstPixel) return false;
+      }
+
+      return true;
+    }
+
+    if (operation === 'blank-region') {
+      const actualImage = await loadImage(actualDataUrl);
+      const scaleX = actualImage.naturalWidth / region.targetWidth;
+      const scaleY = actualImage.naturalHeight / region.targetHeight;
+      const x = Math.max(0, Math.floor(region.x * scaleX));
+      const y = Math.max(0, Math.floor(region.y * scaleY));
+      const width = Math.min(
+        actualImage.naturalWidth - x,
+        Math.max(1, Math.round(region.width * scaleX)),
+      );
+      const height = Math.min(
+        actualImage.naturalHeight - y,
+        Math.max(1, Math.round(region.height * scaleY)),
+      );
+
+      if (width <= 0 || height <= 0) return { blank: true };
+
+      try {
+        const pixels = readImageData(
+          actualImage,
+          actualImage.naturalWidth,
+          actualImage.naturalHeight,
+          {
+            height,
+            width,
+            x,
+            y,
+          },
+        );
+
+        return { blank: pixelsAreUniform(pixels, width, height) };
+      } catch {
+        return { blank: true };
+      }
+    }
+
+    const [referenceImage, actualImage] = await Promise.all([
+      loadImage(referenceDataUrl),
+      loadImage(actualDataUrl),
+    ]);
+    const width = Math.max(referenceImage.naturalWidth, actualImage.naturalWidth);
+    const height = Math.max(referenceImage.naturalHeight, actualImage.naturalHeight);
+    const totalPixels = width * height;
+    const referencePixels = readImageData(referenceImage, width, height);
+    const actualPixels = readImageData(actualImage, width, height);
+    const diffCanvas = globalThis.document.createElement('canvas');
+    diffCanvas.width = width;
+    diffCanvas.height = height;
+    const diffContext = diffCanvas.getContext('2d');
+
+    if (diffContext == null) throw new Error('Unable to create PNG diff canvas context');
+
+    const diffImage = diffContext.createImageData(width, height);
+    let mismatchedPixels = 0;
+
+    for (let offset = 0; offset < referencePixels.length; offset += 4) {
+      const delta = Math.max(
+        Math.abs(referencePixels[offset] - actualPixels[offset]),
+        Math.abs(referencePixels[offset + 1] - actualPixels[offset + 1]),
+        Math.abs(referencePixels[offset + 2] - actualPixels[offset + 2]),
+        Math.abs(referencePixels[offset + 3] - actualPixels[offset + 3]),
+      );
+
+      if (delta > pixelDelta) {
+        mismatchedPixels += 1;
+        diffImage.data[offset] = 255;
+        diffImage.data[offset + 1] = 0;
+        diffImage.data[offset + 2] = 255;
+        diffImage.data[offset + 3] = 255;
+      } else {
+        diffImage.data[offset] = 0;
+        diffImage.data[offset + 1] = 0;
+        diffImage.data[offset + 2] = 0;
+        diffImage.data[offset + 3] = 0;
+      }
+    }
+
+    diffContext.putImageData(diffImage, 0, 0);
+
+    return {
+      actualHeight: actualImage.naturalHeight,
+      actualWidth: actualImage.naturalWidth,
+      diffPngBase64: diffCanvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, ''),
+      height,
+      mismatchedPixels,
+      mismatchRatio: totalPixels === 0 ? 1 : mismatchedPixels / totalPixels,
+      referenceHeight: referenceImage.naturalHeight,
+      referenceWidth: referenceImage.naturalWidth,
+      totalPixels,
+      width,
+    };
+  };
+}
+
 async function comparePngPair(page, testCase, tolerance) {
   const referencePath = resolveWorkspacePath(
     testCase.referencePath,
@@ -372,86 +541,12 @@ async function comparePngPair(page, testCase, tolerance) {
     return [`${testCase.name}: actualPath does not exist (${testCase.actualPath})`];
   }
 
-  const result = await page.evaluate(
-    async ({ actualDataUrl, pixelDelta, referenceDataUrl }) => {
-      function loadImage(source) {
-        return new Promise((resolve, reject) => {
-          const image = new globalThis.Image();
-          image.onload = () => resolve(image);
-          image.onerror = () => reject(new Error(`Unable to decode PNG: ${source.slice(0, 32)}`));
-          image.src = source;
-        });
-      }
-
-      function getImageData(image, width, height) {
-        const canvas = globalThis.document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const context = canvas.getContext('2d', { willReadFrequently: true });
-        context.clearRect(0, 0, width, height);
-        context.drawImage(image, 0, 0);
-        return context.getImageData(0, 0, width, height).data;
-      }
-
-      const [referenceImage, actualImage] = await Promise.all([
-        loadImage(referenceDataUrl),
-        loadImage(actualDataUrl),
-      ]);
-      const width = Math.max(referenceImage.naturalWidth, actualImage.naturalWidth);
-      const height = Math.max(referenceImage.naturalHeight, actualImage.naturalHeight);
-      const totalPixels = width * height;
-      const referencePixels = getImageData(referenceImage, width, height);
-      const actualPixels = getImageData(actualImage, width, height);
-      const diffCanvas = globalThis.document.createElement('canvas');
-      diffCanvas.width = width;
-      diffCanvas.height = height;
-      const diffContext = diffCanvas.getContext('2d');
-      const diffImage = diffContext.createImageData(width, height);
-      let mismatchedPixels = 0;
-
-      for (let offset = 0; offset < referencePixels.length; offset += 4) {
-        const delta = Math.max(
-          Math.abs(referencePixels[offset] - actualPixels[offset]),
-          Math.abs(referencePixels[offset + 1] - actualPixels[offset + 1]),
-          Math.abs(referencePixels[offset + 2] - actualPixels[offset + 2]),
-          Math.abs(referencePixels[offset + 3] - actualPixels[offset + 3]),
-        );
-
-        if (delta > pixelDelta) {
-          mismatchedPixels += 1;
-          diffImage.data[offset] = 255;
-          diffImage.data[offset + 1] = 0;
-          diffImage.data[offset + 2] = 255;
-          diffImage.data[offset + 3] = 255;
-        } else {
-          diffImage.data[offset] = 0;
-          diffImage.data[offset + 1] = 0;
-          diffImage.data[offset + 2] = 0;
-          diffImage.data[offset + 3] = 0;
-        }
-      }
-
-      diffContext.putImageData(diffImage, 0, 0);
-
-      return {
-        actualHeight: actualImage.naturalHeight,
-        actualWidth: actualImage.naturalWidth,
-        diffPngBase64: diffCanvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, ''),
-        height,
-        mismatchedPixels,
-        mismatchRatio: totalPixels === 0 ? 1 : mismatchedPixels / totalPixels,
-        referenceHeight: referenceImage.naturalHeight,
-        referenceWidth: referenceImage.naturalWidth,
-        totalPixels,
-        width,
-      };
-    },
-    {
-      actualDataUrl: imageDataUrl(actualPath),
-      pixelDelta: tolerance.pixelDelta,
-      referenceDataUrl: imageDataUrl(referencePath),
-    },
-  );
+  const result = await page.evaluate(createPngAnalysisProbe(), {
+    actualDataUrl: imageDataUrl(actualPath),
+    operation: 'compare',
+    pixelDelta: tolerance.pixelDelta,
+    referenceDataUrl: imageDataUrl(referencePath),
+  });
 
   mkdirSync(path.dirname(diffPath), { recursive: true });
   writeFileSync(diffPath, Buffer.from(result.diffPngBase64, 'base64'));
@@ -626,6 +721,116 @@ async function performCaptureAction(page, action) {
   }
 }
 
+async function waitForCaptureReadiness(page, testCase) {
+  for (const selector of getCaptureReadinessSelectors(testCase)) {
+    await page.locator(selector).first().waitFor({ state: 'visible' });
+  }
+}
+
+export function createMapCanvasBlankProbe() {
+  return (element) => {
+    const canvas = element;
+
+    if (!(canvas instanceof HTMLCanvasElement)) return true;
+    if (canvas.width === 0 || canvas.height === 0) return true;
+
+    const pixelsAreUniform = (data, width, height) => {
+      if (data.length < 4 || width <= 0 || height <= 0) return true;
+
+      const totalPixels = width * height;
+      const stride = Math.max(1, Math.ceil(totalPixels / 400));
+      const baseline = [data[0], data[1], data[2], data[3]];
+      let checked = 0;
+      let pixel = stride;
+
+      while (pixel < totalPixels && checked < 400) {
+        const offset = pixel * 4;
+
+        if (
+          data[offset] !== baseline[0] ||
+          data[offset + 1] !== baseline[1] ||
+          data[offset + 2] !== baseline[2] ||
+          data[offset + 3] !== baseline[3]
+        ) {
+          return false;
+        }
+
+        checked += 1;
+        pixel += stride;
+      }
+
+      return true;
+    };
+
+    const twoDimensionalContext = canvas.getContext('2d');
+
+    if (twoDimensionalContext != null) {
+      try {
+        const data = twoDimensionalContext.getImageData(0, 0, canvas.width, canvas.height).data;
+
+        return pixelsAreUniform(data, canvas.width, canvas.height);
+      } catch {
+        return true;
+      }
+    }
+
+    const webglContext =
+      canvas.getContext('webgl2') ??
+      canvas.getContext('webgl') ??
+      canvas.getContext('experimental-webgl');
+
+    if (webglContext == null) return true;
+
+    try {
+      const width = webglContext.drawingBufferWidth || canvas.width;
+      const height = webglContext.drawingBufferHeight || canvas.height;
+
+      if (width <= 0 || height <= 0) return true;
+
+      const pixels = new Uint8Array(width * height * 4);
+      webglContext.readPixels(
+        0,
+        0,
+        width,
+        height,
+        webglContext.RGBA,
+        webglContext.UNSIGNED_BYTE,
+        pixels,
+      );
+
+      return pixelsAreUniform(pixels, width, height);
+    } catch {
+      return true;
+    }
+  };
+}
+
+async function isMapScreenshotRegionBlank(page, testCase, target, actualPath) {
+  if (getCaptureReadinessSelectors(testCase).length === 0) return false;
+
+  const [targetBox, canvasBox] = await Promise.all([
+    target.boundingBox(),
+    page.locator('[data-testid="workspace-map"] .maplibregl-canvas').first().boundingBox(),
+  ]);
+
+  if (targetBox == null || canvasBox == null) return true;
+
+  const result = await page.evaluate(createPngAnalysisProbe(), {
+    actualDataUrl: imageDataUrl(actualPath),
+    operation: 'blank-region',
+    region: {
+      height: canvasBox.height,
+      targetHeight: targetBox.height,
+      targetWidth: targetBox.width,
+      width: canvasBox.width,
+      x: canvasBox.x - targetBox.x,
+      y: canvasBox.y - targetBox.y,
+    },
+  });
+
+  return result.blank;
+}
+
 async function captureActualScreenshot(page, testCase, baseUrl) {
   if (testCase.capture == null) return;
 
@@ -643,7 +848,19 @@ async function captureActualScreenshot(page, testCase, baseUrl) {
 
   const target = page.locator(testCase.capture.selector);
   await target.waitFor({ state: 'visible' });
+  await waitForCaptureReadiness(page, testCase);
   await target.screenshot({ path: actualPath });
+
+  if (await isMapScreenshotRegionBlank(page, testCase, target, actualPath)) {
+    await page.waitForTimeout(1_000);
+    await waitForCaptureReadiness(page, testCase);
+    await target.screenshot({ path: actualPath });
+
+    if (await isMapScreenshotRegionBlank(page, testCase, target, actualPath)) {
+      throw new Error(`${testCase.name}: MapLibre canvas stayed blank after one capture retry`);
+    }
+  }
+
   console.log(`visual-qa: captured ${testCase.name} -> ${relativeWorkspacePath(actualPath)}`);
 }
 
@@ -727,7 +944,7 @@ export async function main() {
   }
 
   const evidence = readEvidence(evidencePath);
-  const failures = validateEvidence(evidence);
+  const failures = validateEvidence(evidence, { evidencePath });
 
   if (failures.length === 0) {
     failures.push(...(await validatePixelComparison(evidence)));

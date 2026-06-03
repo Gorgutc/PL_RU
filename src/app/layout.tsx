@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Roboto, Roboto_Mono } from 'next/font/google';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import '../styles/blueprint-overrides.scss';
 import './globals.scss';
 

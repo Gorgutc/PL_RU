@@ -89,9 +89,10 @@ and pair the image diff with DOM/CSS metric assertions for spacing, sizes,
 colors, and responsive behavior. Do not rely on eyeballing alone. If a reference
 PNG is inaccessible, say so explicitly and block delivery unless the current
 user request accepts a metric-only fallback. Visual diff output must stay in
-ignored artifact folders such as `reports/visual-qa/` or
-`test-results/visual-qa/`; do not point it at source, config, docs, `.git/`, or
-tracked files.
+ignored `reports/visual-qa/`; do not point it at `test-results/visual-qa/`,
+source, config, docs, `.git/`, or tracked files. If visual artifacts are missing,
+run `pnpm.cmd check:visual` once; if they are still missing or mismatched,
+return FAIL with the paths and reason instead of entering a retry loop.
 
 ## Frozen Rules
 
@@ -110,6 +111,8 @@ Rules mirrored by `verify-frozen.ts` are binding:
 - A11: quality-tooling dedupe/shared-config contracts stay frozen.
 - A12: mandatory PL_RU subagent orchestration, component reuse, duplicate-code,
   exact-spec, and pixel-level visual QA gates stay documented.
+- A13: workspace shell, left sidebar, side-panel alignment, and real
+  MapLibre/OSM map contract stay frozen.
 
 Additional project rules:
 

@@ -24,9 +24,11 @@ the PNGs through Playwright at pixel level, writes `diffPath`, and fails when th
 dimensions or mismatch counts exceed `tolerance`. A self-reported PASS without
 local PNG pairs is not valid evidence.
 
-`diffPath` must live under `reports/visual-qa/` or `test-results/visual-qa/`.
-Those directories are ignored artifacts; do not point diff output at source,
-config, docs, `.git/`, or any tracked file.
+`actualPath` and `diffPath` for tracked PR evidence must live under
+`reports/visual-qa/`. That directory is ignored for generated artifacts; do not
+point final output at `test-results/visual-qa/`, source, config, docs, `.git/`,
+or any tracked file. `test-results/` is owned by Playwright and can be cleared
+before handoff or subagent review.
 
 When UI files changed in the base diff, CI-visible evidence must be committed at
 `tests/visual-qa/latest.json`. The ignored `reports/visual-qa/latest.json` path
@@ -48,6 +50,12 @@ clicking selectors before the screenshot:
   }
 }
 ```
+
+Workspace/map captures wait for the MapLibre canvas, attribution, and zoom
+controls before screenshotting. If the canvas is blank, the guard retries once
+and then fails without entering a loop. If expected `reports/visual-qa/`
+artifacts are absent, run `pnpm.cmd check:visual` once; if they are still absent
+or mismatched, return FAIL with paths and reason.
 
 Do not commit downloaded Google Drive PNGs unless the current user request
 explicitly asks for that export and `DO_NOT_PUSH.md` allows it.

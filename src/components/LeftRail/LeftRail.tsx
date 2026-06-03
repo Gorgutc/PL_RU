@@ -1,7 +1,7 @@
 // cspell:disable
 'use client';
 
-import { useState } from 'react';
+import { useState, type FocusEvent, type KeyboardEvent, type PointerEvent } from 'react';
 import { Button, Icon } from '@blueprintjs/core';
 import type { RailConfig, RailItem } from '@/components/AppNavigation/navigation';
 import styles from './LeftRail.module.scss';
@@ -28,6 +28,18 @@ function RailButton({
   pressed: boolean;
   onPress: () => void;
 }) {
+  function markPointerFocus(event: PointerEvent<HTMLButtonElement>) {
+    event.currentTarget.dataset.focusSource = 'pointer';
+  }
+
+  function markKeyboardFocus(event: KeyboardEvent<HTMLButtonElement>) {
+    event.currentTarget.dataset.focusSource = 'keyboard';
+  }
+
+  function clearFocusSource(event: FocusEvent<HTMLButtonElement>) {
+    delete event.currentTarget.dataset.focusSource;
+  }
+
   return (
     <Button
       aria-label={item.label}
@@ -35,7 +47,10 @@ function RailButton({
       className={cx(styles.button)}
       data-testid={item.primary ? 'left-rail-button-primary' : undefined}
       icon={<Icon className={styles.icon} icon={item.icon} size={18} />}
+      onBlur={clearFocusSource}
       onClick={onPress}
+      onKeyDown={markKeyboardFocus}
+      onPointerDown={markPointerFocus}
       title={item.label}
       type="button"
       variant="minimal"
