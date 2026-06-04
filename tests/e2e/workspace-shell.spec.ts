@@ -2,7 +2,59 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 
 const HEADER_HEIGHT = 48;
 const VIEWPORT_WIDTH = 1920;
+const RAIL_COLLAPSED_WIDTH = 50;
 const RAIL_HEIGHTS = [768, 900, 1080, 1200, 1440, 2160] as const;
+const RAIL_TAB_EXPECTATIONS = {
+  map: {
+    headerTabId: 'praios-header-tab-map',
+    expandedWidth: 195,
+    icons: {
+      primary: 'flag-outline',
+      documents: 'file-text',
+      objects: 'vector',
+      tools: 'mother-tool-outline',
+      search: 'search-outline',
+      information: 'file-outline',
+      support: 'transition-to-queries',
+      theme: 'moon-outline',
+      collapse: 'double-upper-right-outline',
+      settings: 'setting-outline',
+    },
+  },
+  bar: {
+    headerTabId: 'praios-header-tab-bar',
+    expandedWidth: 207,
+    icons: {
+      primary: 'ruler-outline',
+      timeline: 'zerolinetool-outline',
+      converter: 'globe-outline',
+      weather: 'weather',
+      search: 'search-outline',
+      information: 'file-outline',
+      support: 'transition-to-queries',
+      theme: 'moon-outline',
+      collapse: 'double-upper-right-outline',
+      settings: 'setting-outline',
+    },
+  },
+  tmi: {
+    headerTabId: 'praios-header-tab-tmi',
+    expandedWidth: 170,
+    icons: {
+      primary: 'ruler-outline',
+      area: 'buffer-outline',
+      circle: 'square-outline',
+      polygon: 'object-outline',
+      mark: 'flag-outline',
+      search: 'search-outline',
+      information: 'file-outline',
+      support: 'transition-to-queries',
+      theme: 'moon-outline',
+      collapse: 'double-upper-right-outline',
+      settings: 'setting-outline',
+    },
+  },
+} as const;
 const KICK_SELECT_IDS = [
   'kick-select-point-type',
   'kick-select-launch-point',
@@ -32,6 +84,43 @@ async function requireBox(locator: Locator) {
   const box = await locator.boundingBox();
   if (!box) throw new Error('Expected visible bounding box');
   return box;
+}
+
+async function openRailTab(page: Page, tab: keyof typeof RAIL_TAB_EXPECTATIONS) {
+  if (tab !== 'map') {
+    await page.getByRole('banner').locator(`#${RAIL_TAB_EXPECTATIONS[tab].headerTabId}`).click();
+  }
+
+  await expect(page.getByTestId('workspace-left-area')).toHaveAttribute('data-tab', tab);
+  await expect(page.getByTestId('left-rail')).toBeVisible();
+}
+
+async function expectRailWidth(page: Page, expectedWidth: number) {
+  const leftArea = page.getByTestId('workspace-left-area');
+  const rail = page.getByTestId('left-rail');
+  const map = page.getByTestId('workspace-map');
+  const leftBox = await requireBox(leftArea);
+  const railBox = await requireBox(rail);
+  const mapBox = await requireBox(map);
+
+  expect(Math.round(leftBox.width)).toBe(expectedWidth);
+  expect(Math.round(railBox.width)).toBe(expectedWidth);
+  expect(Math.round(mapBox.x)).toBe(Math.round(leftBox.x + leftBox.width));
+  expect(Math.round(mapBox.width)).toBe(VIEWPORT_WIDTH - Math.round(leftBox.width));
+}
+
+async function expectRailIcons(page: Page, tab: keyof typeof RAIL_TAB_EXPECTATIONS) {
+  const expectedIcons = RAIL_TAB_EXPECTATIONS[tab].icons;
+
+  for (const [itemId, iconId] of Object.entries(expectedIcons)) {
+    const button = page.getByTestId(`left-rail-button-${itemId}`);
+    const icon = button.getByTestId('left-rail-icon');
+
+    await expect(button).toBeVisible();
+    await expect(button).toHaveAttribute('data-rail-item-id', itemId);
+    await expect(button).toHaveAttribute('data-icon-id', iconId);
+    await expect(icon).toHaveAttribute('data-icon-id', iconId);
+  }
 }
 
 async function expectPanelControlsAligned(page: Page, panelTestId: string) {
@@ -197,10 +286,52 @@ test.describe('PraiOS workspace shell', () => {
     expect(Math.round(headerBox.height)).toBe(HEADER_HEIGHT);
     expect(Math.round(shellBox.y)).toBe(HEADER_HEIGHT);
     expect(Math.round(shellBox.height)).toBe(VIEWPORT_WIDTH ? 1080 - HEADER_HEIGHT : 0);
-    expect(Math.round(leftBox.width)).toBe(50);
+    expect(Math.round(leftBox.width)).toBe(RAIL_COLLAPSED_WIDTH);
     expect(Math.round(mapBox.x)).toBe(Math.round(leftBox.x + leftBox.width));
     expect(Math.round(mapBox.width)).toBe(VIEWPORT_WIDTH - Math.round(leftBox.width));
     expect(Math.round(mapBox.height)).toBe(1080 - HEADER_HEIGHT);
+  });
+
+  test('opens and closes the contextual left rail with tab-specific reference widths', async ({
+    page,
+  }) => {
+    await openWorkspace(page);
+
+    for (const tab of Object.keys(RAIL_TAB_EXPECTATIONS) as Array<
+      keyof typeof RAIL_TAB_EXPECTATIONS
+    >) {
+      await openRailTab(page, tab);
+
+      const leftArea = page.getByTestId('workspace-left-area');
+      const rail = page.getByTestId('left-rail');
+      const toggle = page.getByTestId('left-rail-button-collapse');
+
+      await expect(leftArea).toHaveAttribute('data-sidebar-state', 'collapsed');
+      await expect(rail).toHaveAttribute('data-sidebar-state', 'collapsed');
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      await expectRailWidth(page, RAIL_COLLAPSED_WIDTH);
+      await expectRailIcons(page, tab);
+      await expect(rail.getByTestId('left-rail-label')).toHaveCount(0);
+
+      await toggle.click();
+
+      await expect(leftArea).toHaveAttribute('data-sidebar-state', 'expanded');
+      await expect(rail).toHaveAttribute('data-sidebar-state', 'expanded');
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      await expectRailWidth(page, RAIL_TAB_EXPECTATIONS[tab].expandedWidth);
+      await expect(rail.getByTestId('left-rail-label')).toHaveCount(
+        Object.keys(RAIL_TAB_EXPECTATIONS[tab].icons).length,
+      );
+      await expect(rail.getByTestId('left-rail-label').first()).toBeVisible();
+
+      await toggle.click();
+
+      await expect(leftArea).toHaveAttribute('data-sidebar-state', 'collapsed');
+      await expect(rail).toHaveAttribute('data-sidebar-state', 'collapsed');
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      await expectRailWidth(page, RAIL_COLLAPSED_WIDTH);
+      await expect(rail.getByTestId('left-rail-label')).toHaveCount(0);
+    }
   });
 
   test('syncs tab-specific left panels with Header state', async ({ page }) => {
@@ -247,7 +378,7 @@ test.describe('PraiOS workspace shell', () => {
       const topBox = await requireBox(topGroup);
       const bottomBox = await requireBox(bottomGroup);
 
-      expect(Math.round(railBox.width)).toBe(50);
+      expect(Math.round(railBox.width)).toBe(RAIL_COLLAPSED_WIDTH);
       expect(Math.round(railBox.height)).toBe(height - HEADER_HEIGHT);
       expect(Math.round(topBox.y)).toBe(HEADER_HEIGHT + 4);
       expect(Math.round(bottomBox.y + bottomBox.height)).toBe(height - 4);

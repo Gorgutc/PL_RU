@@ -24,6 +24,9 @@
     ".lighthouseci/**",
     "jscpd-report/**",
     "reports/**",
+    "scratch/**",
+    "public/left-rail-icons/**",
+    "tests/visual-qa/latest.json",
     ".codex-refs-baseline/**",
     "Blueprints_lib/**",
     "Osiris_ref/**",
@@ -45,6 +48,7 @@
     "pampushka",
     "praios",
     "sfmono",
-    "viewports"
+    "viewports",
+    "zerolinetool"
   ]
 }

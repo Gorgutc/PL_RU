@@ -9,6 +9,8 @@ import styles from './TabSidePanel.module.scss';
 type TabSidePanelProps = {
   activeTab: HeaderTabId;
   labelledBy: string;
+  railExpanded: boolean;
+  onRailExpandedChange: (expanded: boolean) => void;
 };
 
 type FieldProps = {
@@ -428,10 +430,22 @@ function SatPanel() {
   );
 }
 
-export function TabSidePanel({ activeTab, labelledBy }: TabSidePanelProps) {
+export function TabSidePanel({
+  activeTab,
+  labelledBy,
+  railExpanded,
+  onRailExpandedChange,
+}: TabSidePanelProps) {
   if (activeTab === 'kick') return <KickPanel />;
   if (activeTab === 'stats') return <StatsPanel />;
   if (activeTab === 'sat') return <SatPanel />;
 
-  return <LeftRail config={RAIL_BY_TAB[activeTab]} labelledBy={labelledBy} />;
+  return (
+    <LeftRail
+      config={RAIL_BY_TAB[activeTab]}
+      expanded={railExpanded}
+      labelledBy={labelledBy}
+      onExpandedChange={onRailExpandedChange}
+    />
+  );
 }

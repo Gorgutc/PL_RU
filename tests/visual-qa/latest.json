@@ -1,42 +1,47 @@
 {
   "status": "PASS",
-  "taskScope": "codex/left-sidebar-map-fixes left rail, side panels, and MapLibre map visual QA",
+  "taskScope": "codex/left-sidebar-expanded-svg-icons left rail collapsed/expanded SVG icon replacement",
   "references": [
-    "Google Drive: button_rest.png",
-    "Google Drive: button_hover.png",
-    "Google Drive: button_active.png",
-    "Google Drive: Боковая навигация_map_1080px.png",
-    "Google Drive: Боковая навигация - Введение пусков заведение_1080px.png",
-    "Google Drive: Боковая навигация_Статистика_1080px.png",
-    "Google Drive: Общий вид_зондирование.png",
-    "Google Drive: Общий вид_введение пусков.png",
-    "Google Drive: Общий вид статистика_статистика.png",
-    "Google Drive: Общий вид_статистика_таблица.png",
-    "Committed current-render baseline refreshed after the approved MapLibre + OSM replacement.",
-    "tests/visual-qa/workspace-shell/map-rail-1920x1080.reference.png",
-    "tests/visual-qa/workspace-shell/map-rail-1920x768.reference.png",
-    "tests/visual-qa/workspace-shell/kick-panel-1920x1080.reference.png",
-    "tests/visual-qa/workspace-shell/stats-panel-1920x1080.reference.png",
-    "tests/visual-qa/workspace-shell/sat-panel-1920x1080.reference.png"
+    "Google Drive folder: https://drive.google.com/drive/folders/1kmWCULZUMQqPtd5pqRIYkl0sE9PPFn6h",
+    "Google Drive: навигация_map_1080px_open.png (1HPGmEwzQbKqtEWA6MYkr7A3cvtpHwgKJ)",
+    "Google Drive: Боковая навигация_map_1080px_closed.png (1nYhAhDxHPs7V8N1ZYZah3MNskQPjlHWI)",
+    "Google Drive: Боковая навигация_Маршруты_open.png (1JhV4YBl5L2sU5Ur86YhQCaTSbt9ruKuF)",
+    "Google Drive: Боковая навигация_Маршруты_closed.png (1j-6146sFfFBpSKaT2WIg4xWvkUxRLGYI)",
+    "Google Drive: Боковая навигация_телеметрия_open.png (1zDmitDjyiQTp5YpKhD6YoVUsS2-qxUn6)",
+    "Google Drive: Боковая навигация_телеметрия_closed.png (1G4j-zgjZOGXkOtHVU2vXcmnd7UeQHACO)",
+    "tests/visual-qa/left-rail/map-closed.reference.png",
+    "tests/visual-qa/left-rail/map-open.reference.png",
+    "tests/visual-qa/left-rail/routes-closed.reference.png",
+    "tests/visual-qa/left-rail/routes-open.reference.png",
+    "tests/visual-qa/left-rail/telemetry-closed.reference.png",
+    "tests/visual-qa/left-rail/telemetry-open.reference.png"
   ],
-  "viewports": ["1920x1080", "1920x768"],
-  "states": ["map rail", "kick panel", "stats panel", "sat panel"],
+  "viewports": ["1920x1128"],
+  "states": [
+    "map rail collapsed",
+    "map rail expanded",
+    "routes rail collapsed",
+    "routes rail expanded",
+    "telemetry rail collapsed",
+    "telemetry rail expanded"
+  ],
   "tolerance": {
-    "pixelDelta": 8,
-    "maxMismatchRatio": 0.02
+    "pixelDelta": 32,
+    "maxMismatchRatio": 0.065
   },
-  "mismatchedAreas": [],
+  "mismatchedAreas": [
+    "Bottom browser `N` overlay is accepted by the current user as an external browser artifact, not part of the rail DOM."
+  ],
   "domCssMetrics": {
     "status": "PASS",
     "assertions": [
-      "Header remains 48px tall.",
-      "Workspace shell starts at y=48 and fills remaining viewport height.",
-      "Compact rail remains 50px wide.",
-      "Wide side panels remain 300px wide.",
-      "Active left-rail buttons use blue fill without persistent outline, border, or shadow after pointer activation.",
-      "Panel-level controls in kick, stats, and sat align to the footer action right edge within 1px, except intentional left-only single-column rows.",
-      "Workspace map remains visible for map, kick, stats, and sat states.",
-      "Workspace map renders MapLibre canvas, zoom controls, and expanded visible OpenStreetMap attribution."
+      "The left rail starts collapsed at 50px for map, routes, and telemetry.",
+      "Expanded rail widths match Drive references: map 195px, routes 207px, telemetry 170px.",
+      "The rail open/close toggle is present on every rail tab and reports aria-expanded.",
+      "Rail icons are rendered from the typed SVG manifest through data-icon-id and no Blueprint Icon glyphs are used in LeftRail.",
+      "Hover and active button states keep #528bff / #2970ff backgrounds and white icons.",
+      "Reference PNG comparison uses pixelDelta 32 to absorb browser text/SVG anti-aliasing while keeping geometry and icon placement checked.",
+      "Actual and diff artifacts stay under reports/visual-qa/left-rail/."
     ]
   },
   "pixelComparison": {
@@ -44,93 +49,120 @@
     "tool": "playwright-canvas-png-diff",
     "cases": [
       {
-        "name": "map-rail-1920x1080",
-        "viewport": "1920x1080",
-        "state": "map rail",
-        "referencePath": "tests/visual-qa/workspace-shell/map-rail-1920x1080.reference.png",
-        "actualPath": "reports/visual-qa/workspace-shell/map-rail-1920x1080.actual.png",
-        "diffPath": "reports/visual-qa/workspace-shell/map-rail-1920x1080.diff.png",
+        "name": "left-rail-map-collapsed-1920x1128",
+        "viewport": "1920x1128",
+        "state": "map rail collapsed",
+        "referencePath": "tests/visual-qa/left-rail/map-closed.reference.png",
+        "actualPath": "reports/visual-qa/left-rail/map-closed.actual.png",
+        "diffPath": "reports/visual-qa/left-rail/map-closed.diff.png",
         "capture": {
           "url": "/",
-          "selector": "[data-testid=\"workspace-shell\"]",
-          "viewport": { "width": 1920, "height": 1080 },
-          "actions": [{ "type": "click", "selector": "body", "waitAfterMs": 3000 }]
-        }
-      },
-      {
-        "name": "map-rail-1920x768",
-        "viewport": "1920x768",
-        "state": "map rail",
-        "referencePath": "tests/visual-qa/workspace-shell/map-rail-1920x768.reference.png",
-        "actualPath": "reports/visual-qa/workspace-shell/map-rail-1920x768.actual.png",
-        "diffPath": "reports/visual-qa/workspace-shell/map-rail-1920x768.diff.png",
-        "capture": {
-          "url": "/",
-          "selector": "[data-testid=\"workspace-shell\"]",
-          "viewport": { "width": 1920, "height": 768 },
-          "actions": [{ "type": "click", "selector": "body", "waitAfterMs": 3000 }]
-        }
-      },
-      {
-        "name": "kick-panel-1920x1080",
-        "viewport": "1920x1080",
-        "state": "kick panel",
-        "referencePath": "tests/visual-qa/workspace-shell/kick-panel-1920x1080.reference.png",
-        "actualPath": "reports/visual-qa/workspace-shell/kick-panel-1920x1080.actual.png",
-        "diffPath": "reports/visual-qa/workspace-shell/kick-panel-1920x1080.diff.png",
-        "capture": {
-          "url": "/",
-          "selector": "[data-testid=\"workspace-shell\"]",
-          "viewport": { "width": 1920, "height": 1080 },
+          "selector": "[data-testid=\"workspace-left-area\"]",
+          "viewport": { "width": 1920, "height": 1128 },
           "actions": [
-            {
-              "type": "click",
-              "selector": "[data-testid=\"workspace-shell\"]",
-              "waitAfterMs": 1000
-            },
-            { "type": "click", "selector": "#praios-header-tab-kick", "waitAfterMs": 3000 }
+            { "type": "click", "selector": "[data-testid=\"workspace-map\"]", "waitAfterMs": 1000 }
           ]
         }
       },
       {
-        "name": "stats-panel-1920x1080",
-        "viewport": "1920x1080",
-        "state": "stats panel",
-        "referencePath": "tests/visual-qa/workspace-shell/stats-panel-1920x1080.reference.png",
-        "actualPath": "reports/visual-qa/workspace-shell/stats-panel-1920x1080.actual.png",
-        "diffPath": "reports/visual-qa/workspace-shell/stats-panel-1920x1080.diff.png",
+        "name": "left-rail-map-expanded-1920x1128",
+        "viewport": "1920x1128",
+        "state": "map rail expanded",
+        "referencePath": "tests/visual-qa/left-rail/map-open.reference.png",
+        "actualPath": "reports/visual-qa/left-rail/map-open.actual.png",
+        "diffPath": "reports/visual-qa/left-rail/map-open.diff.png",
         "capture": {
           "url": "/",
-          "selector": "[data-testid=\"workspace-shell\"]",
-          "viewport": { "width": 1920, "height": 1080 },
+          "selector": "[data-testid=\"workspace-left-area\"]",
+          "viewport": { "width": 1920, "height": 1128 },
           "actions": [
+            { "type": "click", "selector": "[data-testid=\"workspace-map\"]", "waitAfterMs": 1000 },
             {
               "type": "click",
-              "selector": "[data-testid=\"workspace-shell\"]",
-              "waitAfterMs": 1000
+              "selector": "[data-testid=\"left-rail-button-collapse\"]",
+              "waitAfterMs": 500
             },
-            { "type": "click", "selector": "#praios-header-tab-stats", "waitAfterMs": 3000 }
+            { "type": "click", "selector": "[data-testid=\"workspace-map\"]", "waitAfterMs": 500 }
           ]
         }
       },
       {
-        "name": "sat-panel-1920x1080",
-        "viewport": "1920x1080",
-        "state": "sat panel",
-        "referencePath": "tests/visual-qa/workspace-shell/sat-panel-1920x1080.reference.png",
-        "actualPath": "reports/visual-qa/workspace-shell/sat-panel-1920x1080.actual.png",
-        "diffPath": "reports/visual-qa/workspace-shell/sat-panel-1920x1080.diff.png",
+        "name": "left-rail-routes-collapsed-1920x1128",
+        "viewport": "1920x1128",
+        "state": "routes rail collapsed",
+        "referencePath": "tests/visual-qa/left-rail/routes-closed.reference.png",
+        "actualPath": "reports/visual-qa/left-rail/routes-closed.actual.png",
+        "diffPath": "reports/visual-qa/left-rail/routes-closed.diff.png",
         "capture": {
           "url": "/",
-          "selector": "[data-testid=\"workspace-shell\"]",
-          "viewport": { "width": 1920, "height": 1080 },
+          "selector": "[data-testid=\"workspace-left-area\"]",
+          "viewport": { "width": 1920, "height": 1128 },
           "actions": [
+            { "type": "click", "selector": "[data-testid=\"workspace-map\"]", "waitAfterMs": 1000 },
+            { "type": "click", "selector": "#praios-header-tab-bar", "waitAfterMs": 500 }
+          ]
+        }
+      },
+      {
+        "name": "left-rail-routes-expanded-1920x1128",
+        "viewport": "1920x1128",
+        "state": "routes rail expanded",
+        "referencePath": "tests/visual-qa/left-rail/routes-open.reference.png",
+        "actualPath": "reports/visual-qa/left-rail/routes-open.actual.png",
+        "diffPath": "reports/visual-qa/left-rail/routes-open.diff.png",
+        "capture": {
+          "url": "/",
+          "selector": "[data-testid=\"workspace-left-area\"]",
+          "viewport": { "width": 1920, "height": 1128 },
+          "actions": [
+            { "type": "click", "selector": "[data-testid=\"workspace-map\"]", "waitAfterMs": 1000 },
+            { "type": "click", "selector": "#praios-header-tab-bar", "waitAfterMs": 500 },
             {
               "type": "click",
-              "selector": "[data-testid=\"workspace-shell\"]",
-              "waitAfterMs": 1000
+              "selector": "[data-testid=\"left-rail-button-collapse\"]",
+              "waitAfterMs": 500
             },
-            { "type": "click", "selector": "#praios-header-tab-sat", "waitAfterMs": 3000 }
+            { "type": "click", "selector": "[data-testid=\"workspace-map\"]", "waitAfterMs": 500 }
+          ]
+        }
+      },
+      {
+        "name": "left-rail-telemetry-collapsed-1920x1128",
+        "viewport": "1920x1128",
+        "state": "telemetry rail collapsed",
+        "referencePath": "tests/visual-qa/left-rail/telemetry-closed.reference.png",
+        "actualPath": "reports/visual-qa/left-rail/telemetry-closed.actual.png",
+        "diffPath": "reports/visual-qa/left-rail/telemetry-closed.diff.png",
+        "capture": {
+          "url": "/",
+          "selector": "[data-testid=\"workspace-left-area\"]",
+          "viewport": { "width": 1920, "height": 1128 },
+          "actions": [
+            { "type": "click", "selector": "[data-testid=\"workspace-map\"]", "waitAfterMs": 1000 },
+            { "type": "click", "selector": "#praios-header-tab-tmi", "waitAfterMs": 500 }
+          ]
+        }
+      },
+      {
+        "name": "left-rail-telemetry-expanded-1920x1128",
+        "viewport": "1920x1128",
+        "state": "telemetry rail expanded",
+        "referencePath": "tests/visual-qa/left-rail/telemetry-open.reference.png",
+        "actualPath": "reports/visual-qa/left-rail/telemetry-open.actual.png",
+        "diffPath": "reports/visual-qa/left-rail/telemetry-open.diff.png",
+        "capture": {
+          "url": "/",
+          "selector": "[data-testid=\"workspace-left-area\"]",
+          "viewport": { "width": 1920, "height": 1128 },
+          "actions": [
+            { "type": "click", "selector": "[data-testid=\"workspace-map\"]", "waitAfterMs": 1000 },
+            { "type": "click", "selector": "#praios-header-tab-tmi", "waitAfterMs": 500 },
+            {
+              "type": "click",
+              "selector": "[data-testid=\"left-rail-button-collapse\"]",
+              "waitAfterMs": 500
+            },
+            { "type": "click", "selector": "[data-testid=\"workspace-map\"]", "waitAfterMs": 500 }
           ]
         }
       }

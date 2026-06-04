@@ -1,13 +1,15 @@
 // cspell:disable
-import type { IconName } from '@blueprintjs/core';
 import type { HeaderTabId } from '@/components/Header/Header';
+import type { RailIconId } from '@/components/AppNavigation/railIcons';
 
 export type WorkspaceSidebarMode = 'rail' | 'panel';
+export type WorkspaceRailState = 'collapsed' | 'expanded';
+export type RailTabId = Extract<HeaderTabId, 'map' | 'bar' | 'tmi'>;
 
 export type RailItem = {
   id: string;
   label: string;
-  icon: IconName;
+  iconId: RailIconId;
   dividerBefore?: boolean;
   primary?: boolean;
 };
@@ -18,58 +20,74 @@ export type RailConfig = {
 };
 
 const SIDEBAR_PANEL_TABS = new Set<HeaderTabId>(['sat', 'kick', 'stats']);
+const SIDEBAR_RAIL_TABS = new Set<HeaderTabId>(['map', 'bar', 'tmi']);
+
+const SHARED_BOTTOM_RAIL_ITEMS = [
+  { id: 'information', label: 'Информация', iconId: 'file-outline' },
+  { id: 'support', label: 'Поддержка', iconId: 'transition-to-queries' },
+  { id: 'theme', label: 'Светлая тема', iconId: 'moon-outline', dividerBefore: true },
+  {
+    id: 'collapse',
+    label: 'Свернуть',
+    iconId: 'double-upper-right-outline',
+    dividerBefore: true,
+  },
+  { id: 'settings', label: 'Настройки', iconId: 'setting-outline', dividerBefore: true },
+] as const satisfies readonly RailItem[];
 
 export function getWorkspaceSidebarMode(tab: HeaderTabId): WorkspaceSidebarMode {
   return SIDEBAR_PANEL_TABS.has(tab) ? 'panel' : 'rail';
 }
 
-export const RAIL_BY_TAB: Record<'map' | 'bar' | 'tmi', RailConfig> = {
+export function isWorkspaceRailTab(tab: HeaderTabId): tab is RailTabId {
+  return SIDEBAR_RAIL_TABS.has(tab);
+}
+
+export const RAIL_BY_TAB: Record<RailTabId, RailConfig> = {
   map: {
     top: [
-      { id: 'primary', label: 'Слои карты', icon: 'pin', primary: true },
-      { id: 'documents', label: 'Документы карты', icon: 'document' },
-      { id: 'objects', label: 'Объекты', icon: 'high-voltage-pole', dividerBefore: true },
-      { id: 'focus', label: 'Фокус карты', icon: 'locate', dividerBefore: true },
-      { id: 'search', label: 'Поиск', icon: 'search', dividerBefore: true },
+      { id: 'primary', label: 'Слои', iconId: 'flag-outline', primary: true },
+      { id: 'documents', label: 'События', iconId: 'file-text' },
+      {
+        id: 'objects',
+        label: 'Военная инфраструктура',
+        iconId: 'vector',
+        dividerBefore: true,
+      },
+      { id: 'tools', label: 'Инструменты', iconId: 'mother-tool-outline', dividerBefore: true },
+      { id: 'search', label: 'Поиск', iconId: 'search-outline', dividerBefore: true },
     ],
-    bottom: [
-      { id: 'bookmarks', label: 'Документы', icon: 'document' },
-      { id: 'messages', label: 'Сообщения', icon: 'comment' },
-      { id: 'history', label: 'История', icon: 'history', dividerBefore: true },
-      { id: 'collapse', label: 'Свернуть', icon: 'double-chevron-right', dividerBefore: true },
-      { id: 'settings', label: 'Настройки', icon: 'cog', dividerBefore: true },
-    ],
+    bottom: SHARED_BOTTOM_RAIL_ITEMS,
   },
   bar: {
     top: [
-      { id: 'primary', label: 'Маршруты', icon: 'route', primary: true },
-      { id: 'timeline', label: 'Лента маршрутов', icon: 'timeline-events' },
-      { id: 'path', label: 'Поиск пути', icon: 'path-search', dividerBefore: true },
-      { id: 'layers', label: 'Слои маршрутов', icon: 'layers', dividerBefore: true },
-      { id: 'table', label: 'Таблица', icon: 'th-list', dividerBefore: true },
+      { id: 'primary', label: 'Линейка', iconId: 'ruler-outline', primary: true },
+      {
+        id: 'timeline',
+        label: 'Редактирование точек',
+        iconId: 'zerolinetool-outline',
+        dividerBefore: true,
+      },
+      {
+        id: 'converter',
+        label: 'Конвертер координат',
+        iconId: 'globe-outline',
+        dividerBefore: true,
+      },
+      { id: 'weather', label: 'Погода', iconId: 'weather', dividerBefore: true },
+      { id: 'search', label: 'Поиск', iconId: 'search-outline', dividerBefore: true },
     ],
-    bottom: [
-      { id: 'filters', label: 'Фильтры', icon: 'filter' },
-      { id: 'document', label: 'Документ', icon: 'document' },
-      { id: 'export', label: 'Экспорт', icon: 'export', dividerBefore: true },
-      { id: 'history', label: 'История', icon: 'history', dividerBefore: true },
-      { id: 'settings', label: 'Настройки', icon: 'cog', dividerBefore: true },
-    ],
+    bottom: SHARED_BOTTOM_RAIL_ITEMS,
   },
   tmi: {
     top: [
-      { id: 'primary', label: 'Телеметрия', icon: 'antenna', primary: true },
-      { id: 'signals', label: 'Сигналы', icon: 'pulse' },
-      { id: 'charts', label: 'Графики', icon: 'timeline-line-chart', dividerBefore: true },
-      { id: 'table', label: 'Таблица', icon: 'panel-table', dividerBefore: true },
-      { id: 'search', label: 'Поиск', icon: 'search', dividerBefore: true },
+      { id: 'primary', label: 'Линейка', iconId: 'ruler-outline', primary: true },
+      { id: 'area', label: 'Область', iconId: 'buffer-outline' },
+      { id: 'circle', label: 'Круг', iconId: 'square-outline', dividerBefore: true },
+      { id: 'polygon', label: 'Полигон', iconId: 'object-outline', dividerBefore: true },
+      { id: 'mark', label: 'Метка', iconId: 'flag-outline', dividerBefore: true },
+      { id: 'search', label: 'Поиск', iconId: 'search-outline', dividerBefore: true },
     ],
-    bottom: [
-      { id: 'notifications', label: 'Уведомления', icon: 'notifications' },
-      { id: 'document', label: 'Документ', icon: 'document' },
-      { id: 'filters', label: 'Фильтры', icon: 'filter', dividerBefore: true },
-      { id: 'history', label: 'История', icon: 'history', dividerBefore: true },
-      { id: 'settings', label: 'Настройки', icon: 'cog', dividerBefore: true },
-    ],
+    bottom: SHARED_BOTTOM_RAIL_ITEMS,
   },
 };
