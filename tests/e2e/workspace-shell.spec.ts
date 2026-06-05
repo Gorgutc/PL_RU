@@ -23,6 +23,8 @@ const MAP_RESIZE_SETTLE_DELAY_MS = 80;
 const REDUCED_MOTION_MAX_DURATION_MS = 20;
 const MAP_MASK_COVERAGE_TOLERANCE_PX = 1;
 const MAP_MASK_MOTION_SAMPLE_ELAPSED_MS = [40, 110, 220] as const;
+const MAP_STAGE_PRE_WATCH_QUIET_MS =
+  WORKSPACE_MOTION_DURATION_MS + MAP_RESIZE_SETTLE_DELAY_MS + 120;
 const RAIL_HEIGHTS = [768, 900, 1080, 1200, 1440, 2160] as const;
 const RAIL_TAB_EXPECTATIONS = {
   map: {
@@ -89,6 +91,12 @@ const KICK_SELECT_IDS = [
   'kick-select-camera',
   'kick-select-interest',
 ] as const;
+
+function getCollapsedMapStageWidth(viewportWidth: number) {
+  return viewportWidth - RAIL_COLLAPSED_WIDTH - MAP_OUTER_GUTTER * 2 - MAP_INNER_INSET * 2;
+}
+
+const MAX_COLLAPSED_MAP_CANVAS_WIDTH = getCollapsedMapStageWidth(VIEWPORT_WIDTH);
 
 async function openWorkspace(page: Page, height = 1080) {
   await page.setViewportSize({ width: VIEWPORT_WIDTH, height });
@@ -326,7 +334,11 @@ async function readMapCanvasResizeMutationCount(page: Page, beforeMs?: number) {
   }, beforeMs);
 }
 
-async function expectMapCanvasResizeAfterLayoutSettles(
+async function readMapCanvasResizeMutationEvents(page: Page) {
+  return page.evaluate(() => window.__workspaceMapCanvasResizeState?.events ?? []);
+}
+
+async function expectMapCanvasAvoidsResizeForShellMotion(
   page: Page,
   canvas: Locator,
   leftArea: Locator,
@@ -342,12 +354,9 @@ async function expectMapCanvasResizeAfterLayoutSettles(
 
   await expect(canvas).toBeVisible();
   expect(
-    await readMapCanvasResizeMutationCount(
-      page,
-      WORKSPACE_MOTION_DURATION_MS + MAP_RESIZE_SETTLE_DELAY_MS - 10,
-    ),
-  ).toBe(0);
-  expect(await readMapCanvasResizeMutationCount(page)).toBeLessThanOrEqual(4);
+    await readMapCanvasResizeMutationEvents(page),
+    'shell motion should not resize MapLibre canvas',
+  ).toHaveLength(0);
 }
 
 async function readMapMaskCoverage(page: Page, label: string) {
@@ -361,14 +370,13 @@ async function readMapMaskCoverage(page: Page, label: string) {
 
     const hostBox = host.getBoundingClientRect();
     const canvasBox = canvas.getBoundingClientRect();
-    const canvasElement = canvas as HTMLCanvasElement;
 
     return {
       canvasHeight: canvasBox.height,
-      canvasInlineHeight: Number.parseFloat(canvasElement.style.height),
-      canvasInlineWidth: Number.parseFloat(canvasElement.style.width),
+      canvasRight: canvasBox.right,
       canvasWidth: canvasBox.width,
       hostHeight: hostBox.height,
+      hostRight: hostBox.right,
       hostWidth: hostBox.width,
       label: sampleLabel,
     };
@@ -388,22 +396,49 @@ async function expectMapCanvasCoversMaskDuringMotion(page: Page, label: string) 
   ).toBeGreaterThanOrEqual(coverage.hostHeight - MAP_MASK_COVERAGE_TOLERANCE_PX);
 }
 
-async function waitForMapCanvasSettledToMask(page: Page, label: string) {
+function expectMapCanvasRightAlignedToMask(
+  coverage: Awaited<ReturnType<typeof readMapMaskCoverage>>,
+) {
+  expect(
+    Math.abs(coverage.canvasRight - coverage.hostRight),
+    `${coverage.label}: MapLibre canvas right edge should stay anchored to the map mask`,
+  ).toBeLessThanOrEqual(MAP_MASK_COVERAGE_TOLERANCE_PX);
+}
+
+async function expectMapCanvasUsesStableStageWidth(
+  page: Page,
+  label: string,
+  expectedWidth = MAX_COLLAPSED_MAP_CANVAS_WIDTH,
+) {
+  const coverage = await readMapMaskCoverage(page, label);
+
+  expect(
+    coverage.canvasWidth,
+    `${coverage.label}: MapLibre canvas should keep the stable collapsed-map stage width`,
+  ).toBeGreaterThanOrEqual(expectedWidth - MAP_MASK_COVERAGE_TOLERANCE_PX);
+  expect(
+    coverage.canvasWidth,
+    `${coverage.label}: MapLibre canvas should not grow beyond the stable stage width`,
+  ).toBeLessThanOrEqual(expectedWidth + MAP_MASK_COVERAGE_TOLERANCE_PX);
+  expectMapCanvasRightAlignedToMask(coverage);
+}
+
+async function waitForMapCanvasStableStage(
+  page: Page,
+  label: string,
+  expectedWidth = MAX_COLLAPSED_MAP_CANVAS_WIDTH,
+) {
   await expect
     .poll(
       async () => {
         const coverage = await readMapMaskCoverage(page, label);
 
         return (
-          Number.isFinite(coverage.canvasInlineWidth) &&
-          Number.isFinite(coverage.canvasInlineHeight) &&
-          Math.abs(coverage.canvasInlineWidth - coverage.hostWidth) <=
-            MAP_MASK_COVERAGE_TOLERANCE_PX &&
-          Math.abs(coverage.canvasInlineHeight - coverage.hostHeight) <=
-            MAP_MASK_COVERAGE_TOLERANCE_PX
+          Math.abs(coverage.canvasWidth - expectedWidth) <= MAP_MASK_COVERAGE_TOLERANCE_PX &&
+          Math.abs(coverage.canvasRight - coverage.hostRight) <= MAP_MASK_COVERAGE_TOLERANCE_PX
         );
       },
-      { message: `${label}: MapLibre canvas inline size should settle to the map mask` },
+      { message: `${label}: MapLibre canvas should keep a stable right-anchored stage` },
     )
     .toBe(true);
 }
@@ -414,6 +449,16 @@ async function expectMapCanvasCoversMaskDuringMotionSamples(page: Page, label: s
   for (const elapsedMs of MAP_MASK_MOTION_SAMPLE_ELAPSED_MS) {
     await page.waitForTimeout(elapsedMs - previousElapsedMs);
     await expectMapCanvasCoversMaskDuringMotion(page, `${label} at ${elapsedMs}ms`);
+    previousElapsedMs = elapsedMs;
+  }
+}
+
+async function expectMapCanvasStableStageDuringMotionSamples(page: Page, label: string) {
+  let previousElapsedMs = 0;
+
+  for (const elapsedMs of MAP_MASK_MOTION_SAMPLE_ELAPSED_MS) {
+    await page.waitForTimeout(elapsedMs - previousElapsedMs);
+    await expectMapCanvasUsesStableStageWidth(page, `${label} at ${elapsedMs}ms`);
     previousElapsedMs = elapsedMs;
   }
 }
@@ -657,7 +702,9 @@ test.describe('PraiOS workspace shell', () => {
     }
   });
 
-  test('uses a shared soft motion contract for left rail and map resizing', async ({ page }) => {
+  test('uses a shared soft motion contract for left rail and map mask changes', async ({
+    page,
+  }) => {
     const { collapseIcon, leftArea, rail, tabPanel, toggle } =
       await openWorkspaceWithRailMotionLocators(page);
 
@@ -685,7 +732,7 @@ test.describe('PraiOS workspace shell', () => {
     await watchMapCanvasResizeMutations(page);
 
     await toggle.click();
-    await expectMapCanvasResizeAfterLayoutSettles(page, canvas, leftArea, 'expanded');
+    await expectMapCanvasAvoidsResizeForShellMotion(page, canvas, leftArea, 'expanded');
 
     await stopWatchingMapCanvasResizeMutations(page);
 
@@ -693,7 +740,7 @@ test.describe('PraiOS workspace shell', () => {
     await watchMapCanvasResizeMutations(page);
 
     await toggle.click();
-    await expectMapCanvasResizeAfterLayoutSettles(page, canvas, leftArea, 'collapsed');
+    await expectMapCanvasAvoidsResizeForShellMotion(page, canvas, leftArea, 'collapsed');
 
     await stopWatchingMapCanvasResizeMutations(page);
   });
@@ -702,20 +749,84 @@ test.describe('PraiOS workspace shell', () => {
     const { toggle } = await openWorkspaceWithRailMotionLocators(page);
 
     await expect(page.locator('.maplibregl-canvas')).toBeVisible();
-    await waitForMapCanvasSettledToMask(page, 'initial map');
+    await waitForMapCanvasStableStage(page, 'initial map');
 
     await toggle.click();
-    await waitForMapCanvasSettledToMask(page, 'expanded rail before close');
+    await waitForMapCanvasStableStage(page, 'expanded rail before close');
 
     await toggle.click();
     await expectMapCanvasCoversMaskDuringMotionSamples(page, 'rail closing');
 
-    await waitForMapCanvasSettledToMask(page, 'collapsed rail after close');
+    await waitForMapCanvasStableStage(page, 'collapsed rail after close');
     await page.getByRole('banner').locator('#praios-header-tab-stats').click();
-    await waitForMapCanvasSettledToMask(page, 'stats panel before map tab');
+    await waitForMapCanvasStableStage(page, 'stats panel before map tab');
 
     await page.getByRole('banner').locator('#praios-header-tab-map').click();
     await expectMapCanvasCoversMaskDuringMotionSamples(page, 'stats to map');
+  });
+
+  test('keeps a right-anchored stable map stage while tabs crop and reveal it', async ({
+    page,
+  }) => {
+    const { toggle } = await openWorkspaceWithRailMotionLocators(page);
+    const header = page.getByRole('banner');
+
+    await expect(page.locator('.maplibregl-canvas')).toBeVisible();
+    await waitForMapCanvasStableStage(page, 'initial collapsed map');
+
+    await header.locator('#praios-header-tab-stats').click();
+    await waitForMapCanvasStableStage(page, 'stats panel crop');
+    await waitForMapCanvasResizeQuiet(page, MAP_STAGE_PRE_WATCH_QUIET_MS);
+    await watchMapCanvasResizeMutations(page);
+
+    await header.locator('#praios-header-tab-map').click();
+    await expectMapCanvasStableStageDuringMotionSamples(page, 'stats to map');
+    await waitForWorkspaceMotion(page);
+    await expectMapCanvasUsesStableStageWidth(page, 'map after stats reveal');
+    const statsToMapResizeEvents = await readMapCanvasResizeMutationEvents(page);
+    expect(statsToMapResizeEvents, 'stats to map should not resize MapLibre canvas').toHaveLength(
+      0,
+    );
+    await stopWatchingMapCanvasResizeMutations(page);
+
+    await toggle.click();
+    await waitForMapCanvasStableStage(page, 'expanded rail crop');
+    await waitForMapCanvasResizeQuiet(page, MAP_STAGE_PRE_WATCH_QUIET_MS);
+    await watchMapCanvasResizeMutations(page);
+
+    await toggle.click();
+    await expectMapCanvasStableStageDuringMotionSamples(page, 'rail closing');
+    await waitForWorkspaceMotion(page);
+    await expectMapCanvasUsesStableStageWidth(page, 'map after rail close reveal');
+    const railClosingResizeEvents = await readMapCanvasResizeMutationEvents(page);
+    expect(railClosingResizeEvents, 'rail closing should not resize MapLibre canvas').toHaveLength(
+      0,
+    );
+    await stopWatchingMapCanvasResizeMutations(page);
+  });
+
+  test('resizes MapLibre when the stable map stage changes with the viewport', async ({ page }) => {
+    await openWorkspace(page);
+    await expect(page.locator('.maplibregl-canvas')).toBeVisible();
+    await waitForMapCanvasStableStage(page, 'initial viewport stage');
+    await waitForMapCanvasResizeQuiet(page, MAP_STAGE_PRE_WATCH_QUIET_MS);
+    await watchMapCanvasResizeMutations(page);
+
+    const resizedViewport = { height: 900, width: 1600 };
+    await page.setViewportSize(resizedViewport);
+    await waitForMapCanvasStableStage(
+      page,
+      'resized viewport stage',
+      getCollapsedMapStageWidth(resizedViewport.width),
+    );
+    await waitForMapCanvasResizeQuiet(page);
+
+    const resizeEvents = await readMapCanvasResizeMutationEvents(page);
+    expect(
+      resizeEvents,
+      'viewport resize should resize MapLibre canvas for the new stage',
+    ).not.toHaveLength(0);
+    await stopWatchingMapCanvasResizeMutations(page);
   });
 
   test('removes meaningful rail motion for reduced-motion users', async ({ page }) => {

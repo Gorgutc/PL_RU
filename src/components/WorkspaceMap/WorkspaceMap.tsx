@@ -14,20 +14,7 @@ import {
 import styles from './WorkspaceMap.module.scss';
 
 const MAP_RESIZE_SETTLE_DELAY_MS = 80;
-const WORKSPACE_SHELL_MOTION_DURATION_MS = 220;
-
-function cssTimeToMs(value: string) {
-  const normalized = value.trim();
-
-  if (normalized.endsWith('ms')) return Number.parseFloat(normalized);
-  if (normalized.endsWith('s')) return Number.parseFloat(normalized) * 1000;
-
-  return Number.parseFloat(normalized);
-}
-
-function maxCssDurationToMs(value: string) {
-  return Math.max(...value.split(',').map(cssTimeToMs));
-}
+const MAP_STAGE_RESIZE_TOLERANCE_PX = 1;
 
 function isExpectedOsmTileError(error: unknown) {
   const message = error instanceof Error ? error.message : String(error);
@@ -39,17 +26,17 @@ function isExpectedOsmTileError(error: unknown) {
 }
 
 export function WorkspaceMap() {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapStageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const mapContainer = mapContainerRef.current;
+    const mapStage = mapStageRef.current;
 
-    if (!mapContainer) return;
+    if (!mapStage) return;
 
     const map = new maplibregl.Map({
       attributionControl: false,
       center: WORKSPACE_MAP_CENTER,
-      container: mapContainer,
+      container: mapStage,
       maxZoom: WORKSPACE_MAP_MAX_ZOOM,
       minZoom: WORKSPACE_MAP_MIN_ZOOM,
       style: WORKSPACE_MAP_STYLE,
@@ -65,89 +52,63 @@ export function WorkspaceMap() {
       throw event.error;
     });
 
-    const tabPanel = mapContainer.closest('#praios-tab-panel');
-    const leftArea = tabPanel?.querySelector('[data-testid="workspace-left-area"]');
-    let isShellTransitioning = false;
     let resizeFrame = 0;
-    let shellTransitionTimeout = 0;
     let resizeTimeout = 0;
-    const getSidebarLayoutSignature = () =>
-      leftArea
-        ? [
-            leftArea.getAttribute('data-sidebar-mode'),
-            leftArea.getAttribute('data-sidebar-state'),
-            leftArea.getAttribute('data-tab'),
-          ].join('|')
-        : '';
-    let sidebarLayoutSignature = getSidebarLayoutSignature();
-    const resizeMap = () => {
-      if (leftArea && getSidebarLayoutSignature() !== sidebarLayoutSignature) {
-        scheduleResizeAfterShellTransition();
-        return;
+    let lastStageSize = {
+      height: mapStage.getBoundingClientRect().height,
+      width: mapStage.getBoundingClientRect().width,
+    };
+    const readRoundedStageSize = () => {
+      const stageBox = mapStage.getBoundingClientRect();
+
+      return {
+        height: Math.round(stageBox.height),
+        width: Math.round(stageBox.width),
+      };
+    };
+    const hasStageSizeChanged = () => {
+      const nextStageBox = mapStage.getBoundingClientRect();
+      const hasChanged =
+        Math.abs(nextStageBox.width - lastStageSize.width) > MAP_STAGE_RESIZE_TOLERANCE_PX ||
+        Math.abs(nextStageBox.height - lastStageSize.height) > MAP_STAGE_RESIZE_TOLERANCE_PX;
+
+      if (hasChanged) {
+        lastStageSize = {
+          height: nextStageBox.height,
+          width: nextStageBox.width,
+        };
       }
 
-      window.clearTimeout(resizeTimeout);
-      window.cancelAnimationFrame(resizeFrame);
-      resizeFrame = window.requestAnimationFrame(() => map.resize());
+      return hasChanged;
     };
-    const resizeMapAfterLayoutSettles = () => {
-      window.clearTimeout(resizeTimeout);
-      if (isShellTransitioning) return;
-
-      resizeTimeout = window.setTimeout(resizeMap, MAP_RESIZE_SETTLE_DELAY_MS);
-    };
-    const getShellTransitionSettleDelay = () => {
-      if (!tabPanel || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        return MAP_RESIZE_SETTLE_DELAY_MS;
-      }
+    const shouldResizeMapCanvas = () => {
+      const canvas = map.getCanvas();
+      const stageSize = readRoundedStageSize();
 
       return (
-        Math.max(
-          WORKSPACE_SHELL_MOTION_DURATION_MS,
-          maxCssDurationToMs(window.getComputedStyle(tabPanel).transitionDuration),
-        ) + MAP_RESIZE_SETTLE_DELAY_MS
+        Math.abs(canvas.width - stageSize.width) > MAP_STAGE_RESIZE_TOLERANCE_PX ||
+        Math.abs(canvas.height - stageSize.height) > MAP_STAGE_RESIZE_TOLERANCE_PX
       );
     };
-    const scheduleResizeAfterShellTransition = () => {
-      sidebarLayoutSignature = getSidebarLayoutSignature();
-      isShellTransitioning = true;
+    const resizeMap = () => {
       window.clearTimeout(resizeTimeout);
-      window.clearTimeout(shellTransitionTimeout);
-      shellTransitionTimeout = window.setTimeout(() => {
-        isShellTransitioning = false;
-        resizeMap();
-      }, getShellTransitionSettleDelay());
+      window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => {
+        if (shouldResizeMapCanvas()) map.resize();
+      });
+    };
+    const resizeMapAfterLayoutSettles = () => {
+      if (!hasStageSizeChanged()) return;
+
+      window.clearTimeout(resizeTimeout);
+      resizeTimeout = window.setTimeout(resizeMap, MAP_RESIZE_SETTLE_DELAY_MS);
     };
     const resizeObserver = new ResizeObserver(resizeMapAfterLayoutSettles);
-    resizeObserver.observe(mapContainer);
-    map.once('load', () => {
-      if (isShellTransitioning) return;
-
-      resizeMap();
-    });
-
-    const railStateObserver = new MutationObserver((records) => {
-      if (
-        records.some((record) =>
-          ['data-sidebar-mode', 'data-sidebar-state', 'data-tab'].includes(
-            record.attributeName ?? '',
-          ),
-        )
-      ) {
-        scheduleResizeAfterShellTransition();
-      }
-    });
-    if (leftArea) {
-      railStateObserver.observe(leftArea, {
-        attributeFilter: ['data-sidebar-mode', 'data-sidebar-state', 'data-tab'],
-        attributes: true,
-      });
-    }
+    resizeObserver.observe(mapStage);
+    map.once('load', resizeMap);
 
     return () => {
-      railStateObserver.disconnect();
       resizeObserver.disconnect();
-      window.clearTimeout(shellTransitionTimeout);
       window.clearTimeout(resizeTimeout);
       window.cancelAnimationFrame(resizeFrame);
       map.remove();
@@ -157,11 +118,9 @@ export function WorkspaceMap() {
   return (
     <section className={styles.map} aria-label="Рабочая карта" data-testid="workspace-map">
       <Card className={styles.mapCard} data-testid="workspace-map-card" elevation={Elevation.ZERO}>
-        <div
-          ref={mapContainerRef}
-          className={styles.mapCanvas}
-          data-testid="workspace-map-canvas"
-        />
+        <div className={styles.mapCanvas} data-testid="workspace-map-canvas">
+          <div ref={mapStageRef} className={styles.mapStage} data-testid="workspace-map-stage" />
+        </div>
       </Card>
     </section>
   );

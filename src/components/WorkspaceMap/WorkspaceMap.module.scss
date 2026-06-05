@@ -1,5 +1,9 @@
 @use '../../styles/tokens' as t;
 
+$map-stage-map-gutters: t.$workspace-map-outer-gutter * 2;
+$map-stage-card-insets: t.$workspace-map-inner-inset * 2;
+$map-stage-left-offset: t.$workspace-rail-width + $map-stage-map-gutters + $map-stage-card-insets;
+
 .map {
   position: relative;
   z-index: 0;
@@ -24,11 +28,20 @@
 }
 
 .mapCanvas {
+  position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
   border-radius: t.$workspace-map-canvas-radius;
   background: t.$color-workspace-map-bg;
+}
+
+.mapStage {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: max(100%, calc(100vw - #{$map-stage-left-offset}));
+  height: 100%;
 }
 
 /* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */

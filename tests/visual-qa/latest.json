@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "taskScope": "codex/left-rail-map-container-motion 240px rail width, stable map resize, soft motion, and map spacing",
+  "taskScope": "codex/left-rail-map-container-motion 240px rail width, stable right-anchored map stage, soft motion, and map spacing",
   "references": [
     "User-provided numeric spec: 10px outer gutter, 8px inner inset, 2px outer container radius, and 4px map radius",
     "tests/visual-qa/workspace-shell/map-rail-1920x1080.reference.png",
@@ -34,7 +34,7 @@
       "The Blueprint Card keeps an 8px inner inset before the MapLibre canvas.",
       "The Blueprint Card outer container radius is 2px.",
       "The MapLibre canvas radius is 4px.",
-      "MapLibre remains visible and uses controlled settled resize after rail open/close; built-in trackResize stays disabled.",
+      "MapLibre remains visible in a stable right-anchored stage that rail and panel width changes crop or reveal; built-in trackResize stays disabled.",
       "Actual and diff artifacts stay under reports/visual-qa/workspace-shell/."
     ]
   },

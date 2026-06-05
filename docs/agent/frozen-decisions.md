@@ -177,12 +177,13 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 - The center workspace is a Blueprint `Card` map surface inside a dynamic map
   container. The map area keeps a symmetric `10px` outer gutter, the Card keeps
   an `8px` inner inset before the MapLibre canvas, the outer container radius is
-  `2px`, the map canvas radius is `4px`, and MapLibre uses controlled settled
-  resize after shell layout changes. MapLibre `trackResize` stays disabled so
-  the WebGL canvas does not resize repeatedly during rail open / close motion;
-  the app-owned `ResizeObserver` and rail-state observer perform the final
-  `map.resize()` after the layout settles. MapLibre CSS is imported through
-  `src/app/layout.tsx`.
+  `2px`, and the map canvas radius is `4px`. The visible map canvas is a clipped
+  mask over a stable right-anchored MapLibre stage sized to the collapsed-rail
+  map width, so left-side rail and panel width changes crop or reveal the map
+  instead of scaling, recentering, or resizing it. MapLibre `trackResize` stays disabled;
+  the app-owned `ResizeObserver` observes the stable stage and calls
+  `map.resize()` only when the stage itself changes, such as true viewport or
+  height changes. MapLibre CSS is imported through `src/app/layout.tsx`.
 - The default map provider is OpenStreetMap raster tiles from
   `https://tile.openstreetmap.org/{z}/{x}/{y}.png`, with expanded visible OSM
   attribution and MapLibre navigation controls. Do not add prefetching or
