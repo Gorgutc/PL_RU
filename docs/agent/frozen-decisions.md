@@ -60,6 +60,19 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   and missing `pnpm codex:ship` for finished delivery all block handoff until
   fixed or explicitly accepted by the current user request.
 
+## App Layout Sizing Grid
+
+- Layout and component dimensions / spacing across the whole app should stay on
+  the shared `10px` / `8px` / `4px` sizing rhythm. Use `4px` as the minimum grid
+  step; prefer `8px` and `10px` multiples for larger component and shell
+  measurements when they fit the visual contract.
+- Radii should follow the same rhythm unless a frozen visual contract explicitly
+  requires a smaller hairline radius; the current `2px` map outer container
+  radius is such a frozen exception.
+- New raw spacing or sizing values must be added through `src/styles/_tokens.scss`
+  and then consumed by SCSS modules, unless a browser or Blueprint API requires
+  a local non-layout numeric value.
+
 ## Header Responsive Tabs
 
 - Header height stays `48px`.
@@ -115,7 +128,7 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   `map`, `bar`, and `tmi`.
 - The rail has a local React-only open / closed state. It starts collapsed on
   first page load and must not use `localStorage` or `sessionStorage`.
-- The expanded left rail width is frozen to `207px` for `map`, `bar`, and
+- The expanded left rail width is frozen to `240px` for `map`, `bar`, and
   `tmi`; the routes (`bar`) expanded reference is the canonical maximum width
   for every contextual rail. `51px` closed reference exports are treated as the
   same `50px` rail plus the exported edge.
@@ -164,9 +177,12 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 - The center workspace is a Blueprint `Card` map surface inside a dynamic map
   container. The map area keeps a symmetric `10px` outer gutter, the Card keeps
   an `8px` inner inset before the MapLibre canvas, the outer container radius is
-  `2px`, the map canvas radius is `4px`, and MapLibre resizes through
-  `ResizeObserver` when rail motion changes the available map width. MapLibre
-  CSS is imported through `src/app/layout.tsx`.
+  `2px`, the map canvas radius is `4px`, and MapLibre uses controlled settled
+  resize after shell layout changes. MapLibre `trackResize` stays disabled so
+  the WebGL canvas does not resize repeatedly during rail open / close motion;
+  the app-owned `ResizeObserver` and rail-state observer perform the final
+  `map.resize()` after the layout settles. MapLibre CSS is imported through
+  `src/app/layout.tsx`.
 - The default map provider is OpenStreetMap raster tiles from
   `https://tile.openstreetmap.org/{z}/{x}/{y}.png`, with expanded visible OSM
   attribution and MapLibre navigation controls. Do not add prefetching or

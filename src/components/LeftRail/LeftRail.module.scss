@@ -1,5 +1,14 @@
 @use '../../styles/tokens' as t;
 
+$rail-label-outer-padding-width: t.$workspace-rail-padding * 2;
+$rail-label-button-padding-width: t.$space-2 * 2;
+$rail-label-text-gap-width: t.$space-3;
+$rail-label-icon-width: t.$workspace-rail-icon-size;
+$rail-label-row-base-width: t.$workspace-rail-expanded-width - $rail-label-outer-padding-width;
+$rail-label-row-width: $rail-label-row-base-width - $rail-label-button-padding-width;
+$rail-label-affordance-width: $rail-label-text-gap-width + $rail-label-icon-width;
+$rail-label-content-width: $rail-label-row-width - $rail-label-affordance-width;
+
 .rail {
   position: relative;
   z-index: 3;
@@ -131,7 +140,7 @@
 }
 
 .railExpanded .label {
-  max-width: 9rem;
+  max-width: $rail-label-content-width;
   opacity: 1;
   transform: translateX(0);
 }

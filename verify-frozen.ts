@@ -236,6 +236,44 @@ async function testNoPxFontSize() {
   );
 }
 
+async function testAppSizingGridContract() {
+  const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
+  const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+  const frontendSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-frontend-rules', 'SKILL.md'),
+    'utf8',
+  );
+  const missingNormalizedSnippets = (content: string, snippets: string[]) => {
+    const normalized = content.replace(/\s+/g, ' ');
+
+    return snippets.filter((snippet) => !normalized.includes(snippet));
+  };
+  const required = [
+    '10px` / `8px` / `4px',
+    'minimum grid step',
+    'whole app',
+    'frozen visual contract',
+    '2px` map outer container',
+  ];
+  const failures = [
+    ...missingNormalizedSnippets(agents, ['A14: app-wide layout sizing', ...required]).map(
+      (snippet) => `AGENTS.md missing ${snippet}`,
+    ),
+    ...missingNormalizedSnippets(frozen, ['## App Layout Sizing Grid', ...required]).map(
+      (snippet) => `frozen-decisions.md missing ${snippet}`,
+    ),
+    ...missingNormalizedSnippets(frontendSkill, required).map(
+      (snippet) => `pl-ru-frontend-rules missing ${snippet}`,
+    ),
+  ];
+
+  record(
+    'A14: app-wide layout sizing follows the 10px / 8px / 4px rhythm',
+    failures.length === 0,
+    failures.length ? failures.join('; ') : undefined,
+  );
+}
+
 async function testCodexMemoryContract() {
   const config = await readFile(path.join(ROOT, '.codex', 'config.toml'), 'utf8');
   const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
@@ -865,7 +903,7 @@ async function testWorkspaceShellContract() {
     ['$color-workspace-button-hover', '#528bff'],
     ['$color-workspace-button-active', '#2970ff'],
     ['$workspace-rail-width', '3.125rem'],
-    ['$workspace-rail-expanded-width', '12.9375rem'],
+    ['$workspace-rail-expanded-width', '15rem'],
     ['$workspace-panel-width', '18.75rem'],
     ['$workspace-rail-button-size', '2.125rem'],
     ['$workspace-control-height', '2rem'],
@@ -1055,6 +1093,9 @@ async function testWorkspaceShellContract() {
       'navigation.ts must not define RailConfig.expandedWidth; widths live in SCSS tokens',
     );
   }
+  if (leftRailStyles.includes('max-width: 9rem')) {
+    failures.push('LeftRail.module.scss must not cap expanded labels at the old 9rem width');
+  }
 
   if (!pkg.dependencies?.['maplibre-gl']) failures.push('package.json missing maplibre-gl');
   for (const forbidden of [
@@ -1167,7 +1208,9 @@ async function testWorkspaceShellContract() {
       'AttributionControl',
       'attributionControl: false',
       'compact: false',
+      'trackResize: false',
       'ResizeObserver',
+      'MutationObserver',
       'map.resize()',
       'center:',
       'maxZoom:',
@@ -1229,7 +1272,9 @@ async function testWorkspaceShellContract() {
       'opens and closes the contextual left rail',
       'data-sidebar-state',
       'left-rail-button-collapse',
-      'RAIL_EXPANDED_WIDTH = 207',
+      'RAIL_EXPANDED_WIDTH = 240',
+      'keeps MapLibre canvas stable while the left rail is animating',
+      'expectRailLabelFits',
       'MAP_OUTER_GUTTER = 10',
       'MAP_INNER_INSET = 8',
       'MAP_CONTAINER_RADIUS = 2',
@@ -1240,7 +1285,7 @@ async function testWorkspaceShellContract() {
     ...missingSnippets(frozen, [
       '## Workspace Shell And Left Sidebar',
       'compact left rail is fixed at `50px` wide',
-      'The expanded left rail width is frozen to `207px` for `map`, `bar`, and',
+      'The expanded left rail width is frozen to `240px` for `map`, `bar`, and',
       'Rail open / close uses one soft `220ms` transition contract',
       'their glyphs use custom SVG assets from the approved Google Drive `Иконки`',
       '`RailItem.iconId` typed against the rail SVG manifest',
@@ -1252,6 +1297,8 @@ async function testWorkspaceShellContract() {
       'outer container radius is',
       '`2px`, the map canvas radius is `4px`',
       '`ResizeObserver`',
+      '`trackResize` stays disabled',
+      '`map.resize()` after the layout settles',
       'Blueprint `Card` map surface inside a dynamic map',
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       'expanded visible OSM',
@@ -1408,6 +1455,7 @@ async function main() {
   await testNoLocalStorage();
   await testNoBlueprintInternalImports();
   await testNoPxFontSize();
+  await testAppSizingGridContract();
   await testCodexMemoryContract();
   await testFrozenHeaderContract();
   await testFrozenQualityToolingContract();

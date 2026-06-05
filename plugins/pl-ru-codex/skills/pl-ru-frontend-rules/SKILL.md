@@ -24,6 +24,12 @@ Run `pnpm verify` whenever architecture rules may be affected. Run `pnpm codex:s
 - Stack is Next.js 16, React 19, TypeScript strict, SCSS modules, Blueprint v6, framer-motion, pnpm, Node 22 LTS.
 - Do not add Tailwind, CSS-in-JS, styled-components, npm lockfiles, yarn lockfiles, `localStorage`, or `sessionStorage` in `src/`.
 - Raw colors, spacing, and typography values belong in `src/styles/_tokens.scss`; component SCSS consumes them through `@use`.
+- Layout and component dimensions / spacing across the whole app should stay on
+  the shared `10px` / `8px` / `4px` sizing rhythm. Use `4px` as the minimum grid
+  step, with `8px` and `10px` multiples preferred for larger component and shell
+  measurements when they fit the visual contract. Radii follow the same rhythm
+  unless a frozen visual contract explicitly requires a smaller hairline radius,
+  such as the current `2px` map outer container.
 - Components are co-located as `src/components/<Name>/<Name>.tsx` and `<Name>.module.scss`.
 - Blueprint imports come only from `@blueprintjs/core` and `@blueprintjs/icons` package roots.
 - Use Blueprint icons through `<Icon icon="..." />`; icon-only controls need accessible names.
