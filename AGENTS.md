@@ -122,6 +122,9 @@ Additional project rules:
 - All images need `alt`; bundled images should use `next/image` where appropriate.
 - Use Blueprint primitives instead of rebuilding `Button`, `Card`, `Dialog`, `Menu`, or `Popover`.
 - Use Blueprint icons through `<Icon icon="..." />`, not raw SVG in production UI.
+  Exception: the left rail uses the approved `RailItem.iconId` SVG manifest for
+  the custom Drive icon replacement task; keep that exception scoped to
+  `LeftRail`.
 - The Blueprint CSS imports in `src/app/layout.tsx` are the stylesheet exception to the package-root import rule.
 - Before adding a component, helper, style contract, or visual state, search for
   an existing local component, Blueprint primitive, token, or frozen contract to

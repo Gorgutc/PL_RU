@@ -821,6 +821,14 @@ async function testWorkspaceShellContract() {
     'utf8',
   );
   const leftRail = await readFile(path.join(SRC, 'components', 'LeftRail', 'LeftRail.tsx'), 'utf8');
+  const navigation = await readFile(
+    path.join(SRC, 'components', 'AppNavigation', 'navigation.ts'),
+    'utf8',
+  );
+  const railIcons = await readFile(
+    path.join(SRC, 'components', 'AppNavigation', 'railIcons.ts'),
+    'utf8',
+  );
   const tabSidePanel = await readFile(
     path.join(SRC, 'components', 'TabSidePanel', 'TabSidePanel.tsx'),
     'utf8',
@@ -849,6 +857,9 @@ async function testWorkspaceShellContract() {
     ['$color-workspace-button-hover', '#528bff'],
     ['$color-workspace-button-active', '#2970ff'],
     ['$workspace-rail-width', '3.125rem'],
+    ['$workspace-rail-map-expanded-width', '12.1875rem'],
+    ['$workspace-rail-bar-expanded-width', '12.9375rem'],
+    ['$workspace-rail-tmi-expanded-width', '10.625rem'],
     ['$workspace-panel-width', '18.75rem'],
     ['$workspace-rail-button-size', '2.125rem'],
     ['$workspace-control-height', '2rem'],
@@ -857,6 +868,180 @@ async function testWorkspaceShellContract() {
   for (const [token, expected] of expectedTokens) {
     const actual = getScssTokenValue(tokens, token);
     if (actual !== expected) failures.push(`${token}=${actual ?? '(missing)'}`);
+  }
+
+  const expectedRailIconAssets = [
+    {
+      id: 'file-text',
+      driveId: '1Ifabjebfh5gyiIqTSYYDJs34kMYCJW-r',
+      sourceFile: 'Icons/File text.svg',
+      fileName: 'file-text.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'button',
+      driveId: '12YtCuKVILdQTxSFWy26biTLzR0rEbl77',
+      sourceFile: 'Icons/button.svg',
+      fileName: 'button.svg',
+      usage: 'drive-inventory',
+    },
+    {
+      id: 'vector',
+      driveId: '13iHeuQT-CKqS0mei2yuZ9wpNHFeCH00K',
+      sourceFile: 'Icons/Vector.svg',
+      fileName: 'vector.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'setting-outline',
+      driveId: '1hyudLltgWnpEjoFQmnhbmI-n2ihtBiZx',
+      sourceFile: 'Icons/24px/setting_outline.svg',
+      fileName: 'setting-outline.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'square-outline',
+      driveId: '1iNV8EnVO0sGU3FbPdtjPXiarMCEb-vIu',
+      sourceFile: 'Icons/24px/square_outline.svg',
+      fileName: 'square-outline.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'ruler-outline',
+      driveId: '1NMpdTwFF0TSK9iClCbzhY1qAvfceuo_h',
+      sourceFile: 'Icons/24px/ruler_outline.svg',
+      fileName: 'ruler-outline.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'moon-outline',
+      driveId: '1H7QCxfDkFuwWc1bcHi7Wnjtk-zGStISa',
+      sourceFile: 'Icons/24px/moon_outline.svg',
+      fileName: 'moon-outline.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'globe-outline',
+      driveId: '1oCJL1zTeWqQ8z3Bkq4HEIbRMCsaarkzi',
+      sourceFile: 'Icons/24px/globe_outline.svg',
+      fileName: 'globe-outline.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'transition-to-queries',
+      driveId: '1AT5N3YPDddLZt-xoRhw1j9_qg-P02y6o',
+      sourceFile: 'Icons/24px/transition_to_queries.svg',
+      fileName: 'transition-to-queries.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'buffer-outline',
+      driveId: '1rfZ-moc4yIBrwdNGMBwVz8bI77CWEOdv',
+      sourceFile: 'Icons/24px/buffer_outline.svg',
+      fileName: 'buffer-outline.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'mother-tool-outline',
+      driveId: '15szlXVrFMwjYFMeNkls5FHKzfrC-XnD4',
+      sourceFile: 'Icons/24px/mother_tool_outline.svg',
+      fileName: 'mother-tool-outline.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'file-outline',
+      driveId: '1OMAIchT-3dG-kFLJL24sZDzsE9GSV7EK',
+      sourceFile: 'Icons/24px/file_outline.svg',
+      fileName: 'file-outline.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'zerolinetool-outline',
+      driveId: '15GlcL37QxVmHxGcHg8kekn35MQGl3hV2',
+      sourceFile: 'Icons/24px/zerolinetool_outline.svg',
+      fileName: 'zerolinetool-outline.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'flag-outline',
+      driveId: '1yJl-Xxz_cIzL7jOwW9uIGMKrYQknnJlK',
+      sourceFile: 'Icons/24px/flag_outline.svg',
+      fileName: 'flag-outline.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'search-outline',
+      driveId: '1Y9vNXxwbfnrNyzHxCHmoKQovLxGWeEKJ',
+      sourceFile: 'Icons/24px/search_outline.svg',
+      fileName: 'search-outline.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'weather',
+      driveId: '1INfD0hmNJiZgTFb4Xv-HDL0PWO_j7je7',
+      sourceFile: 'Icons/24px/weather.svg',
+      fileName: 'weather.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'object-outline',
+      driveId: '1zZxpX6_APmboS-6l3vN4VLjmSMnD1LZl',
+      sourceFile: 'Icons/24px/object_outline.svg',
+      fileName: 'object-outline.svg',
+      usage: 'rail-item',
+    },
+    {
+      id: 'double-upper-right-outline',
+      driveId: '1t9vZsFgSfwbl3UGkzNUhVznZbYv9ILU7',
+      sourceFile: 'Icons/24px/Base Icons/double_upper_right_outline.svg',
+      fileName: 'double-upper-right-outline.svg',
+      usage: 'rail-item',
+    },
+  ] as const;
+
+  const railIconDir = path.join(ROOT, 'public', 'left-rail-icons');
+  let publicRailIcons: string[] = [];
+  try {
+    publicRailIcons = (await readdir(railIconDir))
+      .filter((fileName) => fileName.endsWith('.svg'))
+      .sort();
+  } catch {
+    failures.push('public/left-rail-icons missing');
+  }
+  const expectedRailIconFiles = expectedRailIconAssets.map(({ fileName }) => fileName).sort();
+  if (publicRailIcons.join('|') !== expectedRailIconFiles.join('|')) {
+    failures.push(
+      `public/left-rail-icons SVG inventory mismatch: ${publicRailIcons.join(', ') || '(none)'}`,
+    );
+  }
+  for (const asset of expectedRailIconAssets) {
+    const iconSrc = `/left-rail-icons/${asset.fileName}`;
+    for (const snippet of [
+      `driveId: '${asset.driveId}'`,
+      `sourceFile: '${asset.sourceFile}'`,
+      `src: '${iconSrc}'`,
+      `usage: '${asset.usage}'`,
+    ]) {
+      if (!railIcons.includes(snippet)) {
+        failures.push(`railIcons.ts missing ${asset.id} ${snippet}`);
+      }
+    }
+
+    if (asset.usage === 'rail-item' && !navigation.includes(`iconId: '${asset.id}'`)) {
+      failures.push(`navigation.ts missing rail iconId ${asset.id}`);
+    }
+
+    try {
+      const svg = await readFile(path.join(railIconDir, asset.fileName), 'utf8');
+      if (!svg.includes('<svg')) failures.push(`${asset.fileName} is not an SVG asset`);
+    } catch {
+      failures.push(`missing public rail icon ${asset.fileName}`);
+    }
+  }
+  if (navigation.includes('expandedWidth')) {
+    failures.push(
+      'navigation.ts must not define RailConfig.expandedWidth; widths live in SCSS tokens',
+    );
   }
 
   if (!pkg.dependencies?.['maplibre-gl']) failures.push('package.json missing maplibre-gl');
@@ -891,18 +1076,28 @@ async function testWorkspaceShellContract() {
     ...missingSnippets(appShellStyles, [
       'height: calc(100dvh - t.$header-height);',
       'margin: t.$header-height 0 0;',
-      'grid-template-columns: t.$workspace-rail-width minmax(0, 1fr);',
-      'grid-template-columns: t.$workspace-panel-width minmax(0, 1fr);',
+      '--workspace-left-width: #{t.$workspace-rail-width};',
+      'grid-template-columns: var(--workspace-left-width) minmax(0, 1fr);',
+      '--workspace-left-width: #{t.$workspace-panel-width};',
+      '.tabPanelRailMapExpanded',
+      '.tabPanelRailBarExpanded',
+      '.tabPanelRailTmiExpanded',
       '.tabPanelWide',
     ]).map((snippet) => `AppShell.module.scss missing ${snippet}`),
     ...missingSnippets(leftRail, [
       'Button',
-      'Icon',
+      'RAIL_ICON_ASSETS',
       'data-testid="left-rail"',
-      "data-testid={item.primary ? 'left-rail-button-primary' : undefined}",
-      'aria-pressed={pressed}',
-      'onClick={onPress}',
+      'data-testid="left-rail-icon"',
+      'data-testid={testId}',
+      'data-icon-id={item.iconId}',
+      'aria-expanded={isToggle ? expanded : undefined}',
+      'aria-pressed={isToggle ? undefined : pressed}',
+      'onClick={isToggle ? () => onExpandedChange(!expanded) : onPress}',
     ]).map((snippet) => `LeftRail.tsx missing ${snippet}`),
+    ...missingSnippets(railIcons, ["usage: 'drive-inventory'"]).map(
+      (snippet) => `railIcons.ts missing ${snippet}`,
+    ),
     ...missingSnippets(tabSidePanel, [
       'HTMLSelect',
       'InputGroup',
@@ -997,10 +1192,19 @@ async function testWorkspaceShellContract() {
       'stats-side-panel',
       'sat-side-panel',
       'RAIL_HEIGHTS = [768, 900, 1080, 1200, 1440, 2160]',
+      'RAIL_TAB_EXPECTATIONS',
+      'opens and closes the contextual left rail',
+      'data-sidebar-state',
+      'left-rail-button-collapse',
     ]).map((snippet) => `workspace-shell.spec.ts missing ${snippet}`),
     ...missingSnippets(frozen, [
       '## Workspace Shell And Left Sidebar',
       'compact left rail is fixed at `50px` wide',
+      'The expanded left rail widths are frozen to `195px` for `map`, `207px` for',
+      'their glyphs use custom SVG assets from the approved Google Drive `Иконки`',
+      '`RailItem.iconId` typed against the rail SVG manifest',
+      '`button.svg` is intentionally retained as a `drive-inventory` asset',
+      'The collapse item is present on every rail tab and owns the open / close',
       'Wide side panels are fixed at `300px` wide',
       'real client-side `MapLibre GL JS` map',
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',

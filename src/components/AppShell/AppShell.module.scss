@@ -13,8 +13,11 @@
 }
 
 .tabPanel {
+  --workspace-left-width: #{t.$workspace-rail-width};
+
   display: grid;
-  grid-template-columns: t.$workspace-rail-width minmax(0, 1fr);
+  isolation: isolate;
+  grid-template-columns: var(--workspace-left-width) minmax(0, 1fr);
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -22,11 +25,25 @@
 }
 
 .tabPanelWide {
-  grid-template-columns: t.$workspace-panel-width minmax(0, 1fr);
+  --workspace-left-width: #{t.$workspace-panel-width};
+}
+
+.tabPanelRailMapExpanded {
+  --workspace-left-width: #{t.$workspace-rail-map-expanded-width};
+}
+
+.tabPanelRailBarExpanded {
+  --workspace-left-width: #{t.$workspace-rail-bar-expanded-width};
+}
+
+.tabPanelRailTmiExpanded {
+  --workspace-left-width: #{t.$workspace-rail-tmi-expanded-width};
 }
 
 .leftArea {
-  width: t.$workspace-rail-width;
+  position: relative;
+  z-index: 20;
+  width: var(--workspace-left-width);
   min-width: 0;
   min-height: 0;
   overflow: hidden;

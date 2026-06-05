@@ -112,7 +112,23 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   `calc(100dvh - $header-height)` so the map and left side area fill the
   remaining viewport height without sliding underneath Header.
 - The compact left rail is fixed at `50px` wide. It is contextual for
-  `map`, `bar`, and `tmi`, and uses Blueprint `Button` plus `Icon` primitives.
+  `map`, `bar`, and `tmi`.
+- The rail has a local React-only open / closed state. It starts collapsed on
+  first page load and must not use `localStorage` or `sessionStorage`.
+- The expanded left rail widths are frozen to `195px` for `map`, `207px` for
+  `bar`, and `170px` for `tmi`, matching the approved side-menu reference PNG
+  crops. `51px` closed reference exports are treated as the same `50px` rail
+  plus the exported edge.
+- Left rail buttons keep Blueprint `Button` primitives for interaction, but
+  their glyphs use custom SVG assets from the approved Google Drive `Иконки`
+  folder. `RailItem.iconId` typed against the rail SVG manifest is the source of
+  truth for mapping each tab/item to the correct SVG.
+- The rail SVG manifest keeps the complete Drive `Иконки` inventory as local
+  assets. `button.svg` is intentionally retained as a `drive-inventory` asset
+  even though no current rail item maps to it.
+- The collapse item is present on every rail tab and owns the open / close
+  toggle. In collapsed state it is the expand affordance; in expanded state it
+  collapses the menu.
 - Wide side panels are fixed at `300px` wide. `kick` renders the launch-parameter
   form, `stats` renders table filters, and `sat` renders a temporary probing
   placeholder panel until the probing task gets its own full spec.
