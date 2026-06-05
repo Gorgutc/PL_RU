@@ -5,8 +5,6 @@ import { useState } from 'react';
 import type { HeaderTabId } from '@/components/Header/Header';
 import {
   getWorkspaceSidebarMode,
-  isWorkspaceRailTab,
-  type RailTabId,
   type WorkspaceRailState,
 } from '@/components/AppNavigation/navigation';
 import { TabSidePanel } from '@/components/TabSidePanel/TabSidePanel';
@@ -21,21 +19,13 @@ function cx(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(' ');
 }
 
-const railExpandedClassByTab: Record<RailTabId, string> = {
-  map: styles.tabPanelRailMapExpanded,
-  bar: styles.tabPanelRailBarExpanded,
-  tmi: styles.tabPanelRailTmiExpanded,
-};
-
 export function AppShell({ activeTab }: AppShellProps) {
   const [isRailExpanded, setIsRailExpanded] = useState(false);
   const sidebarMode = getWorkspaceSidebarMode(activeTab);
   const railState: WorkspaceRailState =
     sidebarMode === 'rail' && isRailExpanded ? 'expanded' : 'collapsed';
   const expandedRailClass =
-    sidebarMode === 'rail' && isRailExpanded && isWorkspaceRailTab(activeTab)
-      ? railExpandedClassByTab[activeTab]
-      : false;
+    sidebarMode === 'rail' && isRailExpanded ? styles.tabPanelRailExpanded : false;
 
   return (
     <main

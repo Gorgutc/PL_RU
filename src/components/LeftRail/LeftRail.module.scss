@@ -14,6 +14,7 @@
   overflow: hidden;
   background: t.$color-workspace-bg;
   border-inline-end: 0.0625rem solid t.$color-workspace-rail-border;
+  transition: width t.$workspace-motion-duration t.$workspace-motion-easing;
 }
 
 .railExpanded {
@@ -64,6 +65,13 @@
   background: transparent !important;
   box-shadow: none !important;
   color: t.$color-header-text-on-color !important;
+  overflow: hidden;
+  transition:
+    width t.$workspace-motion-duration t.$workspace-motion-easing,
+    min-width t.$workspace-motion-duration t.$workspace-motion-easing,
+    gap t.$workspace-motion-duration t.$workspace-motion-easing,
+    padding-inline t.$workspace-motion-duration t.$workspace-motion-easing,
+    background-color t.$workspace-motion-duration t.$workspace-motion-easing;
 }
 
 .buttonExpanded.buttonExpanded {
@@ -95,6 +103,7 @@
   object-fit: contain;
   pointer-events: none;
   user-select: none;
+  transition: transform t.$workspace-motion-duration t.$workspace-motion-easing;
 }
 
 .button.button[data-rail-item-id='collapse'][aria-expanded='true'] .icon {
@@ -102,14 +111,29 @@
 }
 
 .label {
+  display: block;
+  max-width: 0;
   overflow: hidden;
   color: t.$color-workspace-placeholder;
   font-family: t.$font-header;
   font-size: t.$fs-workspace-rail-label;
   font-weight: 400 !important;
   line-height: 1;
+  opacity: 0;
   text-overflow: ellipsis;
+  transform: translateX(-0.25rem);
+  transition:
+    max-width t.$workspace-motion-duration t.$workspace-motion-easing,
+    opacity t.$workspace-motion-duration t.$workspace-motion-easing,
+    transform t.$workspace-motion-duration t.$workspace-motion-easing,
+    color t.$workspace-motion-duration t.$workspace-motion-easing;
   white-space: nowrap;
+}
+
+.railExpanded .label {
+  max-width: 9rem;
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .button.button:not(:disabled):hover .label,
@@ -132,4 +156,13 @@
 .button.button[data-focus-source='keyboard']:focus {
   outline: 0.125rem solid t.$color-header-text-on-color !important;
   outline-offset: -0.125rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail,
+  .button.button,
+  .icon.icon,
+  .label {
+    transition-duration: 0ms;
+  }
 }

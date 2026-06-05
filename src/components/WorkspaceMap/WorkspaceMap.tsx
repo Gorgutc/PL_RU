@@ -26,12 +26,14 @@ export function WorkspaceMap() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!mapContainerRef.current) return;
+    const mapContainer = mapContainerRef.current;
+
+    if (!mapContainer) return;
 
     const map = new maplibregl.Map({
       attributionControl: false,
       center: WORKSPACE_MAP_CENTER,
-      container: mapContainerRef.current,
+      container: mapContainer,
       maxZoom: WORKSPACE_MAP_MAX_ZOOM,
       minZoom: WORKSPACE_MAP_MIN_ZOOM,
       style: WORKSPACE_MAP_STYLE,
@@ -46,7 +48,18 @@ export function WorkspaceMap() {
       throw event.error;
     });
 
+    let resizeFrame = 0;
+    const resizeMap = () => {
+      window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => map.resize());
+    };
+    const resizeObserver = new ResizeObserver(resizeMap);
+    resizeObserver.observe(mapContainer);
+    map.once('load', resizeMap);
+
     return () => {
+      resizeObserver.disconnect();
+      window.cancelAnimationFrame(resizeFrame);
       map.remove();
     };
   }, []);

@@ -3,11 +3,18 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 const HEADER_HEIGHT = 48;
 const VIEWPORT_WIDTH = 1920;
 const RAIL_COLLAPSED_WIDTH = 50;
+const RAIL_EXPANDED_WIDTH = 207;
+const MAP_OUTER_GUTTER = 10;
+const MAP_INNER_INSET = 8;
+const MAP_CONTAINER_RADIUS = 2;
+const MAP_CANVAS_RADIUS = 4;
+const WORKSPACE_MOTION_DURATION_MS = 220;
+const REDUCED_MOTION_MAX_DURATION_MS = 20;
 const RAIL_HEIGHTS = [768, 900, 1080, 1200, 1440, 2160] as const;
 const RAIL_TAB_EXPECTATIONS = {
   map: {
     headerTabId: 'praios-header-tab-map',
-    expandedWidth: 195,
+    expandedWidth: RAIL_EXPANDED_WIDTH,
     icons: {
       primary: 'flag-outline',
       documents: 'file-text',
@@ -23,7 +30,7 @@ const RAIL_TAB_EXPECTATIONS = {
   },
   bar: {
     headerTabId: 'praios-header-tab-bar',
-    expandedWidth: 207,
+    expandedWidth: RAIL_EXPANDED_WIDTH,
     icons: {
       primary: 'ruler-outline',
       timeline: 'zerolinetool-outline',
@@ -39,7 +46,7 @@ const RAIL_TAB_EXPECTATIONS = {
   },
   tmi: {
     headerTabId: 'praios-header-tab-tmi',
-    expandedWidth: 170,
+    expandedWidth: RAIL_EXPANDED_WIDTH,
     icons: {
       primary: 'ruler-outline',
       area: 'buffer-outline',
@@ -86,6 +93,72 @@ async function requireBox(locator: Locator) {
   return box;
 }
 
+function cssTimeToMs(value: string) {
+  const normalized = value.trim();
+
+  if (normalized.endsWith('ms')) return Number.parseFloat(normalized);
+  if (normalized.endsWith('s')) return Number.parseFloat(normalized) * 1000;
+
+  return Number.parseFloat(normalized);
+}
+
+function maxCssDurationToMs(value: string) {
+  return Math.max(...value.split(',').map(cssTimeToMs));
+}
+
+async function expectMotionDuration(locator: Locator, expectedMs: number) {
+  const duration = await locator.evaluate(
+    (element) => window.getComputedStyle(element).transitionDuration,
+  );
+  const actualMs = maxCssDurationToMs(duration);
+
+  expect(actualMs).toBeGreaterThanOrEqual(expectedMs - 5);
+  expect(actualMs).toBeLessThanOrEqual(expectedMs + 5);
+}
+
+async function expectReducedMotionDuration(locator: Locator) {
+  const duration = await locator.evaluate(
+    (element) => window.getComputedStyle(element).transitionDuration,
+  );
+
+  expect(maxCssDurationToMs(duration)).toBeLessThanOrEqual(REDUCED_MOTION_MAX_DURATION_MS);
+}
+
+async function expectUniformBorderRadius(locator: Locator, expectedPx: number) {
+  const radii = await locator.evaluate((element) => {
+    const styles = window.getComputedStyle(element);
+
+    return [
+      styles.borderTopLeftRadius,
+      styles.borderTopRightRadius,
+      styles.borderBottomRightRadius,
+      styles.borderBottomLeftRadius,
+    ];
+  });
+
+  expect(radii.map((radius) => Math.round(Number.parseFloat(radius)))).toEqual([
+    expectedPx,
+    expectedPx,
+    expectedPx,
+    expectedPx,
+  ]);
+}
+
+async function openWorkspaceWithRailMotionLocators(page: Page) {
+  await openWorkspace(page);
+
+  const rail = page.getByTestId('left-rail');
+  const toggle = page.getByTestId('left-rail-button-collapse');
+
+  return {
+    collapseIcon: toggle.getByTestId('left-rail-icon'),
+    leftArea: page.getByTestId('workspace-left-area'),
+    rail,
+    tabPanel: page.locator('#praios-tab-panel'),
+    toggle,
+  };
+}
+
 async function openRailTab(page: Page, tab: keyof typeof RAIL_TAB_EXPECTATIONS) {
   if (tab !== 'map') {
     await page.getByRole('banner').locator(`#${RAIL_TAB_EXPECTATIONS[tab].headerTabId}`).click();
@@ -99,6 +172,14 @@ async function expectRailWidth(page: Page, expectedWidth: number) {
   const leftArea = page.getByTestId('workspace-left-area');
   const rail = page.getByTestId('left-rail');
   const map = page.getByTestId('workspace-map');
+
+  await expect
+    .poll(async () => Math.round((await requireBox(leftArea)).width), { timeout: 1500 })
+    .toBe(expectedWidth);
+  await expect
+    .poll(async () => Math.round((await requireBox(rail)).width), { timeout: 1500 })
+    .toBe(expectedWidth);
+
   const leftBox = await requireBox(leftArea);
   const railBox = await requireBox(rail);
   const mapBox = await requireBox(map);
@@ -107,6 +188,33 @@ async function expectRailWidth(page: Page, expectedWidth: number) {
   expect(Math.round(railBox.width)).toBe(expectedWidth);
   expect(Math.round(mapBox.x)).toBe(Math.round(leftBox.x + leftBox.width));
   expect(Math.round(mapBox.width)).toBe(VIEWPORT_WIDTH - Math.round(leftBox.width));
+}
+
+async function expectMapContainerSpacing(page: Page) {
+  const map = page.getByTestId('workspace-map');
+  const mapCard = page.getByTestId('workspace-map-card');
+  const mapCanvas = page.getByTestId('workspace-map-canvas');
+
+  const mapBox = await requireBox(map);
+  const cardBox = await requireBox(mapCard);
+  const canvasBox = await requireBox(mapCanvas);
+
+  expect(Math.round(cardBox.x - mapBox.x)).toBe(MAP_OUTER_GUTTER);
+  expect(Math.round(cardBox.y - mapBox.y)).toBe(MAP_OUTER_GUTTER);
+  expect(Math.round(mapBox.x + mapBox.width - (cardBox.x + cardBox.width))).toBe(MAP_OUTER_GUTTER);
+  expect(Math.round(mapBox.y + mapBox.height - (cardBox.y + cardBox.height))).toBe(
+    MAP_OUTER_GUTTER,
+  );
+  expect(Math.round(canvasBox.x - cardBox.x)).toBe(MAP_INNER_INSET);
+  expect(Math.round(canvasBox.y - cardBox.y)).toBe(MAP_INNER_INSET);
+  expect(Math.round(cardBox.x + cardBox.width - (canvasBox.x + canvasBox.width))).toBe(
+    MAP_INNER_INSET,
+  );
+  expect(Math.round(cardBox.y + cardBox.height - (canvasBox.y + canvasBox.height))).toBe(
+    MAP_INNER_INSET,
+  );
+  await expectUniformBorderRadius(mapCard, MAP_CONTAINER_RADIUS);
+  await expectUniformBorderRadius(mapCanvas, MAP_CANVAS_RADIUS);
 }
 
 async function expectRailIcons(page: Page, tab: keyof typeof RAIL_TAB_EXPECTATIONS) {
@@ -290,6 +398,7 @@ test.describe('PraiOS workspace shell', () => {
     expect(Math.round(mapBox.x)).toBe(Math.round(leftBox.x + leftBox.width));
     expect(Math.round(mapBox.width)).toBe(VIEWPORT_WIDTH - Math.round(leftBox.width));
     expect(Math.round(mapBox.height)).toBe(1080 - HEADER_HEIGHT);
+    await expectMapContainerSpacing(page);
   });
 
   test('opens and closes the contextual left rail with tab-specific reference widths', async ({
@@ -305,13 +414,16 @@ test.describe('PraiOS workspace shell', () => {
       const leftArea = page.getByTestId('workspace-left-area');
       const rail = page.getByTestId('left-rail');
       const toggle = page.getByTestId('left-rail-button-collapse');
+      const railLabels = rail.getByTestId('left-rail-label');
+      const expectedLabelCount = Object.keys(RAIL_TAB_EXPECTATIONS[tab].icons).length;
 
       await expect(leftArea).toHaveAttribute('data-sidebar-state', 'collapsed');
       await expect(rail).toHaveAttribute('data-sidebar-state', 'collapsed');
       await expect(toggle).toHaveAttribute('aria-expanded', 'false');
       await expectRailWidth(page, RAIL_COLLAPSED_WIDTH);
       await expectRailIcons(page, tab);
-      await expect(rail.getByTestId('left-rail-label')).toHaveCount(0);
+      await expect(railLabels).toHaveCount(expectedLabelCount);
+      await expect(railLabels.first()).toHaveCSS('opacity', '0');
 
       await toggle.click();
 
@@ -319,10 +431,9 @@ test.describe('PraiOS workspace shell', () => {
       await expect(rail).toHaveAttribute('data-sidebar-state', 'expanded');
       await expect(toggle).toHaveAttribute('aria-expanded', 'true');
       await expectRailWidth(page, RAIL_TAB_EXPECTATIONS[tab].expandedWidth);
-      await expect(rail.getByTestId('left-rail-label')).toHaveCount(
-        Object.keys(RAIL_TAB_EXPECTATIONS[tab].icons).length,
-      );
-      await expect(rail.getByTestId('left-rail-label').first()).toBeVisible();
+      await expectMapContainerSpacing(page);
+      await expect(railLabels).toHaveCount(expectedLabelCount);
+      await expect(railLabels.first()).toHaveCSS('opacity', '1');
 
       await toggle.click();
 
@@ -330,8 +441,41 @@ test.describe('PraiOS workspace shell', () => {
       await expect(rail).toHaveAttribute('data-sidebar-state', 'collapsed');
       await expect(toggle).toHaveAttribute('aria-expanded', 'false');
       await expectRailWidth(page, RAIL_COLLAPSED_WIDTH);
-      await expect(rail.getByTestId('left-rail-label')).toHaveCount(0);
+      await expect(railLabels).toHaveCount(expectedLabelCount);
+      await expect(railLabels.first()).toHaveCSS('opacity', '0');
     }
+  });
+
+  test('uses a shared soft motion contract for left rail and map resizing', async ({ page }) => {
+    const { collapseIcon, leftArea, rail, tabPanel, toggle } =
+      await openWorkspaceWithRailMotionLocators(page);
+
+    await expectMotionDuration(tabPanel, WORKSPACE_MOTION_DURATION_MS);
+    await expectMotionDuration(leftArea, WORKSPACE_MOTION_DURATION_MS);
+    await expectMotionDuration(rail, WORKSPACE_MOTION_DURATION_MS);
+    await expectMotionDuration(collapseIcon, WORKSPACE_MOTION_DURATION_MS);
+
+    await toggle.click();
+
+    const firstLabel = rail.getByTestId('left-rail-label').first();
+    await expect(firstLabel).toBeVisible();
+    await expectMotionDuration(firstLabel, WORKSPACE_MOTION_DURATION_MS);
+    await expectMapContainerSpacing(page);
+  });
+
+  test('removes meaningful rail motion for reduced-motion users', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+
+    const { collapseIcon, leftArea, rail, tabPanel, toggle } =
+      await openWorkspaceWithRailMotionLocators(page);
+
+    await expectReducedMotionDuration(tabPanel);
+    await expectReducedMotionDuration(leftArea);
+    await expectReducedMotionDuration(rail);
+    await expectReducedMotionDuration(collapseIcon);
+
+    await toggle.click();
+    await expectReducedMotionDuration(rail.getByTestId('left-rail-label').first());
   });
 
   test('syncs tab-specific left panels with Header state', async ({ page }) => {

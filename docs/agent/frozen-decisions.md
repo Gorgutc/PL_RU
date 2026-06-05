@@ -115,10 +115,13 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   `map`, `bar`, and `tmi`.
 - The rail has a local React-only open / closed state. It starts collapsed on
   first page load and must not use `localStorage` or `sessionStorage`.
-- The expanded left rail widths are frozen to `195px` for `map`, `207px` for
-  `bar`, and `170px` for `tmi`, matching the approved side-menu reference PNG
-  crops. `51px` closed reference exports are treated as the same `50px` rail
-  plus the exported edge.
+- The expanded left rail width is frozen to `207px` for `map`, `bar`, and
+  `tmi`; the routes (`bar`) expanded reference is the canonical maximum width
+  for every contextual rail. `51px` closed reference exports are treated as the
+  same `50px` rail plus the exported edge.
+- Rail open / close uses one soft `220ms` transition contract for the shell
+  grid, left area, rail buttons, label reveal, and collapse icon rotation.
+  `prefers-reduced-motion: reduce` removes meaningful rail motion.
 - Left rail buttons keep Blueprint `Button` primitives for interaction, but
   their glyphs use custom SVG assets from the approved Google Drive `Иконки`
   folder. `RailItem.iconId` typed against the rail SVG manifest is the source of
@@ -158,9 +161,12 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   pointer-click focus outline or shadow; keyboard focus remains visible on the
   indicator. Footer action focus uses an inset ring so button borders are not
   clipped by the panel edge.
-- The center workspace is a Blueprint `Card` map surface that fills
-  `minmax(0, 1fr)` and renders a real client-side `MapLibre GL JS` map.
-  MapLibre CSS is imported through `src/app/layout.tsx`.
+- The center workspace is a Blueprint `Card` map surface inside a dynamic map
+  container. The map area keeps a symmetric `10px` outer gutter, the Card keeps
+  an `8px` inner inset before the MapLibre canvas, the outer container radius is
+  `2px`, the map canvas radius is `4px`, and MapLibre resizes through
+  `ResizeObserver` when rail motion changes the available map width. MapLibre
+  CSS is imported through `src/app/layout.tsx`.
 - The default map provider is OpenStreetMap raster tiles from
   `https://tile.openstreetmap.org/{z}/{x}/{y}.png`, with expanded visible OSM
   attribution and MapLibre navigation controls. Do not add prefetching or

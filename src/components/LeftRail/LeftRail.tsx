@@ -86,11 +86,9 @@ function RailButton({
       onKeyDown={markKeyboardFocus}
       onPointerDown={markPointerFocus}
       text={
-        expanded ? (
-          <span className={styles.label} data-testid="left-rail-label">
-            {item.label}
-          </span>
-        ) : undefined
+        <span className={styles.label} data-testid="left-rail-label" aria-hidden="true">
+          {item.label}
+        </span>
       }
       title={label}
       type="button"
