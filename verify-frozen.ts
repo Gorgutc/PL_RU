@@ -443,6 +443,16 @@ async function testFrozenHeaderContract() {
 
 async function testFrozenQualityToolingContract() {
   const pkg = JSON.parse(await readFile(path.join(ROOT, 'package.json'), 'utf8'));
+  const nvmrc = (await readFile(path.join(ROOT, '.nvmrc'), 'utf8')).trim();
+  const ci = await readFile(path.join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8');
+  const codexConfig = await readFile(path.join(ROOT, '.codex', 'config.toml'), 'utf8');
+  const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
+  const architecture = await readFile(path.join(ROOT, 'docs', 'agent', 'architecture.md'), 'utf8');
+  const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+  const frontendSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-frontend-rules', 'SKILL.md'),
+    'utf8',
+  );
   const jscpd = JSON.parse(await readFile(path.join(ROOT, '.jscpd.json'), 'utf8'));
   const shared = await readFile(path.join(ROOT, 'playwright.shared.config.ts'), 'utf8');
   const e2e = await readFile(path.join(ROOT, 'playwright.config.ts'), 'utf8');
@@ -460,6 +470,22 @@ async function testFrozenQualityToolingContract() {
   }
   if (!pkg.scripts?.['quality:deep']?.includes('pnpm check:visual')) {
     failures.push('package.json quality:deep must include pnpm check:visual');
+  }
+  if (pkg.engines?.node !== '>=24.0.0 <25')
+    failures.push('package.json node engine must stay Node 24');
+  if (!pkg.devDependencies?.['@types/node']?.startsWith('^24.')) {
+    failures.push('package.json @types/node must stay aligned to Node 24');
+  }
+  if (nvmrc !== '24') failures.push('.nvmrc must stay Node 24');
+  if (!ci.includes('node-version: 24')) failures.push('ci.yml must use Node 24');
+  if (!codexConfig.includes('node = "24"')) failures.push('.codex/config.toml must use Node 24');
+  for (const [label, text] of [
+    ['AGENTS.md', agents],
+    ['docs/agent/architecture.md', architecture],
+    ['docs/agent/frozen-decisions.md', frozen],
+    ['pl-ru-frontend-rules', frontendSkill],
+  ] as const) {
+    if (!hasPhrase(text, 'Node 24 LTS')) failures.push(`${label} must document Node 24 LTS`);
   }
   if (jscpd.threshold !== 1) failures.push('.jscpd.json threshold must stay 1');
   for (const required of [

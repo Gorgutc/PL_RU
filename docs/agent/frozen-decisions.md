@@ -197,6 +197,9 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 
 ## Quality Tooling
 
+- Node 24 LTS is the supported runtime. The repo contract is mirrored by
+  `.nvmrc`, `package.json` engines, `.github/workflows/ci.yml`,
+  `.codex/config.toml`, root `@types/node`, and the frontend rules skill.
 - `pnpm check:duplicates` must run `jscpd --config .jscpd.json --noTips .` so
   local Windows runs and Linux CI scan the same target set.
 - Shared Playwright config lives in `playwright.shared.config.ts`; e2e and

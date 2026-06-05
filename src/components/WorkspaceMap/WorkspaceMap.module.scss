@@ -33,6 +33,8 @@
 
 /* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
 .mapCanvas :global(.maplibregl-canvas) {
+  min-width: 100%;
+  min-height: 100%;
   border-radius: inherit;
   outline: none;
 }

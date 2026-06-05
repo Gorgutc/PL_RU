@@ -21,6 +21,8 @@ const MAP_CANVAS_RADIUS = 4;
 const WORKSPACE_MOTION_DURATION_MS = 220;
 const MAP_RESIZE_SETTLE_DELAY_MS = 80;
 const REDUCED_MOTION_MAX_DURATION_MS = 20;
+const MAP_MASK_COVERAGE_TOLERANCE_PX = 1;
+const MAP_MASK_MOTION_SAMPLE_ELAPSED_MS = [40, 110, 220] as const;
 const RAIL_HEIGHTS = [768, 900, 1080, 1200, 1440, 2160] as const;
 const RAIL_TAB_EXPECTATIONS = {
   map: {
@@ -348,6 +350,74 @@ async function expectMapCanvasResizeAfterLayoutSettles(
   expect(await readMapCanvasResizeMutationCount(page)).toBeLessThanOrEqual(4);
 }
 
+async function readMapMaskCoverage(page: Page, label: string) {
+  return page.evaluate((sampleLabel) => {
+    const host = document.querySelector('[data-testid="workspace-map-canvas"]');
+    const canvas = document.querySelector('.maplibregl-canvas');
+
+    if (!host || !canvas) {
+      throw new Error(`Expected MapLibre host and canvas for ${sampleLabel}`);
+    }
+
+    const hostBox = host.getBoundingClientRect();
+    const canvasBox = canvas.getBoundingClientRect();
+    const canvasElement = canvas as HTMLCanvasElement;
+
+    return {
+      canvasHeight: canvasBox.height,
+      canvasInlineHeight: Number.parseFloat(canvasElement.style.height),
+      canvasInlineWidth: Number.parseFloat(canvasElement.style.width),
+      canvasWidth: canvasBox.width,
+      hostHeight: hostBox.height,
+      hostWidth: hostBox.width,
+      label: sampleLabel,
+    };
+  }, label);
+}
+
+async function expectMapCanvasCoversMaskDuringMotion(page: Page, label: string) {
+  const coverage = await readMapMaskCoverage(page, label);
+
+  expect(
+    coverage.canvasWidth,
+    `${coverage.label}: MapLibre canvas should cover the map mask width`,
+  ).toBeGreaterThanOrEqual(coverage.hostWidth - MAP_MASK_COVERAGE_TOLERANCE_PX);
+  expect(
+    coverage.canvasHeight,
+    `${coverage.label}: MapLibre canvas should cover the map mask height`,
+  ).toBeGreaterThanOrEqual(coverage.hostHeight - MAP_MASK_COVERAGE_TOLERANCE_PX);
+}
+
+async function waitForMapCanvasSettledToMask(page: Page, label: string) {
+  await expect
+    .poll(
+      async () => {
+        const coverage = await readMapMaskCoverage(page, label);
+
+        return (
+          Number.isFinite(coverage.canvasInlineWidth) &&
+          Number.isFinite(coverage.canvasInlineHeight) &&
+          Math.abs(coverage.canvasInlineWidth - coverage.hostWidth) <=
+            MAP_MASK_COVERAGE_TOLERANCE_PX &&
+          Math.abs(coverage.canvasInlineHeight - coverage.hostHeight) <=
+            MAP_MASK_COVERAGE_TOLERANCE_PX
+        );
+      },
+      { message: `${label}: MapLibre canvas inline size should settle to the map mask` },
+    )
+    .toBe(true);
+}
+
+async function expectMapCanvasCoversMaskDuringMotionSamples(page: Page, label: string) {
+  let previousElapsedMs = 0;
+
+  for (const elapsedMs of MAP_MASK_MOTION_SAMPLE_ELAPSED_MS) {
+    await page.waitForTimeout(elapsedMs - previousElapsedMs);
+    await expectMapCanvasCoversMaskDuringMotion(page, `${label} at ${elapsedMs}ms`);
+    previousElapsedMs = elapsedMs;
+  }
+}
+
 async function stopWatchingMapCanvasResizeMutations(page: Page) {
   await page.evaluate(() => {
     window.__workspaceMapCanvasResizeState?.observer?.disconnect();
@@ -626,6 +696,26 @@ test.describe('PraiOS workspace shell', () => {
     await expectMapCanvasResizeAfterLayoutSettles(page, canvas, leftArea, 'collapsed');
 
     await stopWatchingMapCanvasResizeMutations(page);
+  });
+
+  test('covers the map mask while the left rail and side panels resize', async ({ page }) => {
+    const { toggle } = await openWorkspaceWithRailMotionLocators(page);
+
+    await expect(page.locator('.maplibregl-canvas')).toBeVisible();
+    await waitForMapCanvasSettledToMask(page, 'initial map');
+
+    await toggle.click();
+    await waitForMapCanvasSettledToMask(page, 'expanded rail before close');
+
+    await toggle.click();
+    await expectMapCanvasCoversMaskDuringMotionSamples(page, 'rail closing');
+
+    await waitForMapCanvasSettledToMask(page, 'collapsed rail after close');
+    await page.getByRole('banner').locator('#praios-header-tab-stats').click();
+    await waitForMapCanvasSettledToMask(page, 'stats panel before map tab');
+
+    await page.getByRole('banner').locator('#praios-header-tab-map').click();
+    await expectMapCanvasCoversMaskDuringMotionSamples(page, 'stats to map');
   });
 
   test('removes meaningful rail motion for reduced-motion users', async ({ page }) => {

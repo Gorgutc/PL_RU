@@ -4,7 +4,7 @@ Read this file before editing anything in this repo. It is the canonical instruc
 
 ## TL;DR
 
-1. Stack: Next.js 16 + React 19 + TypeScript 5 strict + SCSS modules + Blueprint (`@blueprintjs/core`, `@blueprintjs/icons`). pnpm only. Node 22 LTS.
+1. Stack: Next.js 16 + React 19 + TypeScript 5 strict + SCSS modules + Blueprint (`@blueprintjs/core`, `@blueprintjs/icons`). pnpm only. Node 24 LTS.
 2. No Tailwind, no CSS-in-JS, no styled-components, no npm/yarn lockfiles.
 3. Architecture source of truth: `verify-frozen.ts`, executed through `pnpm verify`.
 4. Finished work must pass `pnpm codex:ship` before commit/push.
