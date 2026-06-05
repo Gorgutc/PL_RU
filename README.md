@@ -17,7 +17,7 @@ modules, and Blueprint dashboard or data-heavy apps.
 
 ## Prerequisites
 
-- Node 22.18 or newer.
+- Node 24 LTS.
 - pnpm 9 or newer.
 
 ```bash

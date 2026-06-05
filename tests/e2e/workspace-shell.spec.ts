@@ -1,13 +1,35 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
+declare global {
+  interface Window {
+    __workspaceMapCanvasResizeState?: {
+      events: Array<{ height: string | null; now: number; width: string | null }>;
+      observer: MutationObserver | null;
+      startedAt: number;
+    };
+  }
+}
+
 const HEADER_HEIGHT = 48;
 const VIEWPORT_WIDTH = 1920;
 const RAIL_COLLAPSED_WIDTH = 50;
+const RAIL_EXPANDED_WIDTH = 240;
+const MAP_OUTER_GUTTER = 10;
+const MAP_INNER_INSET = 8;
+const MAP_CONTAINER_RADIUS = 2;
+const MAP_CANVAS_RADIUS = 4;
+const WORKSPACE_MOTION_DURATION_MS = 220;
+const MAP_RESIZE_SETTLE_DELAY_MS = 80;
+const REDUCED_MOTION_MAX_DURATION_MS = 20;
+const MAP_MASK_COVERAGE_TOLERANCE_PX = 1;
+const MAP_MASK_MOTION_SAMPLE_ELAPSED_MS = [40, 110, 220] as const;
+const MAP_STAGE_PRE_WATCH_QUIET_MS =
+  WORKSPACE_MOTION_DURATION_MS + MAP_RESIZE_SETTLE_DELAY_MS + 120;
 const RAIL_HEIGHTS = [768, 900, 1080, 1200, 1440, 2160] as const;
 const RAIL_TAB_EXPECTATIONS = {
   map: {
     headerTabId: 'praios-header-tab-map',
-    expandedWidth: 195,
+    expandedWidth: RAIL_EXPANDED_WIDTH,
     icons: {
       primary: 'flag-outline',
       documents: 'file-text',
@@ -23,7 +45,7 @@ const RAIL_TAB_EXPECTATIONS = {
   },
   bar: {
     headerTabId: 'praios-header-tab-bar',
-    expandedWidth: 207,
+    expandedWidth: RAIL_EXPANDED_WIDTH,
     icons: {
       primary: 'ruler-outline',
       timeline: 'zerolinetool-outline',
@@ -39,7 +61,7 @@ const RAIL_TAB_EXPECTATIONS = {
   },
   tmi: {
     headerTabId: 'praios-header-tab-tmi',
-    expandedWidth: 170,
+    expandedWidth: RAIL_EXPANDED_WIDTH,
     icons: {
       primary: 'ruler-outline',
       area: 'buffer-outline',
@@ -70,6 +92,12 @@ const KICK_SELECT_IDS = [
   'kick-select-interest',
 ] as const;
 
+function getCollapsedMapStageWidth(viewportWidth: number) {
+  return viewportWidth - RAIL_COLLAPSED_WIDTH - MAP_OUTER_GUTTER * 2 - MAP_INNER_INSET * 2;
+}
+
+const MAX_COLLAPSED_MAP_CANVAS_WIDTH = getCollapsedMapStageWidth(VIEWPORT_WIDTH);
+
 async function openWorkspace(page: Page, height = 1080) {
   await page.setViewportSize({ width: VIEWPORT_WIDTH, height });
   await page.goto('/');
@@ -86,6 +114,72 @@ async function requireBox(locator: Locator) {
   return box;
 }
 
+function cssTimeToMs(value: string) {
+  const normalized = value.trim();
+
+  if (normalized.endsWith('ms')) return Number.parseFloat(normalized);
+  if (normalized.endsWith('s')) return Number.parseFloat(normalized) * 1000;
+
+  return Number.parseFloat(normalized);
+}
+
+function maxCssDurationToMs(value: string) {
+  return Math.max(...value.split(',').map(cssTimeToMs));
+}
+
+async function expectMotionDuration(locator: Locator, expectedMs: number) {
+  const duration = await locator.evaluate(
+    (element) => window.getComputedStyle(element).transitionDuration,
+  );
+  const actualMs = maxCssDurationToMs(duration);
+
+  expect(actualMs).toBeGreaterThanOrEqual(expectedMs - 5);
+  expect(actualMs).toBeLessThanOrEqual(expectedMs + 5);
+}
+
+async function expectReducedMotionDuration(locator: Locator) {
+  const duration = await locator.evaluate(
+    (element) => window.getComputedStyle(element).transitionDuration,
+  );
+
+  expect(maxCssDurationToMs(duration)).toBeLessThanOrEqual(REDUCED_MOTION_MAX_DURATION_MS);
+}
+
+async function expectUniformBorderRadius(locator: Locator, expectedPx: number) {
+  const radii = await locator.evaluate((element) => {
+    const styles = window.getComputedStyle(element);
+
+    return [
+      styles.borderTopLeftRadius,
+      styles.borderTopRightRadius,
+      styles.borderBottomRightRadius,
+      styles.borderBottomLeftRadius,
+    ];
+  });
+
+  expect(radii.map((radius) => Math.round(Number.parseFloat(radius)))).toEqual([
+    expectedPx,
+    expectedPx,
+    expectedPx,
+    expectedPx,
+  ]);
+}
+
+async function openWorkspaceWithRailMotionLocators(page: Page) {
+  await openWorkspace(page);
+
+  const rail = page.getByTestId('left-rail');
+  const toggle = page.getByTestId('left-rail-button-collapse');
+
+  return {
+    collapseIcon: toggle.getByTestId('left-rail-icon'),
+    leftArea: page.getByTestId('workspace-left-area'),
+    rail,
+    tabPanel: page.locator('#praios-tab-panel'),
+    toggle,
+  };
+}
+
 async function openRailTab(page: Page, tab: keyof typeof RAIL_TAB_EXPECTATIONS) {
   if (tab !== 'map') {
     await page.getByRole('banner').locator(`#${RAIL_TAB_EXPECTATIONS[tab].headerTabId}`).click();
@@ -99,6 +193,14 @@ async function expectRailWidth(page: Page, expectedWidth: number) {
   const leftArea = page.getByTestId('workspace-left-area');
   const rail = page.getByTestId('left-rail');
   const map = page.getByTestId('workspace-map');
+
+  await expect
+    .poll(async () => Math.round((await requireBox(leftArea)).width), { timeout: 3000 })
+    .toBe(expectedWidth);
+  await expect
+    .poll(async () => Math.round((await requireBox(rail)).width), { timeout: 3000 })
+    .toBe(expectedWidth);
+
   const leftBox = await requireBox(leftArea);
   const railBox = await requireBox(rail);
   const mapBox = await requireBox(map);
@@ -107,6 +209,265 @@ async function expectRailWidth(page: Page, expectedWidth: number) {
   expect(Math.round(railBox.width)).toBe(expectedWidth);
   expect(Math.round(mapBox.x)).toBe(Math.round(leftBox.x + leftBox.width));
   expect(Math.round(mapBox.width)).toBe(VIEWPORT_WIDTH - Math.round(leftBox.width));
+}
+
+async function waitForWorkspaceMotion(page: Page) {
+  await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
+}
+
+async function expectMapContainerSpacing(page: Page) {
+  const map = page.getByTestId('workspace-map');
+  const mapCard = page.getByTestId('workspace-map-card');
+  const mapCanvas = page.getByTestId('workspace-map-canvas');
+
+  const mapBox = await requireBox(map);
+  const cardBox = await requireBox(mapCard);
+  const canvasBox = await requireBox(mapCanvas);
+
+  expect(Math.round(cardBox.x - mapBox.x)).toBe(MAP_OUTER_GUTTER);
+  expect(Math.round(cardBox.y - mapBox.y)).toBe(MAP_OUTER_GUTTER);
+  expect(Math.round(mapBox.x + mapBox.width - (cardBox.x + cardBox.width))).toBe(MAP_OUTER_GUTTER);
+  expect(Math.round(mapBox.y + mapBox.height - (cardBox.y + cardBox.height))).toBe(
+    MAP_OUTER_GUTTER,
+  );
+  expect(Math.round(canvasBox.x - cardBox.x)).toBe(MAP_INNER_INSET);
+  expect(Math.round(canvasBox.y - cardBox.y)).toBe(MAP_INNER_INSET);
+  expect(Math.round(cardBox.x + cardBox.width - (canvasBox.x + canvasBox.width))).toBe(
+    MAP_INNER_INSET,
+  );
+  expect(Math.round(cardBox.y + cardBox.height - (canvasBox.y + canvasBox.height))).toBe(
+    MAP_INNER_INSET,
+  );
+  await expectUniformBorderRadius(mapCard, MAP_CONTAINER_RADIUS);
+  await expectUniformBorderRadius(mapCanvas, MAP_CANVAS_RADIUS);
+}
+
+async function expectRailLabelFits(button: Locator) {
+  const label = button.getByTestId('left-rail-label');
+  const metrics = await label.evaluate((element) => ({
+    clientWidth: element.clientWidth,
+    scrollWidth: element.scrollWidth,
+    text: element.textContent,
+  }));
+
+  expect(metrics.scrollWidth, `${metrics.text ?? 'rail label'} should fit`).toBeLessThanOrEqual(
+    metrics.clientWidth + 1,
+  );
+}
+
+async function watchMapCanvasResizeMutations(page: Page) {
+  await page.locator('.maplibregl-canvas').waitFor({ state: 'visible' });
+  await page.evaluate(() => {
+    const canvas = document.querySelector('.maplibregl-canvas');
+
+    if (!canvas) throw new Error('Expected MapLibre canvas before watching mutations');
+
+    const state = {
+      events: [] as Array<{ height: string | null; now: number; width: string | null }>,
+      observer: null as MutationObserver | null,
+      startedAt: performance.now(),
+    };
+
+    state.observer = new MutationObserver(() => {
+      state.events.push({
+        height: canvas.getAttribute('height'),
+        now: performance.now() - state.startedAt,
+        width: canvas.getAttribute('width'),
+      });
+    });
+    state.observer.observe(canvas, {
+      attributeFilter: ['height', 'width'],
+      attributes: true,
+    });
+
+    window.__workspaceMapCanvasResizeState?.observer?.disconnect();
+    window.__workspaceMapCanvasResizeState = state;
+  });
+}
+
+async function waitForMapCanvasResizeQuiet(page: Page, quietMs = 240, timeoutMs = 3000) {
+  await page.locator('.maplibregl-canvas').waitFor({ state: 'visible' });
+  await page.evaluate(
+    ({ quietMs: quietWindow, timeoutMs: timeoutWindow }) =>
+      new Promise<void>((resolve, reject) => {
+        const canvas = document.querySelector('.maplibregl-canvas');
+
+        if (!canvas) {
+          reject(new Error('Expected MapLibre canvas before waiting for quiet resize'));
+          return;
+        }
+
+        let quietTimer = 0;
+        let timeoutTimer = 0;
+        const observer = new MutationObserver(() => {
+          window.clearTimeout(quietTimer);
+          quietTimer = window.setTimeout(finish, quietWindow);
+        });
+        const finish = () => {
+          window.clearTimeout(quietTimer);
+          window.clearTimeout(timeoutTimer);
+          observer.disconnect();
+          resolve();
+        };
+
+        observer.observe(canvas, {
+          attributeFilter: ['height', 'width'],
+          attributes: true,
+        });
+        quietTimer = window.setTimeout(finish, quietWindow);
+        timeoutTimer = window.setTimeout(() => {
+          observer.disconnect();
+          reject(new Error('Timed out waiting for MapLibre canvas resize to settle'));
+        }, timeoutWindow);
+      }),
+    { quietMs, timeoutMs },
+  );
+}
+
+async function readMapCanvasResizeMutationCount(page: Page, beforeMs?: number) {
+  return page.evaluate((limit) => {
+    const events = window.__workspaceMapCanvasResizeState?.events ?? [];
+
+    return typeof limit === 'number'
+      ? events.filter((event) => event.now < limit).length
+      : events.length;
+  }, beforeMs);
+}
+
+async function readMapCanvasResizeMutationEvents(page: Page) {
+  return page.evaluate(() => window.__workspaceMapCanvasResizeState?.events ?? []);
+}
+
+async function expectMapCanvasAvoidsResizeForShellMotion(
+  page: Page,
+  canvas: Locator,
+  leftArea: Locator,
+  sidebarState: 'collapsed' | 'expanded',
+) {
+  await page.waitForTimeout(Math.floor(WORKSPACE_MOTION_DURATION_MS / 2));
+
+  await expect(canvas).toBeVisible();
+  await expect(leftArea).toHaveAttribute('data-sidebar-state', sidebarState);
+  expect(await readMapCanvasResizeMutationCount(page, WORKSPACE_MOTION_DURATION_MS)).toBe(0);
+
+  await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + MAP_RESIZE_SETTLE_DELAY_MS + 120);
+
+  await expect(canvas).toBeVisible();
+  expect(
+    await readMapCanvasResizeMutationEvents(page),
+    'shell motion should not resize MapLibre canvas',
+  ).toHaveLength(0);
+}
+
+async function readMapMaskCoverage(page: Page, label: string) {
+  return page.evaluate((sampleLabel) => {
+    const host = document.querySelector('[data-testid="workspace-map-canvas"]');
+    const canvas = document.querySelector('.maplibregl-canvas');
+
+    if (!host || !canvas) {
+      throw new Error(`Expected MapLibre host and canvas for ${sampleLabel}`);
+    }
+
+    const hostBox = host.getBoundingClientRect();
+    const canvasBox = canvas.getBoundingClientRect();
+
+    return {
+      canvasHeight: canvasBox.height,
+      canvasRight: canvasBox.right,
+      canvasWidth: canvasBox.width,
+      hostHeight: hostBox.height,
+      hostRight: hostBox.right,
+      hostWidth: hostBox.width,
+      label: sampleLabel,
+    };
+  }, label);
+}
+
+async function expectMapCanvasCoversMaskDuringMotion(page: Page, label: string) {
+  const coverage = await readMapMaskCoverage(page, label);
+
+  expect(
+    coverage.canvasWidth,
+    `${coverage.label}: MapLibre canvas should cover the map mask width`,
+  ).toBeGreaterThanOrEqual(coverage.hostWidth - MAP_MASK_COVERAGE_TOLERANCE_PX);
+  expect(
+    coverage.canvasHeight,
+    `${coverage.label}: MapLibre canvas should cover the map mask height`,
+  ).toBeGreaterThanOrEqual(coverage.hostHeight - MAP_MASK_COVERAGE_TOLERANCE_PX);
+}
+
+function expectMapCanvasRightAlignedToMask(
+  coverage: Awaited<ReturnType<typeof readMapMaskCoverage>>,
+) {
+  expect(
+    Math.abs(coverage.canvasRight - coverage.hostRight),
+    `${coverage.label}: MapLibre canvas right edge should stay anchored to the map mask`,
+  ).toBeLessThanOrEqual(MAP_MASK_COVERAGE_TOLERANCE_PX);
+}
+
+async function expectMapCanvasUsesStableStageWidth(
+  page: Page,
+  label: string,
+  expectedWidth = MAX_COLLAPSED_MAP_CANVAS_WIDTH,
+) {
+  const coverage = await readMapMaskCoverage(page, label);
+
+  expect(
+    coverage.canvasWidth,
+    `${coverage.label}: MapLibre canvas should keep the stable collapsed-map stage width`,
+  ).toBeGreaterThanOrEqual(expectedWidth - MAP_MASK_COVERAGE_TOLERANCE_PX);
+  expect(
+    coverage.canvasWidth,
+    `${coverage.label}: MapLibre canvas should not grow beyond the stable stage width`,
+  ).toBeLessThanOrEqual(expectedWidth + MAP_MASK_COVERAGE_TOLERANCE_PX);
+  expectMapCanvasRightAlignedToMask(coverage);
+}
+
+async function waitForMapCanvasStableStage(
+  page: Page,
+  label: string,
+  expectedWidth = MAX_COLLAPSED_MAP_CANVAS_WIDTH,
+) {
+  await expect
+    .poll(
+      async () => {
+        const coverage = await readMapMaskCoverage(page, label);
+
+        return (
+          Math.abs(coverage.canvasWidth - expectedWidth) <= MAP_MASK_COVERAGE_TOLERANCE_PX &&
+          Math.abs(coverage.canvasRight - coverage.hostRight) <= MAP_MASK_COVERAGE_TOLERANCE_PX
+        );
+      },
+      { message: `${label}: MapLibre canvas should keep a stable right-anchored stage` },
+    )
+    .toBe(true);
+}
+
+async function expectMapCanvasCoversMaskDuringMotionSamples(page: Page, label: string) {
+  let previousElapsedMs = 0;
+
+  for (const elapsedMs of MAP_MASK_MOTION_SAMPLE_ELAPSED_MS) {
+    await page.waitForTimeout(elapsedMs - previousElapsedMs);
+    await expectMapCanvasCoversMaskDuringMotion(page, `${label} at ${elapsedMs}ms`);
+    previousElapsedMs = elapsedMs;
+  }
+}
+
+async function expectMapCanvasStableStageDuringMotionSamples(page: Page, label: string) {
+  let previousElapsedMs = 0;
+
+  for (const elapsedMs of MAP_MASK_MOTION_SAMPLE_ELAPSED_MS) {
+    await page.waitForTimeout(elapsedMs - previousElapsedMs);
+    await expectMapCanvasUsesStableStageWidth(page, `${label} at ${elapsedMs}ms`);
+    previousElapsedMs = elapsedMs;
+  }
+}
+
+async function stopWatchingMapCanvasResizeMutations(page: Page) {
+  await page.evaluate(() => {
+    window.__workspaceMapCanvasResizeState?.observer?.disconnect();
+    delete window.__workspaceMapCanvasResizeState;
+  });
 }
 
 async function expectRailIcons(page: Page, tab: keyof typeof RAIL_TAB_EXPECTATIONS) {
@@ -290,6 +651,7 @@ test.describe('PraiOS workspace shell', () => {
     expect(Math.round(mapBox.x)).toBe(Math.round(leftBox.x + leftBox.width));
     expect(Math.round(mapBox.width)).toBe(VIEWPORT_WIDTH - Math.round(leftBox.width));
     expect(Math.round(mapBox.height)).toBe(1080 - HEADER_HEIGHT);
+    await expectMapContainerSpacing(page);
   });
 
   test('opens and closes the contextual left rail with tab-specific reference widths', async ({
@@ -305,13 +667,16 @@ test.describe('PraiOS workspace shell', () => {
       const leftArea = page.getByTestId('workspace-left-area');
       const rail = page.getByTestId('left-rail');
       const toggle = page.getByTestId('left-rail-button-collapse');
+      const railLabels = rail.getByTestId('left-rail-label');
+      const expectedLabelCount = Object.keys(RAIL_TAB_EXPECTATIONS[tab].icons).length;
 
       await expect(leftArea).toHaveAttribute('data-sidebar-state', 'collapsed');
       await expect(rail).toHaveAttribute('data-sidebar-state', 'collapsed');
       await expect(toggle).toHaveAttribute('aria-expanded', 'false');
       await expectRailWidth(page, RAIL_COLLAPSED_WIDTH);
       await expectRailIcons(page, tab);
-      await expect(rail.getByTestId('left-rail-label')).toHaveCount(0);
+      await expect(railLabels).toHaveCount(expectedLabelCount);
+      await expect(railLabels.first()).toHaveCSS('opacity', '0');
 
       await toggle.click();
 
@@ -319,10 +684,12 @@ test.describe('PraiOS workspace shell', () => {
       await expect(rail).toHaveAttribute('data-sidebar-state', 'expanded');
       await expect(toggle).toHaveAttribute('aria-expanded', 'true');
       await expectRailWidth(page, RAIL_TAB_EXPECTATIONS[tab].expandedWidth);
-      await expect(rail.getByTestId('left-rail-label')).toHaveCount(
-        Object.keys(RAIL_TAB_EXPECTATIONS[tab].icons).length,
-      );
-      await expect(rail.getByTestId('left-rail-label').first()).toBeVisible();
+      await expectMapContainerSpacing(page);
+      await expect(railLabels).toHaveCount(expectedLabelCount);
+      await expect(railLabels.first()).toHaveCSS('opacity', '1');
+      if (tab === 'map') {
+        await expectRailLabelFits(page.getByTestId('left-rail-button-objects'));
+      }
 
       await toggle.click();
 
@@ -330,8 +697,151 @@ test.describe('PraiOS workspace shell', () => {
       await expect(rail).toHaveAttribute('data-sidebar-state', 'collapsed');
       await expect(toggle).toHaveAttribute('aria-expanded', 'false');
       await expectRailWidth(page, RAIL_COLLAPSED_WIDTH);
-      await expect(rail.getByTestId('left-rail-label')).toHaveCount(0);
+      await expect(railLabels).toHaveCount(expectedLabelCount);
+      await expect(railLabels.first()).toHaveCSS('opacity', '0');
     }
+  });
+
+  test('uses a shared soft motion contract for left rail and map mask changes', async ({
+    page,
+  }) => {
+    const { collapseIcon, leftArea, rail, tabPanel, toggle } =
+      await openWorkspaceWithRailMotionLocators(page);
+
+    await expectMotionDuration(tabPanel, WORKSPACE_MOTION_DURATION_MS);
+    await expectMotionDuration(leftArea, WORKSPACE_MOTION_DURATION_MS);
+    await expectMotionDuration(rail, WORKSPACE_MOTION_DURATION_MS);
+    await expectMotionDuration(collapseIcon, WORKSPACE_MOTION_DURATION_MS);
+
+    await toggle.click();
+
+    const firstLabel = rail.getByTestId('left-rail-label').first();
+    await expect(firstLabel).toBeVisible();
+    await expectMotionDuration(firstLabel, WORKSPACE_MOTION_DURATION_MS);
+    await waitForWorkspaceMotion(page);
+    await expectMapContainerSpacing(page);
+  });
+
+  test('keeps MapLibre canvas stable while the left rail is animating', async ({ page }) => {
+    const { leftArea, toggle } = await openWorkspaceWithRailMotionLocators(page);
+    const map = page.getByTestId('workspace-map');
+    const canvas = map.locator('.maplibregl-canvas');
+
+    await expect(canvas).toBeVisible();
+    await waitForMapCanvasResizeQuiet(page);
+    await watchMapCanvasResizeMutations(page);
+
+    await toggle.click();
+    await expectMapCanvasAvoidsResizeForShellMotion(page, canvas, leftArea, 'expanded');
+
+    await stopWatchingMapCanvasResizeMutations(page);
+
+    await waitForMapCanvasResizeQuiet(page);
+    await watchMapCanvasResizeMutations(page);
+
+    await toggle.click();
+    await expectMapCanvasAvoidsResizeForShellMotion(page, canvas, leftArea, 'collapsed');
+
+    await stopWatchingMapCanvasResizeMutations(page);
+  });
+
+  test('covers the map mask while the left rail and side panels resize', async ({ page }) => {
+    const { toggle } = await openWorkspaceWithRailMotionLocators(page);
+
+    await expect(page.locator('.maplibregl-canvas')).toBeVisible();
+    await waitForMapCanvasStableStage(page, 'initial map');
+
+    await toggle.click();
+    await waitForMapCanvasStableStage(page, 'expanded rail before close');
+
+    await toggle.click();
+    await expectMapCanvasCoversMaskDuringMotionSamples(page, 'rail closing');
+
+    await waitForMapCanvasStableStage(page, 'collapsed rail after close');
+    await page.getByRole('banner').locator('#praios-header-tab-stats').click();
+    await waitForMapCanvasStableStage(page, 'stats panel before map tab');
+
+    await page.getByRole('banner').locator('#praios-header-tab-map').click();
+    await expectMapCanvasCoversMaskDuringMotionSamples(page, 'stats to map');
+  });
+
+  test('keeps a right-anchored stable map stage while tabs crop and reveal it', async ({
+    page,
+  }) => {
+    const { toggle } = await openWorkspaceWithRailMotionLocators(page);
+    const header = page.getByRole('banner');
+
+    await expect(page.locator('.maplibregl-canvas')).toBeVisible();
+    await waitForMapCanvasStableStage(page, 'initial collapsed map');
+
+    await header.locator('#praios-header-tab-stats').click();
+    await waitForMapCanvasStableStage(page, 'stats panel crop');
+    await waitForMapCanvasResizeQuiet(page, MAP_STAGE_PRE_WATCH_QUIET_MS);
+    await watchMapCanvasResizeMutations(page);
+
+    await header.locator('#praios-header-tab-map').click();
+    await expectMapCanvasStableStageDuringMotionSamples(page, 'stats to map');
+    await waitForWorkspaceMotion(page);
+    await expectMapCanvasUsesStableStageWidth(page, 'map after stats reveal');
+    const statsToMapResizeEvents = await readMapCanvasResizeMutationEvents(page);
+    expect(statsToMapResizeEvents, 'stats to map should not resize MapLibre canvas').toHaveLength(
+      0,
+    );
+    await stopWatchingMapCanvasResizeMutations(page);
+
+    await toggle.click();
+    await waitForMapCanvasStableStage(page, 'expanded rail crop');
+    await waitForMapCanvasResizeQuiet(page, MAP_STAGE_PRE_WATCH_QUIET_MS);
+    await watchMapCanvasResizeMutations(page);
+
+    await toggle.click();
+    await expectMapCanvasStableStageDuringMotionSamples(page, 'rail closing');
+    await waitForWorkspaceMotion(page);
+    await expectMapCanvasUsesStableStageWidth(page, 'map after rail close reveal');
+    const railClosingResizeEvents = await readMapCanvasResizeMutationEvents(page);
+    expect(railClosingResizeEvents, 'rail closing should not resize MapLibre canvas').toHaveLength(
+      0,
+    );
+    await stopWatchingMapCanvasResizeMutations(page);
+  });
+
+  test('resizes MapLibre when the stable map stage changes with the viewport', async ({ page }) => {
+    await openWorkspace(page);
+    await expect(page.locator('.maplibregl-canvas')).toBeVisible();
+    await waitForMapCanvasStableStage(page, 'initial viewport stage');
+    await waitForMapCanvasResizeQuiet(page, MAP_STAGE_PRE_WATCH_QUIET_MS);
+    await watchMapCanvasResizeMutations(page);
+
+    const resizedViewport = { height: 900, width: 1600 };
+    await page.setViewportSize(resizedViewport);
+    await waitForMapCanvasStableStage(
+      page,
+      'resized viewport stage',
+      getCollapsedMapStageWidth(resizedViewport.width),
+    );
+    await waitForMapCanvasResizeQuiet(page);
+
+    const resizeEvents = await readMapCanvasResizeMutationEvents(page);
+    expect(
+      resizeEvents,
+      'viewport resize should resize MapLibre canvas for the new stage',
+    ).not.toHaveLength(0);
+    await stopWatchingMapCanvasResizeMutations(page);
+  });
+
+  test('removes meaningful rail motion for reduced-motion users', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+
+    const { collapseIcon, leftArea, rail, tabPanel, toggle } =
+      await openWorkspaceWithRailMotionLocators(page);
+
+    await expectReducedMotionDuration(tabPanel);
+    await expectReducedMotionDuration(leftArea);
+    await expectReducedMotionDuration(rail);
+    await expectReducedMotionDuration(collapseIcon);
+
+    await toggle.click();
+    await expectReducedMotionDuration(rail.getByTestId('left-rail-label').first());
   });
 
   test('syncs tab-specific left panels with Header state', async ({ page }) => {
@@ -342,6 +852,7 @@ test.describe('PraiOS workspace shell', () => {
     await expect(page.getByTestId('workspace-left-area')).toHaveAttribute('data-tab', 'map');
 
     await header.locator('#praios-header-tab-kick').click();
+    await waitForWorkspaceMotion(page);
 
     await expect(page.getByRole('tabpanel')).toHaveAttribute(
       'aria-labelledby',
@@ -350,9 +861,14 @@ test.describe('PraiOS workspace shell', () => {
     await expect(page.getByTestId('workspace-left-area')).toHaveAttribute('data-tab', 'kick');
     await expect(page.getByTestId('kick-side-panel')).toBeVisible();
     await expect(page.getByText('Создание параметров для пуска')).toBeVisible();
-    expect(Math.round((await requireBox(page.getByTestId('workspace-left-area'))).width)).toBe(300);
+    await expect
+      .poll(async () =>
+        Math.round((await requireBox(page.getByTestId('workspace-left-area'))).width),
+      )
+      .toBe(300);
 
     await header.locator('#praios-header-tab-stats').click();
+    await waitForWorkspaceMotion(page);
 
     await expect(page.getByRole('tabpanel')).toHaveAttribute(
       'aria-labelledby',
@@ -361,7 +877,11 @@ test.describe('PraiOS workspace shell', () => {
     await expect(page.getByTestId('workspace-left-area')).toHaveAttribute('data-tab', 'stats');
     await expect(page.getByTestId('stats-side-panel')).toBeVisible();
     await expect(page.getByText('Фильтры таблицы')).toBeVisible();
-    expect(Math.round((await requireBox(page.getByTestId('workspace-left-area'))).width)).toBe(300);
+    await expect
+      .poll(async () =>
+        Math.round((await requireBox(page.getByTestId('workspace-left-area'))).width),
+      )
+      .toBe(300);
   });
 
   for (const height of RAIL_HEIGHTS) {

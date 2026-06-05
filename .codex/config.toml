@@ -10,7 +10,7 @@ name = "PL_RU"
 repository = "Gorgutc/PL_RU"
 branch_prefix = "codex/"
 package_manager = "pnpm"
-node = "22"
+node = "24"
 
 [workflow]
 bootstrap_doc = "docs/agent/bootstrap.md"

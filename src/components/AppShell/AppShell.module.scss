@@ -22,22 +22,15 @@
   height: 100%;
   min-height: 0;
   overflow: hidden;
+  transition: grid-template-columns t.$workspace-motion-duration t.$workspace-motion-easing;
 }
 
 .tabPanelWide {
   --workspace-left-width: #{t.$workspace-panel-width};
 }
 
-.tabPanelRailMapExpanded {
-  --workspace-left-width: #{t.$workspace-rail-map-expanded-width};
-}
-
-.tabPanelRailBarExpanded {
-  --workspace-left-width: #{t.$workspace-rail-bar-expanded-width};
-}
-
-.tabPanelRailTmiExpanded {
-  --workspace-left-width: #{t.$workspace-rail-tmi-expanded-width};
+.tabPanelRailExpanded {
+  --workspace-left-width: #{t.$workspace-rail-expanded-width};
 }
 
 .leftArea {
@@ -47,6 +40,7 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+  transition: width t.$workspace-motion-duration t.$workspace-motion-easing;
 }
 
 .leftAreaPanel {
@@ -64,4 +58,11 @@
   clip-path: inset(50%);
   margin: -0.0625rem;
   white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabPanel,
+  .leftArea {
+    transition-duration: 0ms;
+  }
 }

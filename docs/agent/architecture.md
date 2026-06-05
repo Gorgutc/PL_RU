@@ -14,7 +14,7 @@ authority than `verify-frozen.ts`, the current user request, or `AGENTS.md`.
 - framer-motion is available for future UI motion but is not required by the
   starter screen.
 - pnpm is the only package manager.
-- Node 22 LTS is the supported runtime.
+- Node 24 LTS is the supported runtime.
 
 ## Runtime Shape
 

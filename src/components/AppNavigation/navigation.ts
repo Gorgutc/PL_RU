@@ -20,7 +20,6 @@ export type RailConfig = {
 };
 
 const SIDEBAR_PANEL_TABS = new Set<HeaderTabId>(['sat', 'kick', 'stats']);
-const SIDEBAR_RAIL_TABS = new Set<HeaderTabId>(['map', 'bar', 'tmi']);
 
 const SHARED_BOTTOM_RAIL_ITEMS = [
   { id: 'information', label: 'Информация', iconId: 'file-outline' },
@@ -37,10 +36,6 @@ const SHARED_BOTTOM_RAIL_ITEMS = [
 
 export function getWorkspaceSidebarMode(tab: HeaderTabId): WorkspaceSidebarMode {
   return SIDEBAR_PANEL_TABS.has(tab) ? 'panel' : 'rail';
-}
-
-export function isWorkspaceRailTab(tab: HeaderTabId): tab is RailTabId {
-  return SIDEBAR_RAIL_TABS.has(tab);
 }
 
 export const RAIL_BY_TAB: Record<RailTabId, RailConfig> = {

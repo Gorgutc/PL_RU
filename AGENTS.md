@@ -4,7 +4,7 @@ Read this file before editing anything in this repo. It is the canonical instruc
 
 ## TL;DR
 
-1. Stack: Next.js 16 + React 19 + TypeScript 5 strict + SCSS modules + Blueprint (`@blueprintjs/core`, `@blueprintjs/icons`). pnpm only. Node 22 LTS.
+1. Stack: Next.js 16 + React 19 + TypeScript 5 strict + SCSS modules + Blueprint (`@blueprintjs/core`, `@blueprintjs/icons`). pnpm only. Node 24 LTS.
 2. No Tailwind, no CSS-in-JS, no styled-components, no npm/yarn lockfiles.
 3. Architecture source of truth: `verify-frozen.ts`, executed through `pnpm verify`.
 4. Finished work must pass `pnpm codex:ship` before commit/push.
@@ -113,6 +113,8 @@ Rules mirrored by `verify-frozen.ts` are binding:
   exact-spec, and pixel-level visual QA gates stay documented.
 - A13: workspace shell, left sidebar, side-panel alignment, and real
   MapLibre/OSM map contract stay frozen.
+- A14: app-wide layout sizing follows the `10px` / `8px` / `4px` rhythm, with
+  `4px` as the minimum grid step and explicit frozen-radius exceptions allowed.
 
 Additional project rules:
 
@@ -121,6 +123,12 @@ Additional project rules:
 - Dark mode is explicit via `<html className="bp6-dark">`; do not use `prefers-color-scheme` for theme.
 - All images need `alt`; bundled images should use `next/image` where appropriate.
 - Use Blueprint primitives instead of rebuilding `Button`, `Card`, `Dialog`, `Menu`, or `Popover`.
+- Layout and component dimensions / spacing across the whole app should stay on
+  the shared `10px` / `8px` / `4px` sizing rhythm. Use `4px` as the minimum grid
+  step, and prefer `8px` / `10px` multiples for larger component and shell
+  measurements when they fit the visual contract. Radii follow the same rhythm
+  unless a frozen visual contract explicitly requires a smaller hairline radius,
+  such as the current `2px` map outer container.
 - Use Blueprint icons through `<Icon icon="..." />`, not raw SVG in production UI.
   Exception: the left rail uses the approved `RailItem.iconId` SVG manifest for
   the custom Drive icon replacement task; keep that exception scoped to

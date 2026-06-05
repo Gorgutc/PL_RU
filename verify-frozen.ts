@@ -236,6 +236,44 @@ async function testNoPxFontSize() {
   );
 }
 
+async function testAppSizingGridContract() {
+  const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
+  const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+  const frontendSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-frontend-rules', 'SKILL.md'),
+    'utf8',
+  );
+  const missingNormalizedSnippets = (content: string, snippets: string[]) => {
+    const normalized = content.replace(/\s+/g, ' ');
+
+    return snippets.filter((snippet) => !normalized.includes(snippet));
+  };
+  const required = [
+    '10px` / `8px` / `4px',
+    'minimum grid step',
+    'whole app',
+    'frozen visual contract',
+    '2px` map outer container',
+  ];
+  const failures = [
+    ...missingNormalizedSnippets(agents, ['A14: app-wide layout sizing', ...required]).map(
+      (snippet) => `AGENTS.md missing ${snippet}`,
+    ),
+    ...missingNormalizedSnippets(frozen, ['## App Layout Sizing Grid', ...required]).map(
+      (snippet) => `frozen-decisions.md missing ${snippet}`,
+    ),
+    ...missingNormalizedSnippets(frontendSkill, required).map(
+      (snippet) => `pl-ru-frontend-rules missing ${snippet}`,
+    ),
+  ];
+
+  record(
+    'A14: app-wide layout sizing follows the 10px / 8px / 4px rhythm',
+    failures.length === 0,
+    failures.length ? failures.join('; ') : undefined,
+  );
+}
+
 async function testCodexMemoryContract() {
   const config = await readFile(path.join(ROOT, '.codex', 'config.toml'), 'utf8');
   const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
@@ -405,6 +443,16 @@ async function testFrozenHeaderContract() {
 
 async function testFrozenQualityToolingContract() {
   const pkg = JSON.parse(await readFile(path.join(ROOT, 'package.json'), 'utf8'));
+  const nvmrc = (await readFile(path.join(ROOT, '.nvmrc'), 'utf8')).trim();
+  const ci = await readFile(path.join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8');
+  const codexConfig = await readFile(path.join(ROOT, '.codex', 'config.toml'), 'utf8');
+  const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
+  const architecture = await readFile(path.join(ROOT, 'docs', 'agent', 'architecture.md'), 'utf8');
+  const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+  const frontendSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-frontend-rules', 'SKILL.md'),
+    'utf8',
+  );
   const jscpd = JSON.parse(await readFile(path.join(ROOT, '.jscpd.json'), 'utf8'));
   const shared = await readFile(path.join(ROOT, 'playwright.shared.config.ts'), 'utf8');
   const e2e = await readFile(path.join(ROOT, 'playwright.config.ts'), 'utf8');
@@ -422,6 +470,22 @@ async function testFrozenQualityToolingContract() {
   }
   if (!pkg.scripts?.['quality:deep']?.includes('pnpm check:visual')) {
     failures.push('package.json quality:deep must include pnpm check:visual');
+  }
+  if (pkg.engines?.node !== '>=24.0.0 <25')
+    failures.push('package.json node engine must stay Node 24');
+  if (!pkg.devDependencies?.['@types/node']?.startsWith('^24.')) {
+    failures.push('package.json @types/node must stay aligned to Node 24');
+  }
+  if (nvmrc !== '24') failures.push('.nvmrc must stay Node 24');
+  if (!ci.includes('node-version: 24')) failures.push('ci.yml must use Node 24');
+  if (!codexConfig.includes('node = "24"')) failures.push('.codex/config.toml must use Node 24');
+  for (const [label, text] of [
+    ['AGENTS.md', agents],
+    ['docs/agent/architecture.md', architecture],
+    ['docs/agent/frozen-decisions.md', frozen],
+    ['pl-ru-frontend-rules', frontendSkill],
+  ] as const) {
+    if (!hasPhrase(text, 'Node 24 LTS')) failures.push(`${label} must document Node 24 LTS`);
   }
   if (jscpd.threshold !== 1) failures.push('.jscpd.json threshold must stay 1');
   for (const required of [
@@ -821,6 +885,10 @@ async function testWorkspaceShellContract() {
     'utf8',
   );
   const leftRail = await readFile(path.join(SRC, 'components', 'LeftRail', 'LeftRail.tsx'), 'utf8');
+  const leftRailStyles = await readFile(
+    path.join(SRC, 'components', 'LeftRail', 'LeftRail.module.scss'),
+    'utf8',
+  );
   const navigation = await readFile(
     path.join(SRC, 'components', 'AppNavigation', 'navigation.ts'),
     'utf8',
@@ -841,6 +909,10 @@ async function testWorkspaceShellContract() {
     path.join(SRC, 'components', 'WorkspaceMap', 'WorkspaceMap.tsx'),
     'utf8',
   );
+  const workspaceMapStyles = await readFile(
+    path.join(SRC, 'components', 'WorkspaceMap', 'WorkspaceMap.module.scss'),
+    'utf8',
+  );
   const mapConfig = await readFile(
     path.join(SRC, 'components', 'WorkspaceMap', 'mapConfig.ts'),
     'utf8',
@@ -857,12 +929,16 @@ async function testWorkspaceShellContract() {
     ['$color-workspace-button-hover', '#528bff'],
     ['$color-workspace-button-active', '#2970ff'],
     ['$workspace-rail-width', '3.125rem'],
-    ['$workspace-rail-map-expanded-width', '12.1875rem'],
-    ['$workspace-rail-bar-expanded-width', '12.9375rem'],
-    ['$workspace-rail-tmi-expanded-width', '10.625rem'],
+    ['$workspace-rail-expanded-width', '15rem'],
     ['$workspace-panel-width', '18.75rem'],
     ['$workspace-rail-button-size', '2.125rem'],
     ['$workspace-control-height', '2rem'],
+    ['$workspace-map-outer-gutter', '0.625rem'],
+    ['$workspace-map-inner-inset', '0.5rem'],
+    ['$workspace-map-container-radius', '0.125rem'],
+    ['$workspace-map-canvas-radius', '0.25rem'],
+    ['$workspace-motion-duration', '220ms'],
+    ['$workspace-motion-easing', 'cubic-bezier(0.22, 1, 0.36, 1)'],
   ]);
 
   for (const [token, expected] of expectedTokens) {
@@ -1043,6 +1119,9 @@ async function testWorkspaceShellContract() {
       'navigation.ts must not define RailConfig.expandedWidth; widths live in SCSS tokens',
     );
   }
+  if (leftRailStyles.includes('max-width: 9rem')) {
+    failures.push('LeftRail.module.scss must not cap expanded labels at the old 9rem width');
+  }
 
   if (!pkg.dependencies?.['maplibre-gl']) failures.push('package.json missing maplibre-gl');
   for (const forbidden of [
@@ -1078,10 +1157,12 @@ async function testWorkspaceShellContract() {
       'margin: t.$header-height 0 0;',
       '--workspace-left-width: #{t.$workspace-rail-width};',
       'grid-template-columns: var(--workspace-left-width) minmax(0, 1fr);',
+      'transition: grid-template-columns t.$workspace-motion-duration t.$workspace-motion-easing;',
       '--workspace-left-width: #{t.$workspace-panel-width};',
-      '.tabPanelRailMapExpanded',
-      '.tabPanelRailBarExpanded',
-      '.tabPanelRailTmiExpanded',
+      '.tabPanelRailExpanded',
+      '--workspace-left-width: #{t.$workspace-rail-expanded-width};',
+      'transition: width t.$workspace-motion-duration t.$workspace-motion-easing;',
+      '@media (prefers-reduced-motion: reduce)',
       '.tabPanelWide',
     ]).map((snippet) => `AppShell.module.scss missing ${snippet}`),
     ...missingSnippets(leftRail, [
@@ -1091,10 +1172,20 @@ async function testWorkspaceShellContract() {
       'data-testid="left-rail-icon"',
       'data-testid={testId}',
       'data-icon-id={item.iconId}',
+      'data-testid="left-rail-label"',
       'aria-expanded={isToggle ? expanded : undefined}',
       'aria-pressed={isToggle ? undefined : pressed}',
       'onClick={isToggle ? () => onExpandedChange(!expanded) : onPress}',
     ]).map((snippet) => `LeftRail.tsx missing ${snippet}`),
+    ...missingSnippets(leftRailStyles, [
+      'transition: width t.$workspace-motion-duration t.$workspace-motion-easing;',
+      'max-width t.$workspace-motion-duration t.$workspace-motion-easing',
+      'opacity t.$workspace-motion-duration t.$workspace-motion-easing',
+      'transform t.$workspace-motion-duration t.$workspace-motion-easing',
+      '.railExpanded .label',
+      'opacity: 1;',
+      '@media (prefers-reduced-motion: reduce)',
+    ]).map((snippet) => `LeftRail.module.scss missing ${snippet}`),
     ...missingSnippets(railIcons, ["usage: 'drive-inventory'"]).map(
       (snippet) => `railIcons.ts missing ${snippet}`,
     ),
@@ -1143,6 +1234,9 @@ async function testWorkspaceShellContract() {
       'AttributionControl',
       'attributionControl: false',
       'compact: false',
+      'trackResize: false',
+      'ResizeObserver',
+      'map.resize()',
       'center:',
       'maxZoom:',
       'minZoom:',
@@ -1150,7 +1244,15 @@ async function testWorkspaceShellContract() {
       'data-testid="workspace-map"',
       'data-testid="workspace-map-card"',
       'data-testid="workspace-map-canvas"',
+      'data-testid="workspace-map-stage"',
     ]).map((snippet) => `WorkspaceMap.tsx missing ${snippet}`),
+    ...missingSnippets(workspaceMapStyles, [
+      'padding: t.$workspace-map-outer-gutter;',
+      'padding: t.$workspace-map-inner-inset;',
+      'box-shadow: inset 0 0 0 0.0625rem t.$color-workspace-border;',
+      'border-radius: t.$workspace-map-container-radius;',
+      'border-radius: t.$workspace-map-canvas-radius;',
+    ]).map((snippet) => `WorkspaceMap.module.scss missing ${snippet}`),
     ...missingSnippets(mapConfig, [
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       '&copy; OpenStreetMap contributors',
@@ -1196,17 +1298,39 @@ async function testWorkspaceShellContract() {
       'opens and closes the contextual left rail',
       'data-sidebar-state',
       'left-rail-button-collapse',
+      'RAIL_EXPANDED_WIDTH = 240',
+      'keeps MapLibre canvas stable while the left rail is animating',
+      'keeps a right-anchored stable map stage while tabs crop and reveal it',
+      'MAX_COLLAPSED_MAP_CANVAS_WIDTH',
+      'expectRailLabelFits',
+      'MAP_OUTER_GUTTER = 10',
+      'MAP_INNER_INSET = 8',
+      'MAP_CONTAINER_RADIUS = 2',
+      'MAP_CANVAS_RADIUS = 4',
+      'WORKSPACE_MOTION_DURATION_MS = 220',
+      "reducedMotion: 'reduce'",
     ]).map((snippet) => `workspace-shell.spec.ts missing ${snippet}`),
     ...missingSnippets(frozen, [
       '## Workspace Shell And Left Sidebar',
       'compact left rail is fixed at `50px` wide',
-      'The expanded left rail widths are frozen to `195px` for `map`, `207px` for',
+      'The expanded left rail width is frozen to `240px` for `map`, `bar`, and',
+      'Rail open / close uses one soft `220ms` transition contract',
       'their glyphs use custom SVG assets from the approved Google Drive `Иконки`',
       '`RailItem.iconId` typed against the rail SVG manifest',
       '`button.svg` is intentionally retained as a `drive-inventory` asset',
       'The collapse item is present on every rail tab and owns the open / close',
       'Wide side panels are fixed at `300px` wide',
-      'real client-side `MapLibre GL JS` map',
+      'symmetric `10px` outer gutter',
+      'an `8px` inner inset',
+      'outer container radius is',
+      '`2px`, and the map canvas radius is `4px`',
+      'stable right-anchored MapLibre stage',
+      'crop or reveal the map',
+      '`ResizeObserver`',
+      'MapLibre `trackResize` stays',
+      'disabled;',
+      '`map.resize()` only when the stage itself changes',
+      'Blueprint `Card` map surface inside a dynamic map',
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       'expanded visible OSM',
       'within a `1px` tolerance',
@@ -1362,6 +1486,7 @@ async function main() {
   await testNoLocalStorage();
   await testNoBlueprintInternalImports();
   await testNoPxFontSize();
+  await testAppSizingGridContract();
   await testCodexMemoryContract();
   await testFrozenHeaderContract();
   await testFrozenQualityToolingContract();
