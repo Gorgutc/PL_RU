@@ -3,7 +3,8 @@ import { chromium } from 'playwright';
 import { withNextDevServer } from './lib/next-server.mjs';
 
 const urls = ['/'];
-const chromiumExecutablePath = chromium.executablePath();
+const chromiumExecutablePath =
+  process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ?? chromium.executablePath();
 
 await withNextDevServer({ port: 3101 }, async (baseUrl) => {
   let failures = 0;

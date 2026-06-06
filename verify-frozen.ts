@@ -444,6 +444,7 @@ async function testFrozenHeaderContract() {
 async function testFrozenQualityToolingContract() {
   const pkg = JSON.parse(await readFile(path.join(ROOT, 'package.json'), 'utf8'));
   const nvmrc = (await readFile(path.join(ROOT, '.nvmrc'), 'utf8')).trim();
+  const verifyFrozen = await readFile(path.join(ROOT, 'verify-frozen.ts'), 'utf8');
   const ci = await readFile(path.join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8');
   const codexConfig = await readFile(path.join(ROOT, '.codex', 'config.toml'), 'utf8');
   const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
@@ -460,6 +461,16 @@ async function testFrozenQualityToolingContract() {
   const syncRefs = await readFile(path.join(ROOT, 'scripts', 'sync-refs.mjs'), 'utf8');
   const verifyRefs = await readFile(path.join(ROOT, 'scripts', 'verify-reference.js'), 'utf8');
   const pa11yScript = await readFile(path.join(ROOT, 'scripts', 'run-pa11y.mjs'), 'utf8');
+  const visualScript = await readFile(
+    path.join(ROOT, 'scripts', 'check-visual-evidence.mjs'),
+    'utf8',
+  );
+  const runtimeStart = verifyFrozen.lastIndexOf('async function withDevServer');
+  const runtimeEnd = verifyFrozen.lastIndexOf('async function testRuntime');
+  const verifyRuntimeBlock =
+    runtimeStart >= 0 && runtimeEnd > runtimeStart
+      ? verifyFrozen.slice(runtimeStart, runtimeEnd)
+      : '';
   const failures: string[] = [];
 
   if (pkg.scripts?.['check:duplicates'] !== 'jscpd --config .jscpd.json --noTips .') {
@@ -478,6 +489,18 @@ async function testFrozenQualityToolingContract() {
   }
   if (nvmrc !== '24') failures.push('.nvmrc must stay Node 24');
   if (!ci.includes('node-version: 24')) failures.push('ci.yml must use Node 24');
+  if (!ci.includes('FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true')) {
+    failures.push('ci.yml must force GitHub JavaScript actions to Node 24');
+  }
+  if (!ci.includes('PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: /usr/bin/google-chrome')) {
+    failures.push('ci.yml must point browser checks at system Chrome in CI');
+  }
+  if (!ci.includes('pnpm exec playwright install-deps chromium')) {
+    failures.push('ci.yml must install Playwright system dependencies');
+  }
+  if (/pnpm exec playwright install(?!-deps)\b/.test(ci)) {
+    failures.push('ci.yml must not download Playwright Chromium in GitHub Actions');
+  }
   if (!codexConfig.includes('node = "24"')) failures.push('.codex/config.toml must use Node 24');
   for (const [label, text] of [
     ['AGENTS.md', agents],
@@ -511,9 +534,11 @@ async function testFrozenQualityToolingContract() {
     ...((await pathExists('scripts/check-visual-evidence.mjs'))
       ? []
       : ['scripts/check-visual-evidence.mjs missing']),
-    ...missingSnippets(shared, ['createPlaywrightConfig', 'Desktop Chrome']).map(
-      (snippet) => `playwright.shared.config.ts missing ${snippet}`,
-    ),
+    ...missingSnippets(shared, [
+      'createPlaywrightConfig',
+      'Desktop Chrome',
+      "channel: 'chrome'",
+    ]).map((snippet) => `playwright.shared.config.ts missing ${snippet}`),
     ...missingSnippets(e2e, ["createPlaywrightConfig('./tests/e2e')"]).map(
       (snippet) => `playwright.config.ts missing ${snippet}`,
     ),
@@ -529,8 +554,17 @@ async function testFrozenQualityToolingContract() {
     ...missingSnippets(pa11yScript, [
       "import { chromium } from 'playwright';",
       'chromium.executablePath()',
+      'PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH',
       'executablePath: chromiumExecutablePath',
     ]).map((snippet) => `run-pa11y.mjs missing ${snippet}`),
+    ...missingSnippets(visualScript, [
+      'PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH',
+      'chromium.launch(chromiumLaunchOptions)',
+    ]).map((snippet) => `check-visual-evidence.mjs missing ${snippet}`),
+    ...missingSnippets(verifyRuntimeBlock, [
+      'PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH',
+      'chromium.launch(chromiumLaunchOptions)',
+    ]).map((snippet) => `verify-frozen.ts withDevServer runtime launch missing ${snippet}`),
   );
 
   record(
@@ -1388,7 +1422,10 @@ async function withDevServer(fn: (page: Page, baseURL: string) => Promise<void>)
       server.once('error', reject);
     });
     await waitForUrl(baseURL, 90_000);
-    const browser = await chromium.launch();
+    const chromiumLaunchOptions = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+      : {};
+    const browser = await chromium.launch(chromiumLaunchOptions);
     try {
       const page = await browser.newPage();
       await fn(page, baseURL);

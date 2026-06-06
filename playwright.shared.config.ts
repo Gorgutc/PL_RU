@@ -1,5 +1,7 @@
 import { devices, type PlaywrightTestConfig } from '@playwright/test';
 
+const ciChromeChannel = process.env.CI ? ({ channel: 'chrome' } as const) : {};
+
 const sharedConfig = {
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -9,6 +11,7 @@ const sharedConfig = {
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
+    ...ciChromeChannel,
   },
   projects: [
     {

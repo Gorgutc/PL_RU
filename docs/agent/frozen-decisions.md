@@ -205,10 +205,17 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   local Windows runs and Linux CI scan the same target set.
 - Shared Playwright config lives in `playwright.shared.config.ts`; e2e and
   quality configs should extend it instead of duplicating the full config body.
+- Linux CI runs Playwright browser checks against the hosted runner's system
+  Google Chrome via the shared `channel: 'chrome'` config and the
+  `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` environment variable. Do not download
+  Playwright Chromium in GitHub Actions; the CDN install can stall after the
+  archive reaches 100% and block the full ship gate.
 - Reference manifest hashing lives in `scripts/lib/reference-manifest.mjs`;
   `scripts/sync-refs.mjs` and `scripts/verify-reference.js` should share it.
-- Pa11y uses the Playwright Chromium executable from `playwright` so local runs
-  and Linux CI use the same installed browser family.
+- Pa11y uses the Playwright Chromium executable from `playwright` by default
+  for local runs, and uses `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` in Linux CI so
+  it stays on the same Chromium browser family without requiring a Playwright
+  browser download.
 - `pnpm check:visual` stays in the deep quality gate. It must require visual QA
   evidence for UI-surface changes detected in the base diff, unstaged worktree
   diff, staged diff, or untracked files.

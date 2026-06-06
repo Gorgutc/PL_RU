@@ -873,6 +873,9 @@ async function validatePixelComparison(evidence) {
   const { chromium } = await import('playwright');
   const cases = evidence.pixelComparison.cases;
   const needsLiveCapture = cases.some((testCase) => testCase.capture != null);
+  const chromiumLaunchOptions = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+    ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+    : {};
   const server = needsLiveCapture
     ? await ensureVisualQaServer(visualQaBaseUrl)
     : { close: async () => undefined };
@@ -880,7 +883,7 @@ async function validatePixelComparison(evidence) {
   const failures = [];
 
   try {
-    browser = await chromium.launch();
+    browser = await chromium.launch(chromiumLaunchOptions);
     const page = await browser.newPage();
 
     for (const testCase of cases) {

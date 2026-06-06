@@ -23,6 +23,9 @@ const robotoMono = Roboto_Mono({
 export const metadata: Metadata = {
   title: 'TS Frontend Starter',
   description: 'Next.js 16 + React 19 + Blueprint + SCSS modules starter.',
+  icons: {
+    icon: [{ url: '/left-rail-icons/globe-outline.svg', type: 'image/svg+xml' }],
+  },
 };
 
 export const viewport: Viewport = {
