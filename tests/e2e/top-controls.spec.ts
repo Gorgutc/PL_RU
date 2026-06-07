@@ -8,6 +8,9 @@ const RAIL_COLLAPSED_WIDTH = 50;
 const RAIL_EXPANDED_WIDTH = 240;
 const PANEL_WIDTH = 300;
 const WORKSPACE_MOTION_DURATION_MS = 220;
+// The per-tab toolbar must keep a constant height so switching tabs never resizes
+// the map stage (frozen A13): 10px top padding + an 86px control card.
+const TOP_CONTROLS_HEIGHT = 96;
 
 const ALL_TABS = ['map', 'bar', 'tmi', 'sat', 'kick', 'stats'] as const;
 const PANEL_TABS = ['kick', 'stats', 'sat'] as const;
@@ -53,6 +56,25 @@ test.describe('Per-tab top control blocks', () => {
         Math.round(toolbarBox.y + toolbarBox.height),
       );
       expect(Math.round(toolbarBox.x)).toBe(Math.round(mapBox.x));
+
+      // Constant toolbar height across every tab — a regression to taller
+      // controls (e.g. 32px selects) would resize the map stage on tab switch.
+      expect(Math.round(toolbarBox.height)).toBe(TOP_CONTROLS_HEIGHT);
+
+      // Full-width contract: the leading-groups scroller has no internal
+      // horizontal overflow and never overlaps the pinned data-type group.
+      const fit = await toolbar.evaluate((el) => {
+        const scroller = el.firstElementChild as HTMLElement;
+        const trailing = el.lastElementChild as HTMLElement;
+        const scrollerRect = scroller.getBoundingClientRect();
+        const trailingRect = trailing.getBoundingClientRect();
+        return {
+          scrollerOverflow: scroller.scrollWidth - scroller.clientWidth,
+          overlap: Math.round(scrollerRect.right) - Math.round(trailingRect.left),
+        };
+      });
+      expect(fit.scrollerOverflow).toBeLessThanOrEqual(1);
+      expect(fit.overlap).toBeLessThanOrEqual(0);
     }
   });
 

@@ -1443,8 +1443,31 @@ async function testTopControlBlocksContract() {
     );
     if (!controls.includes("from '@blueprintjs/core'"))
       failures.push('controls.tsx must build top controls on Blueprint primitives');
+    // Toolbar dropdowns reuse the shared SelectControl in its dense (30px) variant
+    // so the per-tab toolbar height stays constant and the map never resizes.
+    if (!controls.includes("from '@/components/controls/SelectControl/SelectControl'"))
+      failures.push('controls.tsx must reuse the shared SelectControl');
+    if (!controls.includes('dense'))
+      failures.push('controls.tsx toolbar select must use the dense (30px) variant');
   } catch {
     failures.push('controls.tsx unreadable');
+  }
+
+  try {
+    const topControlsStyles = await readFile(
+      path.join(SRC, 'components', 'TabTopControls', 'TabTopControls.module.scss'),
+      'utf8',
+    );
+    // Full-width contract: a per-tab card flexes, the map groups use the 16px gap,
+    // and the scroller is not a horizontal scroll container.
+    for (const cls of ['.cardFlexible', '.cardTightGroups']) {
+      if (!topControlsStyles.includes(cls))
+        failures.push(`TabTopControls.module.scss missing ${cls}`);
+    }
+    if (topControlsStyles.includes('overflow: auto hidden'))
+      failures.push('TabTopControls.module.scss scroller must not scroll horizontally');
+  } catch {
+    failures.push('TabTopControls.module.scss unreadable');
   }
 
   try {
@@ -1454,6 +1477,10 @@ async function testTopControlBlocksContract() {
         'Top Control Blocks',
         'TabTopControls',
         'presentational with local UI state',
+        'cardFlexible',
+        'cardTightGroups',
+        'internal horizontal scroll',
+        '`dense` 30px',
       ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
     );
   } catch {

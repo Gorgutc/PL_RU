@@ -22,8 +22,8 @@ const DATETIME_FROM = '24-04-2025 | 00:00';
 const DATETIME_TO = '24-04-2025 | 00:00';
 
 // ── Shell ────────────────────────────────────────────────────────────────────
-// Leading groups scroll horizontally when space is tight; the "Тип данных"
-// group stays pinned on the right.
+// At 1920 with the rail collapsed the cards fill the full toolbar width with no
+// internal horizontal scroll; the "Тип данных" group stays pinned on the right.
 function Toolbar({
   label,
   children,
