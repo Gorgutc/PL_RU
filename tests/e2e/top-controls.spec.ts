@@ -136,6 +136,53 @@ test.describe('Per-tab top control blocks', () => {
     await expect(toolbar.locator('section[aria-label="Работа с таблицей"]')).toBeVisible();
   });
 
+  test('keeps the sat animation control a resting-outlined toggle (rest -> active)', async ({
+    page,
+  }) => {
+    await openWorkspace(page);
+    await selectTab(page, 'sat');
+
+    const button = page
+      .getByTestId('tab-top-controls')
+      .getByRole('button', { name: /Создать анимацию/ });
+    await expect(button).toBeVisible();
+
+    // Rest: outlined, NOT a filled accent button (the bug was a permanent fill).
+    await expect(button).toHaveAttribute('aria-pressed', 'false');
+    expect(await button.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(
+      'rgba(0, 0, 0, 0)',
+    );
+
+    // Click toggles it on and fills it with the accent, like the account button.
+    // Move the pointer off the button first so we read the resting active fill
+    // (#2970ff), not the lighter hover fill (#528bff).
+    await button.click();
+    await expect(button).toHaveAttribute('aria-pressed', 'true');
+    await page.mouse.move(0, 0);
+    expect(await button.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(
+      'rgb(41, 112, 255)',
+    );
+
+    // Click again returns it to the resting outlined state.
+    await button.click();
+    await expect(button).toHaveAttribute('aria-pressed', 'false');
+
+    // Even while still focused after a pointer click (and not hovered), the resting
+    // button keeps its hairline outline — it must never go borderless.
+    await page.mouse.move(0, 0);
+    const rest = await button.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return {
+        bg: cs.backgroundColor,
+        outlineStyle: cs.outlineStyle,
+        outlineWidth: Number.parseFloat(cs.outlineWidth),
+      };
+    });
+    expect(rest.bg).toBe('rgba(0, 0, 0, 0)');
+    expect(rest.outlineStyle).toBe('solid');
+    expect(rest.outlineWidth).toBeGreaterThan(0);
+  });
+
   test('toggles the data-type segmented control with radiogroup semantics', async ({ page }) => {
     await openWorkspace(page);
     await selectTab(page, 'bar');

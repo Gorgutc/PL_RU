@@ -1449,8 +1449,34 @@ async function testTopControlBlocksContract() {
       failures.push('controls.tsx must reuse the shared SelectControl');
     if (!controls.includes('dense'))
       failures.push('controls.tsx toolbar select must use the dense (30px) variant');
+    // The sat animation control is a resting-outlined toggle (rest→active like the
+    // account button), exposed via aria-pressed — not the filled primary button.
+    if (!controls.includes('export function ToggleActionButton'))
+      failures.push('controls.tsx must define the outlined ToggleActionButton');
+    // Toggle-specific (not the unrelated IconButton): the active-fill wiring and
+    // the pressed-state a11y attribute must both stay on ToggleActionButton.
+    if (!controls.includes('aria-pressed={active}'))
+      failures.push(
+        'controls.tsx ToggleActionButton must expose aria-pressed for its toggle state',
+      );
+    if (!controls.includes('toggleActionActive'))
+      failures.push('controls.tsx ToggleActionButton must wire the active accent-fill class');
   } catch {
     failures.push('controls.tsx unreadable');
+  }
+
+  try {
+    const topControls = await readFile(
+      path.join(SRC, 'components', 'TabTopControls', 'TabTopControls.tsx'),
+      'utf8',
+    );
+    // Require the JSX render (`<ToggleActionButton`), not just the import, so a
+    // regression of the animation action back to the filled PrimaryActionButton
+    // is actually caught.
+    if (!topControls.includes('<ToggleActionButton'))
+      failures.push('TabTopControls.tsx must render the animation control as <ToggleActionButton>');
+  } catch {
+    failures.push('TabTopControls.tsx unreadable');
   }
 
   try {
@@ -1460,7 +1486,12 @@ async function testTopControlBlocksContract() {
     );
     // Full-width contract: a per-tab card flexes, the map groups use the 16px gap,
     // and the scroller is not a horizontal scroll container.
-    for (const cls of ['.cardFlexible', '.cardTightGroups']) {
+    for (const cls of [
+      '.cardFlexible',
+      '.cardTightGroups',
+      '.toggleAction',
+      '.toggleActionActive',
+    ]) {
       if (!topControlsStyles.includes(cls))
         failures.push(`TabTopControls.module.scss missing ${cls}`);
     }
@@ -1481,6 +1512,8 @@ async function testTopControlBlocksContract() {
         'cardTightGroups',
         'internal horizontal scroll',
         '`dense` 30px',
+        'rest→active',
+        'ToggleActionButton',
       ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
     );
   } catch {

@@ -233,6 +233,14 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   assignment in the function groups is adjustable in the manifest.
 - Map icon glyphs render as block `<img>` centered in their `32x30` button, and
   the four `map` function groups sit `16px` apart (`cardTightGroups`).
+- Toolbar action buttons follow a rest→active model. The `tmi` "Загрузить
+  маршруты" primary action is a filled accent button (`PrimaryActionButton`,
+  `#2970ff` surface). The `sat` "Создать анимацию…" control is a resting-outlined
+  toggle (`ToggleActionButton`): transparent + `#666`/`$color-workspace-border`
+  hairline at rest (the same outlined surface as the `Фильтры` chip), filling with
+  the `#2970ff`/`$color-workspace-button-active` accent only when toggled on, with
+  `aria-pressed`. Do not "restore" the animation toggle to the filled
+  `PrimaryActionButton` — the resting-outlined look is intentional.
 - Toolbar dropdowns reuse the shared `SelectControl` (same component as the side
   panels) in its `dense` 30px variant, so the per-tab toolbar height stays
   constant and the map stage never resizes on tab switches. The shared select's

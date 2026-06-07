@@ -202,7 +202,12 @@
   background: t.$color-workspace-button-hover !important;
 }
 
-.chipButton.chipButton {
+// Outlined toolbar buttons: "Фильтры" chip and the "Создать анимацию…" toggle
+// share one resting look (transparent surface + hairline outline).
+// `.toggleActionActive` fills it with the accent when on — the same rest→active
+// principle as the Header account button.
+.chipButton.chipButton,
+.toggleAction.toggleAction {
   min-height: t.$top-controls-control-height;
   padding-inline: t.$top-controls-inline-pad;
   border-radius: t.$radius-xs;
@@ -217,18 +222,45 @@
   line-height: 1rem;
 }
 
-.chipButton.chipButton:not(:disabled):hover {
+.chipButton.chipButton:not(:disabled):hover,
+.toggleAction.toggleAction:not(:disabled):hover {
   outline-color: t.$color-workspace-button-hover;
   color: t.$color-header-action-hover !important;
 }
 
-.primaryButton.primaryButton:focus,
-.chipButton.chipButton:focus {
+// Toggled-on state ("работать по тому же принципу" as the account button):
+// accent fill, declared after the shared hover so it wins at equal specificity.
+.toggleActionActive.toggleActionActive,
+.toggleActionActive.toggleActionActive:not(:disabled):hover {
+  outline-color: t.$color-workspace-button-active;
+  background: t.$color-workspace-button-active !important;
+  color: t.$color-header-text-on-color !important;
+}
+
+.toggleActionActive.toggleActionActive:not(:disabled):hover {
+  background: t.$color-workspace-button-hover !important;
+}
+
+// The filled primary button has no outlined border, so its focus ring is simply
+// suppressed (re-added for keyboards via :focus-visible below).
+.primaryButton.primaryButton:focus {
   outline: 0;
 }
 
-.primaryButton.primaryButton:focus-visible,
-.chipButton.chipButton:focus-visible {
+// The outlined buttons render their "border" as an outline, so on :focus they must
+// re-assert that hairline instead of dropping to `outline: 0` (which would leave
+// the resting button borderless after a pointer click). Mirrors `.iconButton`.
+.chipButton.chipButton:focus,
+.toggleAction.toggleAction:focus {
+  outline: 0.0625rem solid t.$color-workspace-border;
+  outline-offset: -0.0625rem;
+}
+
+// `:not(:disabled)` raises these to the hover/active-hover specificity (and they
+// are declared last), so the keyboard focus ring stays white even while hovered.
+.primaryButton.primaryButton:not(:disabled):focus-visible,
+.chipButton.chipButton:not(:disabled):focus-visible,
+.toggleAction.toggleAction:not(:disabled):focus-visible {
   outline: 0.125rem solid t.$color-header-text-on-color;
   outline-offset: 0.125rem;
 }

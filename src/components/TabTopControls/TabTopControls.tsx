@@ -13,6 +13,7 @@ import {
   SegmentedControl,
   SelectField,
   SwitchToggle,
+  ToggleActionButton,
   type SegmentItem,
 } from './controls';
 import { MAP_FUNCTION_GROUPS, MAP_LAYER_GROUP, MAP_LAYER_TOGGLES } from './mapIcons';
@@ -214,9 +215,9 @@ function SatTopControls() {
       </ControlCard>
       <ControlCard ariaLabel="Анимация">
         <ControlField title="Анимация">
-          <PrimaryActionButton icon="grid-view">
+          <ToggleActionButton icon="grid-view">
             Создать анимацию с замедленной сьемкой
-          </PrimaryActionButton>
+          </ToggleActionButton>
         </ControlField>
       </ControlCard>
     </Toolbar>

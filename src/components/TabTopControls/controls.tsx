@@ -174,7 +174,8 @@ export function SwitchToggle({
   return <Switch className={styles.switch} defaultChecked={defaultChecked} label={label} />;
 }
 
-// Primary accent button ("Загрузить маршруты", "Создать анимацию…").
+// Primary accent button — solid accent fill ("Загрузить маршруты"). The sat
+// "Создать анимацию…" control uses the outlined ToggleActionButton instead.
 export function PrimaryActionButton({
   children,
   icon,
@@ -189,6 +190,35 @@ export function PrimaryActionButton({
       aria-label={ariaLabel}
       className={styles.primaryButton}
       icon={icon ? <Icon icon={icon} size={16} /> : undefined}
+      text={children}
+      type="button"
+      variant="minimal"
+    />
+  );
+}
+
+// Outlined toggle button that enables a block ("Создать анимацию…"). At rest it
+// uses the same outlined toolbar-control language as the "Фильтры" chip
+// (transparent + hairline outline, not filled); clicking toggles it on and fills
+// it with the accent — the same rest→active principle as the Header account
+// button. Presentational local pressed state, exposed via aria-pressed.
+export function ToggleActionButton({
+  children,
+  icon,
+  ariaLabel,
+}: {
+  children: ReactNode;
+  icon?: IconName;
+  ariaLabel?: string;
+}) {
+  const [active, setActive] = useState(false);
+  return (
+    <Button
+      aria-label={ariaLabel}
+      aria-pressed={active}
+      className={cx(styles.toggleAction, active && styles.toggleActionActive)}
+      icon={icon ? <Icon icon={icon} size={16} /> : undefined}
+      onClick={() => setActive((value) => !value)}
       text={children}
       type="button"
       variant="minimal"
