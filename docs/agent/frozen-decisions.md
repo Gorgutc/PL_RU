@@ -218,9 +218,12 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   rail expands to `240px`), without a page-level horizontal scrollbar and without
   clipping the data-type group.
 - The `map` tab icon-button groups (Инфраструктура / Наложения на карту / Борты /
-  Слои карты) require a dedicated SVG glyph manifest and are added when those
-  assets are available; the rest of the `map` block (date-time + `Тип данных`)
-  and all other tabs are in place.
+  Слои карты + two map toggles) use a dedicated SVG glyph manifest in
+  `public/top-control-icons/` driven by `src/components/TabTopControls/mapIcons.ts`.
+  This is the map-tab equivalent of the left-rail SVG exception: production map
+  control icons use these SVGs via `<img>`, not Blueprint `<Icon>`. The
+  `Слои карты` group maps 1:1 to the map layer providers; the exact glyph↔button
+  assignment in the function groups is adjustable in the manifest.
 - Reuse before adding: new toolbar controls must reuse Blueprint primitives,
   `src/styles/_tokens.scss`, the shared `src/lib/cx.ts`, and existing patterns
   rather than duplicating the side-panel controls.

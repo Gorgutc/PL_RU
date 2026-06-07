@@ -8,7 +8,8 @@ import {
   Switch,
 } from '@blueprintjs/core';
 import type { IconName } from '@blueprintjs/icons';
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
+import { mapIconLabel, mapIconSrc, type MapIconGroup, type MapIconId } from './mapIcons';
 import styles from './TabTopControls.module.scss';
 
 /**
@@ -183,4 +184,47 @@ export function ChipButton({ children, icon }: { children: ReactNode; icon?: Ico
       variant="minimal"
     />
   );
+}
+
+// Square icon button (32x30 outline) with a custom SVG glyph from the manifest.
+// Presentational toggle; the glyph set is the map-tab SVG manifest exception.
+export function IconButton({ id }: { id: MapIconId }) {
+  const label = mapIconLabel(id);
+  return (
+    <button aria-label={label} className={styles.iconButton} title={label} type="button">
+      <img
+        alt=""
+        aria-hidden="true"
+        className={styles.iconGlyph}
+        data-icon-id={id}
+        draggable={false}
+        src={mapIconSrc(id)}
+      />
+    </button>
+  );
+}
+
+// A titled group of icon buttons with optional vertical dividers.
+export function IconButtonGroup({ group }: { group: MapIconGroup }) {
+  const dividerAfter = new Set(group.dividerAfter ?? []);
+  return (
+    <div className={styles.field}>
+      <span className={styles.fieldTitle}>{group.title}</span>
+      <div className={styles.iconRow}>
+        {group.items.map((id, index) => (
+          <Fragment key={id}>
+            <IconButton id={id} />
+            {dividerAfter.has(index) ? (
+              <span aria-hidden="true" className={styles.iconDivider} />
+            ) : null}
+          </Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Compact Blueprint Switch used as a map-layer toggle (no visible label).
+export function LayerToggle({ label }: { label: string }) {
+  return <Switch aria-label={label} className={styles.layerToggle} defaultChecked />;
 }

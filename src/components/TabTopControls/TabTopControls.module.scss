@@ -238,6 +238,70 @@
   outline-offset: 0.125rem;
 }
 
+// ── Map icon-button groups ───────────────────────────────────────────────────
+.iconRow {
+  display: flex;
+  align-items: center;
+  gap: t.$space-1;
+  min-width: 0;
+}
+
+.iconButton {
+  display: inline-flex;
+  width: 2rem;
+  height: t.$top-controls-control-height;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: t.$radius-xs;
+  outline: 0.0625rem solid t.$color-workspace-border;
+  outline-offset: -0.0625rem;
+  background: transparent;
+  cursor: pointer;
+}
+
+.iconButton:not(:disabled):hover {
+  outline-color: t.$color-workspace-button-hover;
+}
+
+.iconButton:focus {
+  outline: 0.0625rem solid t.$color-workspace-border;
+  outline-offset: -0.0625rem;
+}
+
+.iconButton:focus-visible {
+  outline: 0.125rem solid t.$color-header-text-on-color;
+  outline-offset: 0.125rem;
+}
+
+.iconGlyph {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+.iconDivider {
+  width: 0;
+  height: 1rem;
+  flex: 0 0 auto;
+  border-inline-start: 0.0625rem solid t.$color-workspace-rail-divider;
+}
+
+.layerToggle.layerToggle {
+  align-self: center;
+  min-height: t.$top-controls-control-height;
+  margin: 0;
+}
+
+/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+.layerToggle.layerToggle :global(input:checked ~ .bp6-control-indicator),
+.layerToggle.layerToggle :global(input:checked ~ .bp5-control-indicator) {
+  background: t.$color-workspace-button-active !important;
+}
+/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
+
 // ── Focus-visible for inputs/selects ─────────────────────────────────────────
 .dateTimeInput:focus-visible,
 .searchInput:focus-visible,

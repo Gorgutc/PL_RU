@@ -56,6 +56,29 @@ test.describe('Per-tab top control blocks', () => {
     }
   });
 
+  test('renders the map function icon groups with layer toggles', async ({ page }) => {
+    await openWorkspace(page);
+    await selectTab(page, 'map');
+
+    const functions = page
+      .getByTestId('tab-top-controls')
+      .locator('section[aria-label="Функции карты"]');
+    await expect(functions).toBeVisible();
+    // Инфраструктура (11) + Наложения (8) + Борты (4) + Слои карты (9) = 32 icon buttons.
+    await expect(functions.locator('button')).toHaveCount(32);
+    await expect(functions.locator('img')).toHaveCount(32);
+    await expect(functions.locator('.bp6-switch')).toHaveCount(2);
+    expect(
+      await functions
+        .locator('img')
+        .evaluateAll((imgs) =>
+          imgs.every(
+            (img) => img instanceof HTMLImageElement && img.complete && img.naturalWidth > 0,
+          ),
+        ),
+    ).toBe(true);
+  });
+
   test('shows the expected lead controls per tab', async ({ page }) => {
     await openWorkspace(page);
     const toolbar = page.getByTestId('tab-top-controls');

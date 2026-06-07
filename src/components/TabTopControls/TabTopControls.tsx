@@ -1,11 +1,14 @@
 // cspell:disable
-import { useState, type ReactNode } from 'react';
+import { Fragment, useState, type ReactNode } from 'react';
 import type { HeaderTabId } from '@/components/Header/Header';
 import {
   ChipButton,
   ControlCard,
   ControlField,
   DateTimeRange,
+  IconButton,
+  IconButtonGroup,
+  LayerToggle,
   PrimaryActionButton,
   SearchField,
   SegmentedControl,
@@ -13,6 +16,7 @@ import {
   SwitchToggle,
   type SegmentItem,
 } from './controls';
+import { MAP_FUNCTION_GROUPS, MAP_LAYER_GROUP, MAP_LAYER_TOGGLES } from './mapIcons';
 import styles from './TabTopControls.module.scss';
 
 const DATETIME_FROM = '24-04-2025  |  00:00';
@@ -64,13 +68,33 @@ function DateTimeCard() {
 }
 
 // ── map: Оперативная карта ────────────────────────────────────────────────────
-// NOTE: the infrastructure / overlay / boards / layers icon-button groups are a
-// follow-up sub-step (needs the icon manifest); the date-time + data-type frame
-// is in place so the block renders and the shell integrates.
 const MAP_DATA_TYPES: readonly SegmentItem[] = [
   { id: 'operational', label: 'Оперативная', icon: 'list' },
   { id: 'analysis', label: 'Анализ данных', icon: 'list' },
 ];
+
+// Map layers group: icon buttons (with dividers) plus the two map toggles.
+function MapLayersField() {
+  const dividerAfter = new Set(MAP_LAYER_GROUP.dividerAfter ?? []);
+  return (
+    <div className={styles.field}>
+      <span className={styles.fieldTitle}>{MAP_LAYER_GROUP.title}</span>
+      <div className={styles.iconRow}>
+        {MAP_LAYER_GROUP.items.map((id, index) => (
+          <Fragment key={id}>
+            <IconButton id={id} />
+            {dividerAfter.has(index) ? (
+              <span aria-hidden="true" className={styles.iconDivider} />
+            ) : null}
+          </Fragment>
+        ))}
+        {MAP_LAYER_TOGGLES.map((label) => (
+          <LayerToggle key={label} label={label} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function MapTopControls() {
   return (
@@ -80,6 +104,12 @@ function MapTopControls() {
     >
       <ControlCard ariaLabel="Дата и время">
         <DateTimeCard />
+      </ControlCard>
+      <ControlCard ariaLabel="Функции карты">
+        {MAP_FUNCTION_GROUPS.map((group) => (
+          <IconButtonGroup group={group} key={group.title} />
+        ))}
+        <MapLayersField />
       </ControlCard>
     </Toolbar>
   );
