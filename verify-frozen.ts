@@ -1391,6 +1391,37 @@ async function testWorkspaceShellContract() {
   );
 }
 
+async function testClaudeCodexParity() {
+  // A16: the Claude (.claude/ + CLAUDE.md) and Codex (.codex/ + plugins/ +
+  // AGENTS.md) wrappers must stay in parity. Logic lives in one place —
+  // scripts/verify-claude-codex-parity.mjs — and is also runnable standalone.
+  try {
+    const out = execFileSync(process.execPath, ['scripts/verify-claude-codex-parity.mjs'], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const lastLine = out.toString().trim().split('\n').pop() ?? '';
+    record(
+      'A16: Claude/Codex wrapper parity',
+      true,
+      lastLine.replace(/^\[PASS\]\s*/, '') || undefined,
+    );
+  } catch (e) {
+    const err = e as { stdout?: Buffer | string; stderr?: Buffer | string; message?: string };
+    const detail = (
+      err.stderr?.toString() ||
+      err.stdout?.toString() ||
+      err.message ||
+      'parity failed'
+    )
+      .trim()
+      .replace(/\s+/g, ' ')
+      .slice(0, 300);
+    record('A16: Claude/Codex wrapper parity', false, detail);
+  }
+}
+
 async function waitForUrl(url: string, timeoutMs: number) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -1529,6 +1560,7 @@ async function main() {
   await testFrozenQualityToolingContract();
   await testAgentVisualQaContract();
   await testWorkspaceShellContract();
+  await testClaudeCodexParity();
 
   if (!process.argv.includes('--static')) {
     try {
