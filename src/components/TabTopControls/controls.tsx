@@ -21,18 +21,46 @@ import styles from './TabTopControls.module.scss';
  */
 
 // Card section: the dark control-surface card that holds one or more titled fields.
-export function ControlCard({ children, ariaLabel }: { children: ReactNode; ariaLabel?: string }) {
+// `flexible` lets the card grow/shrink to fill the toolbar width (the per-tab
+// date/time card); `tightGroups` uses the 16px group gap (map function groups).
+export function ControlCard({
+  children,
+  ariaLabel,
+  flexible,
+  tightGroups,
+}: {
+  children: ReactNode;
+  ariaLabel?: string;
+  flexible?: boolean;
+  tightGroups?: boolean;
+}) {
   return (
-    <section className={styles.card} aria-label={ariaLabel}>
+    <section
+      aria-label={ariaLabel}
+      className={cx(
+        styles.card,
+        flexible && styles.cardFlexible,
+        tightGroups && styles.cardTightGroups,
+      )}
+    >
       {children}
     </section>
   );
 }
 
-// A titled field column: a 12px/500 label above its control row.
-export function ControlField({ title, children }: { title: string; children: ReactNode }) {
+// A titled field column: a 12px/500 label above its control row. `grow` lets the
+// column fill its flexible card so the date/time control stretches dynamically.
+export function ControlField({
+  title,
+  children,
+  grow,
+}: {
+  title: string;
+  children: ReactNode;
+  grow?: boolean;
+}) {
   return (
-    <div className={styles.field}>
+    <div className={cx(styles.field, grow && styles.fieldGrow)}>
       <span className={styles.fieldTitle}>{title}</span>
       <div className={styles.fieldRow}>{children}</div>
     </div>

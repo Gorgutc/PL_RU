@@ -18,8 +18,8 @@ import {
 import { MAP_FUNCTION_GROUPS, MAP_LAYER_GROUP, MAP_LAYER_TOGGLES } from './mapIcons';
 import styles from './TabTopControls.module.scss';
 
-const DATETIME_FROM = '24-04-2025  |  00:00';
-const DATETIME_TO = '24-04-2025  |  00:00';
+const DATETIME_FROM = '24-04-2025 | 00:00';
+const DATETIME_TO = '24-04-2025 | 00:00';
 
 // ── Shell ────────────────────────────────────────────────────────────────────
 // Leading groups scroll horizontally when space is tight; the "Тип данных"
@@ -60,7 +60,7 @@ function DataTypeCard({ items }: { items: readonly SegmentItem[] }) {
 
 function DateTimeCard() {
   return (
-    <ControlField title="Дата и время от и до:">
+    <ControlField grow title="Дата и время от и до:">
       <DateTimeRange from={DATETIME_FROM} to={DATETIME_TO} />
     </ControlField>
   );
@@ -78,10 +78,10 @@ function MapTopControls() {
       label="Управление: оперативная карта"
       trailing={<DataTypeCard items={MAP_DATA_TYPES} />}
     >
-      <ControlCard ariaLabel="Дата и время">
+      <ControlCard ariaLabel="Дата и время" flexible>
         <DateTimeCard />
       </ControlCard>
-      <ControlCard ariaLabel="Функции карты">
+      <ControlCard ariaLabel="Функции карты" tightGroups>
         {MAP_FUNCTION_GROUPS.map((group) => (
           <IconButtonGroup group={group} key={group.title} />
         ))}
@@ -127,7 +127,7 @@ function WeatherCard() {
 function RoutesTopControls() {
   return (
     <Toolbar label="Управление: маршруты" trailing={<DataTypeCard items={BAR_DATA_TYPES} />}>
-      <ControlCard ariaLabel="Работа с данными по карте">
+      <ControlCard ariaLabel="Работа с данными по карте" flexible>
         <ControlField title="Работа с данными по карте">
           <SearchField placeholder="Поиск по названию, координатам" />
         </ControlField>
@@ -147,7 +147,7 @@ const TMI_DATA_TYPES: readonly SegmentItem[] = [
 function TelemetryTopControls() {
   return (
     <Toolbar label="Управление: телеметрия" trailing={<DataTypeCard items={TMI_DATA_TYPES} />}>
-      <ControlCard ariaLabel="Дата и загрузка маршрутов">
+      <ControlCard ariaLabel="Дата и загрузка маршрутов" flexible>
         <DateTimeCard />
         <ControlField title=" ">
           <PrimaryActionButton icon="flows">Загрузить маршруты</PrimaryActionButton>
@@ -200,8 +200,8 @@ const SAT_DATA_TYPES: readonly SegmentItem[] = [
 function SatTopControls() {
   return (
     <Toolbar label="Управление: зондирование" trailing={<DataTypeCard items={SAT_DATA_TYPES} />}>
-      <ControlCard ariaLabel="Временной диапазон">
-        <ControlField title="Временной диапазон">
+      <ControlCard ariaLabel="Временной диапазон" flexible>
+        <ControlField grow title="Временной диапазон">
           <DateTimeRange from={DATETIME_FROM} to={DATETIME_TO} />
         </ControlField>
       </ControlCard>
@@ -236,7 +236,7 @@ function KickTopControls() {
       label="Управление: введение пусков"
       trailing={<DataTypeCard items={KICK_DATA_TYPES} />}
     >
-      <ControlCard ariaLabel="Текущие пуски">
+      <ControlCard ariaLabel="Текущие пуски" flexible>
         <ControlField title="Текущие пуски">
           <SearchField placeholder="Поиск по таблице" />
           <ChipButton icon="filter">Фильтры</ChipButton>
@@ -259,7 +259,7 @@ const STATS_DATA_TYPES: readonly SegmentItem[] = [
 function StatsTopControls() {
   return (
     <Toolbar label="Управление: статистика" trailing={<DataTypeCard items={STATS_DATA_TYPES} />}>
-      <ControlCard ariaLabel="Работа с таблицей">
+      <ControlCard ariaLabel="Работа с таблицей" flexible>
         <ControlField title="Работа с таблицей">
           <SearchField placeholder="Поиск по таблице" />
           <ChipButton icon="filter">Фильтры</ChipButton>

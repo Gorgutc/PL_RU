@@ -23,7 +23,6 @@
   align-items: stretch;
   gap: t.$top-controls-gap;
   min-width: 0;
-  overflow: auto hidden;
 }
 
 .trailing {
@@ -45,11 +44,29 @@
   background: t.$color-header-dropdown-bg;
 }
 
+// A card that flexes to fill the toolbar width (the date/time card per tab);
+// fixed cards keep flex: 0 0 auto so they hold their intrinsic width.
+.cardFlexible {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+// Tighter 16px gap between the four map icon-button groups (vs the 24px card gap).
+.cardTightGroups {
+  gap: t.$top-controls-group-gap;
+}
+
 .field {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: t.$top-controls-stack-gap;
+}
+
+// A field column that grows to fill its flexible card (the date/time field).
+.fieldGrow {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .fieldTitle {
@@ -109,8 +126,8 @@
 
 // ── Text inputs (date-time, search) ──────────────────────────────────────────
 .dateField {
-  width: t.$top-controls-datetime-width;
-  min-width: 0;
+  flex: 1 1 auto;
+  min-width: t.$top-controls-datetime-min-width;
 }
 
 .search {
@@ -132,6 +149,7 @@
 }
 
 .dateTimeInput.dateTimeInput {
+  padding-inline: t.$space-1;
   font-variant-numeric: tabular-nums;
 }
 
@@ -141,8 +159,10 @@
 
 .dateTimeRange {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
   gap: t.$space-1;
+  min-width: 0;
 }
 
 // ── Native select dropdown ───────────────────────────────────────────────────
@@ -284,6 +304,7 @@
 }
 
 .iconGlyph {
+  display: block;
   width: 1rem;
   height: 1rem;
   flex: 0 0 auto;
