@@ -196,6 +196,35 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 - The Header visual contract is not part of this shell contract and must not be
   changed when extending the left side menu or real map.
 
+## Top Control Blocks
+
+- Each top-level tab renders its own per-tab top control block (`TabTopControls`)
+  as a horizontal toolbar at the top of the workspace right column, above the
+  `WorkspaceMap`. The left rail/panel keep their full height; only the map's
+  available height changes, handled by the existing map `ResizeObserver`. The map
+  contract (right-anchored stage, `trackResize: false`) is not weakened.
+- Functionality comes from Blueprint primitives (`SegmentedControl`, `HTMLSelect`,
+  `InputGroup`, `Switch`, `Button`, `Icon`); the look, layout, and copy come from
+  the Figma design. The blocks are presentational with local UI state only (no
+  data backend) until a dedicated task wires real data.
+- Card sections reuse the frozen dropdown/control surface: `#171d20` background,
+  `#727677` 1px outline, `2px` radius, `16px` padding, and `12px`/500 white
+  titles. Controls are `30px` tall with `3px` radius and `#666` outline; the
+  segmented `Тип данных` active pill uses `#2970ff`. All raw values live in
+  `src/styles/_tokens.scss` (`$top-controls-*` plus reused tokens); no inline hex
+  and no `px` font-size.
+- The `Тип данных` group stays pinned to the right; the leading groups scroll
+  horizontally inside the toolbar when space is tight (for example when the left
+  rail expands to `240px`), without a page-level horizontal scrollbar and without
+  clipping the data-type group.
+- The `map` tab icon-button groups (Инфраструктура / Наложения на карту / Борты /
+  Слои карты) require a dedicated SVG glyph manifest and are added when those
+  assets are available; the rest of the `map` block (date-time + `Тип данных`)
+  and all other tabs are in place.
+- Reuse before adding: new toolbar controls must reuse Blueprint primitives,
+  `src/styles/_tokens.scss`, the shared `src/lib/cx.ts`, and existing patterns
+  rather than duplicating the side-panel controls.
+
 ## Quality Tooling
 
 - Node 24 LTS is the supported runtime. The repo contract is mirrored by

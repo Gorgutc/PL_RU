@@ -1,8 +1,14 @@
 // cspell:disable
-import { Button, HTMLSelect, Icon, InputGroup, Switch } from '@blueprintjs/core';
+import {
+  Button,
+  HTMLSelect,
+  Icon,
+  InputGroup,
+  SegmentedControl as BlueprintSegmentedControl,
+  Switch,
+} from '@blueprintjs/core';
 import type { IconName } from '@blueprintjs/icons';
 import type { ReactNode } from 'react';
-import { cx } from '@/lib/cx';
 import styles from './TabTopControls.module.scss';
 
 /**
@@ -13,17 +19,9 @@ import styles from './TabTopControls.module.scss';
  */
 
 // Card section: the dark control-surface card that holds one or more titled fields.
-export function ControlCard({
-  children,
-  grow,
-  ariaLabel,
-}: {
-  children: ReactNode;
-  grow?: boolean;
-  ariaLabel?: string;
-}) {
+export function ControlCard({ children, ariaLabel }: { children: ReactNode; ariaLabel?: string }) {
   return (
-    <section className={cx(styles.card, grow && styles.cardGrow)} aria-label={ariaLabel}>
+    <section className={styles.card} aria-label={ariaLabel}>
       {children}
     </section>
   );
@@ -53,25 +51,18 @@ export function SegmentedControl({
   onChange: (id: string) => void;
   ariaLabel: string;
 }) {
+  // Reuse Blueprint's SegmentedControl: it provides the radiogroup/radio roles
+  // and Arrow/Home/End keyboard handling; we only restyle it to the Figma look.
   return (
-    <div className={styles.segmented} role="tablist" aria-label={ariaLabel}>
-      {items.map((item) => {
-        const selected = item.id === value;
-        return (
-          <button
-            key={item.id}
-            aria-selected={selected}
-            className={cx(styles.segment, selected && styles.segmentSelected)}
-            onClick={() => onChange(item.id)}
-            role="tab"
-            type="button"
-          >
-            {item.icon ? <Icon className={styles.segmentIcon} icon={item.icon} size={16} /> : null}
-            <span>{item.label}</span>
-          </button>
-        );
-      })}
-    </div>
+    <BlueprintSegmentedControl
+      aria-label={ariaLabel}
+      className={styles.segmented}
+      intent="primary"
+      onValueChange={onChange}
+      options={items.map((item) => ({ label: item.label, value: item.id, icon: item.icon }))}
+      role="radiogroup"
+      value={value}
+    />
   );
 }
 

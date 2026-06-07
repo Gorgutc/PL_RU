@@ -23,7 +23,6 @@
   align-items: stretch;
   gap: t.$top-controls-gap;
   min-width: 0;
-  padding-block-end: 0.125rem;
   overflow: auto hidden;
 }
 
@@ -38,17 +37,12 @@
   display: flex;
   flex: 0 0 auto;
   align-items: flex-start;
-  gap: 1.5rem;
+  gap: t.$top-controls-card-gap;
   padding: t.$top-controls-card-padding;
   border-radius: t.$radius-dropdown;
   outline: 0.0625rem solid t.$color-header-dropdown-border;
   outline-offset: -0.0625rem;
   background: t.$color-header-dropdown-bg;
-}
-
-.cardGrow {
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 .field {
@@ -74,58 +68,44 @@
   min-width: 0;
 }
 
-// ── Segmented control ("Тип данных" / "Погодные параметры") ───────────────────
-.segmented {
-  display: inline-flex;
-  align-items: center;
-  gap: t.$top-controls-segment-gap;
+// ── Segmented control: Blueprint SegmentedControl restyled to the Figma look ──
+/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+.segmented.segmented {
   height: t.$top-controls-control-height;
   padding: t.$space-1;
   border-radius: t.$radius-xs;
   outline: 0.0625rem solid t.$color-workspace-border;
   outline-offset: -0.0625rem;
+  background: transparent;
+  box-shadow: none;
 }
 
-.segment {
-  display: inline-flex;
-  height: t.$top-controls-segment-height;
-  align-items: center;
-  justify-content: center;
-  gap: t.$space-1;
-  padding-inline: 0.625rem;
-  border: 0;
+.segmented.segmented :global(.bp6-button),
+.segmented.segmented :global(.bp5-button) {
+  min-height: t.$top-controls-segment-height;
+  padding: 0 t.$top-controls-inline-pad;
   border-radius: t.$radius-xs;
   background: transparent;
+  box-shadow: none;
   color: t.$color-header-text-on-color;
   font-family: t.$font-sans;
   font-size: t.$fs-header-nav;
   font-weight: 400;
   line-height: 1rem;
-  white-space: nowrap;
-  cursor: pointer;
 }
 
-.segment:not(.segmentSelected):hover {
+.segmented.segmented :global(.bp6-button:hover),
+.segmented.segmented :global(.bp5-button:hover) {
+  background: transparent;
   color: t.$color-header-action-hover;
 }
 
-.segmentSelected {
+.segmented.segmented :global(.bp6-button[aria-checked='true']),
+.segmented.segmented :global(.bp5-button[aria-checked='true']) {
   background: t.$color-workspace-button-active;
   color: t.$color-header-text-on-color;
 }
-
-.segment:focus {
-  outline: 0;
-}
-
-.segment:focus-visible {
-  outline: 0.125rem solid t.$color-header-text-on-color;
-  outline-offset: 0.125rem;
-}
-
-.segmentIcon {
-  color: currentcolor;
-}
+/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
 
 // ── Text inputs (date-time, search) ──────────────────────────────────────────
 .dateField {
@@ -190,22 +170,6 @@
 }
 /* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
 
-.labeledSelect {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: t.$space-1;
-}
-
-.labeledSelectTitle {
-  color: t.$color-header-text-on-color;
-  font-family: t.$font-sans;
-  font-size: t.$fs-header-nav;
-  font-weight: 500;
-  line-height: 1rem;
-  white-space: nowrap;
-}
-
 // ── Switch (data sources) ────────────────────────────────────────────────────
 .switch.switch {
   display: inline-flex;
@@ -228,7 +192,7 @@
 // ── Buttons ──────────────────────────────────────────────────────────────────
 .primaryButton.primaryButton {
   min-height: t.$top-controls-control-height;
-  padding-inline: 0.625rem;
+  padding-inline: t.$top-controls-inline-pad;
   border-radius: t.$radius-xs;
   background: t.$color-workspace-button-active !important;
   box-shadow: none !important;
@@ -245,7 +209,7 @@
 
 .chipButton.chipButton {
   min-height: t.$top-controls-control-height;
-  padding-inline: 0.625rem;
+  padding-inline: t.$top-controls-inline-pad;
   border-radius: t.$radius-xs;
   outline: 0.0625rem solid t.$color-workspace-border;
   outline-offset: -0.0625rem;

@@ -4,6 +4,7 @@ import { createContext, useContext, useId, type ReactNode } from 'react';
 import type { HeaderTabId } from '@/components/Header/Header';
 import { RAIL_BY_TAB } from '@/components/AppNavigation/navigation';
 import { LeftRail } from '@/components/LeftRail/LeftRail';
+import { cx } from '@/lib/cx';
 import styles from './TabSidePanel.module.scss';
 
 type TabSidePanelProps = {
@@ -26,10 +27,6 @@ type SelectFieldConfig = {
   value: string;
   placeholder?: boolean;
 };
-
-function cx(...classes: Array<string | false | undefined>) {
-  return classes.filter(Boolean).join(' ');
-}
 
 function SectionDivider() {
   return <div className={styles.divider} aria-hidden="true" />;

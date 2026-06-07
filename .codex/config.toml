@@ -1,6 +1,7 @@
 # Convenience mirror for Codex sessions working in PL_RU.
 # Canonical authority remains:
-# verify-frozen.ts > current user request > AGENTS.md > plugins/pl-ru-codex/skills/**
+# verify-frozen.ts > current user request > AGENTS.md = CLAUDE.md > skills (plugins/pl-ru-codex/skills/** = .claude/skills/**) > design references
+# AGENTS.md and CLAUDE.md are two equivalent canons; parity guarded by rule A16.
 
 [features]
 memories = true

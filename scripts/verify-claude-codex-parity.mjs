@@ -66,6 +66,32 @@ const codexAgents = fileBasenames('.codex/agents', '.toml');
 const claudeAgents = fileBasenames('.claude/agents', '.md');
 diffSets('agent', codexAgents, claudeAgents, '.codex/agents', '.claude/agents');
 
+// 2b. Fail closed: required roots must be non-empty. A deleted or renamed
+// wrapper tree should fail parity, not silently pass with zero entries.
+if (codexSkills.length === 0)
+  errors.push('skills: no Codex skills under plugins/pl-ru-codex/skills (parity root missing?)');
+if (claudeSkills.length === 0)
+  errors.push('skills: no Claude skills under .claude/skills (parity root missing?)');
+if (codexAgents.length === 0)
+  errors.push('agents: no Codex agents under .codex/agents (parity root missing?)');
+if (claudeAgents.length === 0)
+  errors.push('agents: no Claude agents under .claude/agents (parity root missing?)');
+
+// 2c. Claude-only command surface documented in CLAUDE.md must stay present.
+const REQUIRED_COMMANDS = [
+  'bootstrap',
+  'verify',
+  'visual-qa',
+  'orchestrate',
+  'ship',
+  'adversarial-review',
+];
+const claudeCommands = fileBasenames('.claude/commands', '.md');
+for (const cmd of REQUIRED_COMMANDS) {
+  if (!claudeCommands.includes(cmd))
+    errors.push(`command: .claude/commands/${cmd}.md is missing (documented in CLAUDE.md)`);
+}
+
 // 3. Shared hook runbooks parity.
 for (const hook of ['session-start.md', 'user-prompt-submit.md']) {
   const inCodex = existsSync(path.join(ROOT, '.codex/hooks', hook));
@@ -97,6 +123,6 @@ if (errors.length) {
 }
 
 console.log(
-  `[PASS] Claude<->Codex wrapper parity (A16): ${claudeSkills.length} skills, ${claudeAgents.length} agents, shared hooks + constitutions in sync.`,
+  `[PASS] Claude<->Codex wrapper parity (A16): ${claudeSkills.length} skills, ${claudeAgents.length} agents, ${claudeCommands.length} commands, shared hooks + constitutions in sync.`,
 );
 process.exit(0);

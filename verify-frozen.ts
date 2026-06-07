@@ -1391,6 +1391,58 @@ async function testWorkspaceShellContract() {
   );
 }
 
+async function testTopControlBlocksContract() {
+  const failures: string[] = [];
+
+  if (!(await pathExists('src/components/TabTopControls/TabTopControls.tsx')))
+    failures.push('TabTopControls.tsx missing');
+  if (!(await pathExists('src/components/TabTopControls/controls.tsx')))
+    failures.push('TabTopControls controls.tsx missing');
+
+  try {
+    const appShell = await readFile(
+      path.join(SRC, 'components', 'AppShell', 'AppShell.tsx'),
+      'utf8',
+    );
+    if (!appShell.includes('TabTopControls'))
+      failures.push('AppShell.tsx does not render TabTopControls');
+  } catch {
+    failures.push('AppShell.tsx unreadable');
+  }
+
+  try {
+    const tokens = await readFile(path.join(SRC, 'styles', '_tokens.scss'), 'utf8');
+    for (const token of [
+      '$top-controls-control-height',
+      '$top-controls-segment-height',
+      '$top-controls-gap',
+    ]) {
+      if (!tokens.includes(token)) failures.push(`_tokens.scss missing ${token}`);
+    }
+  } catch {
+    failures.push('_tokens.scss unreadable');
+  }
+
+  try {
+    const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+    failures.push(
+      ...missingSnippets(frozen, [
+        'Top Control Blocks',
+        'TabTopControls',
+        'presentational with local UI state',
+      ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
+    );
+  } catch {
+    failures.push('frozen-decisions.md unreadable');
+  }
+
+  record(
+    'A15: per-tab top control blocks stay on the frozen control-surface contract',
+    failures.length === 0,
+    failures.length ? failures.slice(0, 10).join('; ') : undefined,
+  );
+}
+
 async function testClaudeCodexParity() {
   // A16: the Claude (.claude/ + CLAUDE.md) and Codex (.codex/ + plugins/ +
   // AGENTS.md) wrappers must stay in parity. Logic lives in one place —
@@ -1560,6 +1612,7 @@ async function main() {
   await testFrozenQualityToolingContract();
   await testAgentVisualQaContract();
   await testWorkspaceShellContract();
+  await testTopControlBlocksContract();
   await testClaudeCodexParity();
 
   if (!process.argv.includes('--static')) {

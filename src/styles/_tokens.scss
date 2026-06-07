@@ -129,6 +129,8 @@ $top-controls-segment-height: 1.5rem; // 24px active/inactive segment pill
 $top-controls-segment-gap: $space-1; // 4px between segments
 $top-controls-search-width: 16rem; // 256px search field
 $top-controls-datetime-width: 11.25rem; // 180px per date-time field
+$top-controls-card-gap: 1.5rem; // 24px between titled fields inside one card section
+$top-controls-inline-pad: 0.625rem; // 10px inline padding for segments / action buttons
 
 // ─── Radii / shadows ─────────────────────────────────────────────────────────
 $radius-xs: 0.1875rem;
