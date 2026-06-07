@@ -1,8 +1,10 @@
 {
   "status": "PASS",
-  "taskScope": "codex/left-rail-map-container-motion 240px rail width, stable right-anchored map stage, soft motion, and map spacing",
+  "taskScope": "Per-tab top control blocks (TabTopControls) toolbar above the map, plus refreshed workspace-shell baselines now that the toolbar reduces the map height",
   "references": [
-    "User-provided numeric spec: 10px outer gutter, 8px inner inset, 2px outer container radius, and 4px map radius",
+    "Figma per-tab block exports: Desktop/Work/Верхние блоки управления/*_общий блок.png and *_code.md (design source for sizing/colors)",
+    "Numeric spec: card #171d20 surface, #727677 1px outline, 2px radius, 16px padding, 30px controls, 24px #2970ff active segment",
+    "tests/visual-qa/top-control/map-1920x1080.reference.png",
     "tests/visual-qa/workspace-shell/map-rail-1920x1080.reference.png",
     "tests/visual-qa/workspace-shell/map-rail-expanded-1920x1080.reference.png",
     "tests/visual-qa/workspace-shell/routes-rail-expanded-1920x1080.reference.png",
@@ -12,6 +14,7 @@
   ],
   "viewports": ["1920x1080", "1920x768"],
   "states": [
+    "map top controls",
     "map rail collapsed",
     "map rail expanded",
     "routes rail expanded",
@@ -25,23 +28,35 @@
   "domCssMetrics": {
     "status": "PASS",
     "assertions": [
-      "The compact left rail remains 50px for map, routes, and telemetry.",
-      "The expanded left rail is unified at 240px for map, routes, and telemetry.",
-      "Wide side-panel tabs remain fixed at 300px.",
-      "The workspace shell, left area, rail, rail labels, and collapse icon use the shared 220ms motion contract.",
-      "prefers-reduced-motion removes meaningful rail and shell transitions.",
-      "The map area keeps a symmetric 10px outer gutter before the Blueprint Card.",
-      "The Blueprint Card keeps an 8px inner inset before the MapLibre canvas.",
-      "The Blueprint Card outer container radius is 2px.",
-      "The MapLibre canvas radius is 4px.",
-      "MapLibre remains visible in a stable right-anchored stage that rail and panel width changes crop or reveal; built-in trackResize stays disabled.",
-      "Actual and diff artifacts stay under reports/visual-qa/workspace-shell/."
+      "Each tab renders its TabTopControls toolbar above the map at the top of the workspace right column (toolbar y = 48px Header, toolbar x = map x). Verified for all six tabs in tests/e2e/top-controls.spec.ts.",
+      "Card sections use the #171d20 surface, #727677 1px outline, 2px radius, and 16px padding; titles are 12px/500 white; controls are 30px tall with 3px radius; the segmented Тип данных active pill is 24px on #2970ff.",
+      "The Тип данных group stays pinned right; leading groups scroll horizontally with no page-level horizontal scrollbar when the rail expands to 240px (map + bar checked in e2e).",
+      "The map toolbar (icon-heavy) keeps a cropped pixel baseline; the other tabs are covered by DOM/CSS metrics + e2e instead of a pixel baseline, because dense text labels (font anti-aliasing) and the 50px->300px panel motion make a cropped toolbar pixel-diff non-deterministic. Panel tabs align the toolbar to the 300px panel (e2e toolbar.x === 300).",
+      "The map function block renders 11 + 8 + 4 + 9 Blueprint icon buttons + 2 layer toggles; every glyph SVG loads and every icon button keeps an aria-label (e2e).",
+      "Map height/offset now account for the toolbar; the frozen map gutter (10px), inner inset (8px), and radii (2px/4px) are unchanged (workspace-shell.spec.ts).",
+      "Actual and diff artifacts stay under reports/visual-qa/."
     ]
   },
   "pixelComparison": {
     "status": "PASS",
     "tool": "playwright-canvas-png-diff",
     "cases": [
+      {
+        "name": "top-control-map-1920x1080",
+        "viewport": "1920x1080",
+        "state": "map top controls",
+        "referencePath": "tests/visual-qa/top-control/map-1920x1080.reference.png",
+        "actualPath": "reports/visual-qa/top-control/map-1920x1080.actual.png",
+        "diffPath": "reports/visual-qa/top-control/map-1920x1080.diff.png",
+        "capture": {
+          "url": "/",
+          "selector": "[data-testid=\"tab-top-controls\"]",
+          "viewport": { "width": 1920, "height": 1080 },
+          "actions": [
+            { "type": "click", "selector": "#praios-header-tab-map", "waitAfterMs": 1500 }
+          ]
+        }
+      },
       {
         "name": "workspace-shell-map-collapsed-1920x1080",
         "viewport": "1920x1080",
