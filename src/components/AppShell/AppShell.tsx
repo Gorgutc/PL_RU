@@ -8,6 +8,7 @@ import {
   type WorkspaceRailState,
 } from '@/components/AppNavigation/navigation';
 import { TabSidePanel } from '@/components/TabSidePanel/TabSidePanel';
+import { TabTopControls } from '@/components/TabTopControls/TabTopControls';
 import { WorkspaceMap } from '@/components/WorkspaceMap/WorkspaceMap';
 import styles from './AppShell.module.scss';
 
@@ -58,7 +59,12 @@ export function AppShell({ activeTab }: AppShellProps) {
             onRailExpandedChange={setIsRailExpanded}
           />
         </div>
-        <WorkspaceMap />
+        <div className={styles.workspaceColumn}>
+          <TabTopControls activeTab={activeTab} />
+          <div className={styles.mapArea}>
+            <WorkspaceMap />
+          </div>
+        </div>
       </section>
     </main>
   );

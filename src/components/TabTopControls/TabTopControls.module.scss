@@ -1,0 +1,283 @@
+@use '../../styles/tokens' as t;
+
+// ── Toolbar shell ────────────────────────────────────────────────────────────
+.toolbar {
+  display: flex;
+  box-sizing: border-box;
+  align-items: stretch;
+  gap: t.$top-controls-gap;
+  width: 100%;
+  min-width: 0;
+  padding: t.$workspace-map-outer-gutter t.$workspace-map-outer-gutter 0;
+}
+
+.toolbar *,
+.toolbar *::before,
+.toolbar *::after {
+  box-sizing: border-box;
+}
+
+.scroller {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: stretch;
+  gap: t.$top-controls-gap;
+  min-width: 0;
+  padding-block-end: 0.125rem;
+  overflow: auto hidden;
+}
+
+.trailing {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+}
+
+// ── Card section (dark control surface) holding one or more titled fields ────
+.card {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: t.$top-controls-card-padding;
+  border-radius: t.$radius-dropdown;
+  outline: 0.0625rem solid t.$color-header-dropdown-border;
+  outline-offset: -0.0625rem;
+  background: t.$color-header-dropdown-bg;
+}
+
+.cardGrow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: t.$top-controls-stack-gap;
+}
+
+.fieldTitle {
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-weight: 500;
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+.fieldRow {
+  display: flex;
+  align-items: center;
+  gap: t.$top-controls-group-gap;
+  min-width: 0;
+}
+
+// ── Segmented control ("Тип данных" / "Погодные параметры") ───────────────────
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: t.$top-controls-segment-gap;
+  height: t.$top-controls-control-height;
+  padding: t.$space-1;
+  border-radius: t.$radius-xs;
+  outline: 0.0625rem solid t.$color-workspace-border;
+  outline-offset: -0.0625rem;
+}
+
+.segment {
+  display: inline-flex;
+  height: t.$top-controls-segment-height;
+  align-items: center;
+  justify-content: center;
+  gap: t.$space-1;
+  padding-inline: 0.625rem;
+  border: 0;
+  border-radius: t.$radius-xs;
+  background: transparent;
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-weight: 400;
+  line-height: 1rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.segment:not(.segmentSelected):hover {
+  color: t.$color-header-action-hover;
+}
+
+.segmentSelected {
+  background: t.$color-workspace-button-active;
+  color: t.$color-header-text-on-color;
+}
+
+.segment:focus {
+  outline: 0;
+}
+
+.segment:focus-visible {
+  outline: 0.125rem solid t.$color-header-text-on-color;
+  outline-offset: 0.125rem;
+}
+
+.segmentIcon {
+  color: currentcolor;
+}
+
+// ── Text inputs (date-time, search) ──────────────────────────────────────────
+.dateField {
+  width: t.$top-controls-datetime-width;
+  min-width: 0;
+}
+
+.search {
+  width: t.$top-controls-search-width;
+  min-width: 0;
+}
+
+.dateTimeInput.dateTimeInput,
+.searchInput.searchInput {
+  width: 100%;
+  height: t.$top-controls-control-height;
+  border-radius: t.$radius-xs;
+  background: transparent !important;
+  box-shadow: inset 0 0 0 0.0625rem t.$color-workspace-border !important;
+  color: t.$color-header-text-on-color !important;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  line-height: 1rem;
+}
+
+.dateTimeInput.dateTimeInput {
+  font-variant-numeric: tabular-nums;
+}
+
+.leadingIcon.leadingIcon {
+  color: t.$color-header-text-on-color !important;
+}
+
+.dateTimeRange {
+  display: flex;
+  align-items: center;
+  gap: t.$space-1;
+}
+
+// ── Native select dropdown ───────────────────────────────────────────────────
+.select.select {
+  height: t.$top-controls-control-height;
+  min-width: 0;
+}
+
+.select.select select {
+  height: t.$top-controls-control-height;
+  min-width: 0;
+  border-radius: t.$radius-xs;
+  background: transparent !important;
+  box-shadow: inset 0 0 0 0.0625rem t.$color-workspace-border !important;
+  color: t.$color-header-text-on-color !important;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  line-height: 1rem;
+}
+
+/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+.select.select :global(.bp6-icon),
+.select.select :global(.bp5-icon) {
+  color: t.$color-header-text-on-color;
+}
+/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
+
+.labeledSelect {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: t.$space-1;
+}
+
+.labeledSelectTitle {
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-weight: 500;
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+// ── Switch (data sources) ────────────────────────────────────────────────────
+.switch.switch {
+  display: inline-flex;
+  align-items: center;
+  min-height: t.$top-controls-control-height;
+  margin: 0;
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  line-height: 1rem;
+}
+
+/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+.switch.switch :global(input:checked ~ .bp6-control-indicator),
+.switch.switch :global(input:checked ~ .bp5-control-indicator) {
+  background: t.$color-workspace-button-active !important;
+}
+/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
+
+// ── Buttons ──────────────────────────────────────────────────────────────────
+.primaryButton.primaryButton {
+  min-height: t.$top-controls-control-height;
+  padding-inline: 0.625rem;
+  border-radius: t.$radius-xs;
+  background: t.$color-workspace-button-active !important;
+  box-shadow: none !important;
+  color: t.$color-header-text-on-color !important;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-weight: 400;
+  line-height: 1rem;
+}
+
+.primaryButton.primaryButton:not(:disabled):hover {
+  background: t.$color-workspace-button-hover !important;
+}
+
+.chipButton.chipButton {
+  min-height: t.$top-controls-control-height;
+  padding-inline: 0.625rem;
+  border-radius: t.$radius-xs;
+  outline: 0.0625rem solid t.$color-workspace-border;
+  outline-offset: -0.0625rem;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: t.$color-header-text-on-color !important;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-weight: 400;
+  line-height: 1rem;
+}
+
+.chipButton.chipButton:not(:disabled):hover {
+  outline-color: t.$color-workspace-button-hover;
+  color: t.$color-header-action-hover !important;
+}
+
+.primaryButton.primaryButton:focus,
+.chipButton.chipButton:focus {
+  outline: 0;
+}
+
+.primaryButton.primaryButton:focus-visible,
+.chipButton.chipButton:focus-visible {
+  outline: 0.125rem solid t.$color-header-text-on-color;
+  outline-offset: 0.125rem;
+}
+
+// ── Focus-visible for inputs/selects ─────────────────────────────────────────
+.dateTimeInput:focus-visible,
+.searchInput:focus-visible,
+.select.select select:focus-visible {
+  outline: 0.125rem solid t.$color-header-text-on-color;
+  outline-offset: -0.125rem;
+}

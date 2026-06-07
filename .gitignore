@@ -50,3 +50,6 @@ next-env.d.ts
 # Per-session baseline written by scripts/sync-refs.mjs
 .codex-refs-baseline/
 .claude/.refs-baseline/
+
+# Local Claude preview config (not part of the tracked wrapper)
+.claude/launch.json
