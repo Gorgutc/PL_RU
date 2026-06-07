@@ -19,9 +19,9 @@ async function openWorkspace(page: Page) {
 }
 
 async function selectTab(page: Page, tab: (typeof ALL_TABS)[number]) {
-  if (tab !== 'map') {
-    await page.getByRole('banner').locator(`#praios-header-tab-${tab}`).click();
-  }
+  // Always click the Header tab (clicking the already-active tab is a no-op) so
+  // the helper works mid-test regardless of which tab is currently active.
+  await page.getByRole('banner').locator(`#praios-header-tab-${tab}`).click();
   await expect(page.getByTestId('workspace-left-area')).toHaveAttribute('data-tab', tab);
   // Let the shell width motion settle so toolbar/map measurements are stable
   // (panel <-> rail transitions animate the left-area width over 220ms).
@@ -77,6 +77,18 @@ test.describe('Per-tab top control blocks', () => {
           ),
         ),
     ).toBe(true);
+    // Every icon button keeps a non-empty accessible name.
+    const iconLabels = await functions
+      .locator('button')
+      .evaluateAll((els) => els.map((el) => (el.getAttribute('aria-label') ?? '').trim()));
+    expect(iconLabels.length).toBe(32);
+    expect(iconLabels.every((label) => label.length > 0)).toBe(true);
+    // Both layer toggles keep accessible names.
+    const toggleLabels = await functions
+      .locator('.bp6-switch input')
+      .evaluateAll((els) => els.map((el) => (el.getAttribute('aria-label') ?? '').trim()));
+    expect(toggleLabels.length).toBe(2);
+    expect(toggleLabels.every((label) => label.length > 0)).toBe(true);
   });
 
   test('shows the expected lead controls per tab', async ({ page }) => {
@@ -124,33 +136,42 @@ test.describe('Per-tab top control blocks', () => {
     page,
   }) => {
     await openWorkspace(page);
-    await selectTab(page, 'bar');
 
-    const toolbar = page.getByTestId('tab-top-controls');
-    const dataType = toolbar.locator('section[aria-label="Тип данных"]');
-    const toggle = page.getByTestId('left-rail-button-collapse');
+    // Check both the lean `bar` toolbar and the dense `map` toolbar (32 icon
+    // buttons + toggles) — the map block is the most likely to overflow.
+    for (const tab of ['bar', 'map'] as const) {
+      await selectTab(page, tab);
 
-    expect(Math.round((await requireBox(toolbar)).x)).toBe(RAIL_COLLAPSED_WIDTH);
-    const collapsedDataType = await requireBox(dataType);
-    expect(Math.round(collapsedDataType.x + collapsedDataType.width)).toBeLessThanOrEqual(
-      VIEWPORT.width,
-    );
+      const toolbar = page.getByTestId('tab-top-controls');
+      const dataType = toolbar.locator('section[aria-label="Тип данных"]');
+      const toggle = page.getByTestId('left-rail-button-collapse');
 
-    await toggle.click();
-    await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
+      expect(Math.round((await requireBox(toolbar)).x)).toBe(RAIL_COLLAPSED_WIDTH);
+      const collapsedDataType = await requireBox(dataType);
+      expect(Math.round(collapsedDataType.x + collapsedDataType.width)).toBeLessThanOrEqual(
+        VIEWPORT.width,
+      );
 
-    expect(Math.round((await requireBox(toolbar)).x)).toBe(RAIL_EXPANDED_WIDTH);
-    await expect(dataType).toBeVisible();
-    const expandedDataType = await requireBox(dataType);
-    expect(Math.round(expandedDataType.x + expandedDataType.width)).toBeLessThanOrEqual(
-      VIEWPORT.width,
-    );
+      await toggle.click();
+      await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
 
-    const scroll = await page.evaluate(() => ({
-      clientWidth: document.documentElement.clientWidth,
-      scrollWidth: document.documentElement.scrollWidth,
-    }));
-    expect(scroll.scrollWidth).toBeLessThanOrEqual(scroll.clientWidth);
+      expect(Math.round((await requireBox(toolbar)).x)).toBe(RAIL_EXPANDED_WIDTH);
+      await expect(dataType).toBeVisible();
+      const expandedDataType = await requireBox(dataType);
+      expect(Math.round(expandedDataType.x + expandedDataType.width)).toBeLessThanOrEqual(
+        VIEWPORT.width,
+      );
+
+      const scroll = await page.evaluate(() => ({
+        clientWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+      }));
+      expect(scroll.scrollWidth).toBeLessThanOrEqual(scroll.clientWidth);
+
+      // Collapse again so the next tab starts from the collapsed rail.
+      await toggle.click();
+      await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
+    }
   });
 
   test('aligns the toolbar with the 300px side-panel tabs', async ({ page }) => {

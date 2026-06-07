@@ -1,12 +1,11 @@
 // cspell:disable
-import { Fragment, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { HeaderTabId } from '@/components/Header/Header';
 import {
   ChipButton,
   ControlCard,
   ControlField,
   DateTimeRange,
-  IconButton,
   IconButtonGroup,
   LayerToggle,
   PrimaryActionButton,
@@ -73,29 +72,6 @@ const MAP_DATA_TYPES: readonly SegmentItem[] = [
   { id: 'analysis', label: 'Анализ данных', icon: 'list' },
 ];
 
-// Map layers group: icon buttons (with dividers) plus the two map toggles.
-function MapLayersField() {
-  const dividerAfter = new Set(MAP_LAYER_GROUP.dividerAfter ?? []);
-  return (
-    <div className={styles.field}>
-      <span className={styles.fieldTitle}>{MAP_LAYER_GROUP.title}</span>
-      <div className={styles.iconRow}>
-        {MAP_LAYER_GROUP.items.map((id, index) => (
-          <Fragment key={id}>
-            <IconButton id={id} />
-            {dividerAfter.has(index) ? (
-              <span aria-hidden="true" className={styles.iconDivider} />
-            ) : null}
-          </Fragment>
-        ))}
-        {MAP_LAYER_TOGGLES.map((label) => (
-          <LayerToggle key={label} label={label} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function MapTopControls() {
   return (
     <Toolbar
@@ -109,7 +85,12 @@ function MapTopControls() {
         {MAP_FUNCTION_GROUPS.map((group) => (
           <IconButtonGroup group={group} key={group.title} />
         ))}
-        <MapLayersField />
+        <IconButtonGroup
+          group={MAP_LAYER_GROUP}
+          trailing={MAP_LAYER_TOGGLES.map((label) => (
+            <LayerToggle key={label} label={label} />
+          ))}
+        />
       </ControlCard>
     </Toolbar>
   );

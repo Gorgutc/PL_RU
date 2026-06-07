@@ -8,7 +8,8 @@ import {
   Switch,
 } from '@blueprintjs/core';
 import type { IconName } from '@blueprintjs/icons';
-import { Fragment, type ReactNode } from 'react';
+import { Fragment, useState, type ReactNode } from 'react';
+import { cx } from '@/lib/cx';
 import { mapIconLabel, mapIconSrc, type MapIconGroup, type MapIconId } from './mapIcons';
 import styles from './TabTopControls.module.scss';
 
@@ -187,11 +188,21 @@ export function ChipButton({ children, icon }: { children: ReactNode; icon?: Ico
 }
 
 // Square icon button (32x30 outline) with a custom SVG glyph from the manifest.
-// Presentational toggle; the glyph set is the map-tab SVG manifest exception.
+// Uses the Blueprint Button primitive (the SVG-manifest exception only covers
+// the glyph rendered via <img>); presentational local pressed toggle.
 export function IconButton({ id }: { id: MapIconId }) {
   const label = mapIconLabel(id);
+  const [pressed, setPressed] = useState(false);
   return (
-    <button aria-label={label} className={styles.iconButton} title={label} type="button">
+    <Button
+      aria-label={label}
+      aria-pressed={pressed}
+      className={cx(styles.iconButton, pressed && styles.iconButtonActive)}
+      onClick={() => setPressed((value) => !value)}
+      title={label}
+      type="button"
+      variant="minimal"
+    >
       <img
         alt=""
         aria-hidden="true"
@@ -200,12 +211,19 @@ export function IconButton({ id }: { id: MapIconId }) {
         draggable={false}
         src={mapIconSrc(id)}
       />
-    </button>
+    </Button>
   );
 }
 
-// A titled group of icon buttons with optional vertical dividers.
-export function IconButtonGroup({ group }: { group: MapIconGroup }) {
+// A titled group of icon buttons with optional vertical dividers and trailing
+// content (e.g. the map-layer toggles).
+export function IconButtonGroup({
+  group,
+  trailing,
+}: {
+  group: MapIconGroup;
+  trailing?: ReactNode;
+}) {
   const dividerAfter = new Set(group.dividerAfter ?? []);
   return (
     <div className={styles.field}>
@@ -219,6 +237,7 @@ export function IconButtonGroup({ group }: { group: MapIconGroup }) {
             ) : null}
           </Fragment>
         ))}
+        {trailing}
       </div>
     </div>
   );

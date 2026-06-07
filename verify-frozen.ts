@@ -1423,6 +1423,23 @@ async function testTopControlBlocksContract() {
     failures.push('_tokens.scss unreadable');
   }
 
+  // Map icon manifest + glyph assets, and Blueprint-primitive reuse for controls.
+  if (!(await pathExists('src/components/TabTopControls/mapIcons.ts')))
+    failures.push('TabTopControls mapIcons.ts missing');
+  if (!(await pathExists('public/top-control-icons')))
+    failures.push('public/top-control-icons SVG manifest dir missing');
+
+  try {
+    const controls = await readFile(
+      path.join(SRC, 'components', 'TabTopControls', 'controls.tsx'),
+      'utf8',
+    );
+    if (!controls.includes("from '@blueprintjs/core'"))
+      failures.push('controls.tsx must build top controls on Blueprint primitives');
+  } catch {
+    failures.push('controls.tsx unreadable');
+  }
+
   try {
     const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
     failures.push(

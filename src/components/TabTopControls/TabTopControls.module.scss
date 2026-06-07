@@ -246,32 +246,39 @@
   min-width: 0;
 }
 
-.iconButton {
+.iconButton.iconButton {
   display: inline-flex;
   width: 2rem;
+  min-width: 2rem;
   height: t.$top-controls-control-height;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 0;
   border-radius: t.$radius-xs;
   outline: 0.0625rem solid t.$color-workspace-border;
   outline-offset: -0.0625rem;
-  background: transparent;
+  background: transparent !important;
+  box-shadow: none !important;
   cursor: pointer;
 }
 
-.iconButton:not(:disabled):hover {
+.iconButton.iconButton:not(:disabled):hover {
   outline-color: t.$color-workspace-button-hover;
+  background: transparent !important;
 }
 
-.iconButton:focus {
+.iconButtonActive.iconButtonActive {
+  outline-color: t.$color-workspace-button-active;
+  background: t.$color-workspace-button-active !important;
+}
+
+.iconButton.iconButton:focus {
   outline: 0.0625rem solid t.$color-workspace-border;
   outline-offset: -0.0625rem;
 }
 
-.iconButton:focus-visible {
+.iconButton.iconButton:focus-visible {
   outline: 0.125rem solid t.$color-header-text-on-color;
   outline-offset: 0.125rem;
 }

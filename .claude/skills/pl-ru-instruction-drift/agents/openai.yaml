@@ -1,0 +1,6 @@
+interface:
+  display_name: 'PL_RU Instruction Drift'
+  short_description: 'Instruction, skill, docs, script, and CI drift checks'
+  default_prompt: 'Use $pl-ru-instruction-drift before changing PL_RU instructions or tooling docs.'
+policy:
+  allow_implicit_invocation: true

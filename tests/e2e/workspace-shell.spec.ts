@@ -643,6 +643,7 @@ test.describe('PraiOS workspace shell', () => {
     const shellBox = await requireBox(shell);
     const leftBox = await requireBox(leftArea);
     const mapBox = await requireBox(map);
+    const topControlsBox = await requireBox(page.getByTestId('tab-top-controls'));
 
     expect(Math.round(headerBox.height)).toBe(HEADER_HEIGHT);
     expect(Math.round(shellBox.y)).toBe(HEADER_HEIGHT);
@@ -650,7 +651,13 @@ test.describe('PraiOS workspace shell', () => {
     expect(Math.round(leftBox.width)).toBe(RAIL_COLLAPSED_WIDTH);
     expect(Math.round(mapBox.x)).toBe(Math.round(leftBox.x + leftBox.width));
     expect(Math.round(mapBox.width)).toBe(VIEWPORT_WIDTH - Math.round(leftBox.width));
-    expect(Math.round(mapBox.height)).toBe(1080 - HEADER_HEIGHT);
+    // The per-tab top control toolbar sits above the map; the map fills the
+    // remaining height below it.
+    expect(Math.round(topControlsBox.y)).toBe(HEADER_HEIGHT);
+    expect(Math.round(mapBox.y)).toBe(HEADER_HEIGHT + Math.round(topControlsBox.height));
+    expect(Math.round(mapBox.height)).toBe(
+      1080 - HEADER_HEIGHT - Math.round(topControlsBox.height),
+    );
     await expectMapContainerSpacing(page);
   });
 

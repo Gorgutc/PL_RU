@@ -18,7 +18,7 @@ instruction changes, quality-tooling changes, or GitHub delivery.
    `.claude/projects/<project>/memory/MEMORY.md`.
 3. Check `git status --short --branch`.
 4. Confirm the source of truth order:
-   `verify-frozen.ts > current user request > AGENTS.md > plugins/pl-ru-codex/skills/**`.
+   `verify-frozen.ts > current user request > AGENTS.md = CLAUDE.md > skills (.claude/skills/** = plugins/pl-ru-codex/skills/**) > design references`.
 5. If the task touches UI or source code, use `/pl-ru-frontend-rules`.
 6. If the task is broad, use `/pl-ru-audit-orchestrator`.
 7. Always raise the applicable PL_RU subagents before delivery when subagent
