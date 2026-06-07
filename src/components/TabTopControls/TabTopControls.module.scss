@@ -165,31 +165,6 @@
   min-width: 0;
 }
 
-// ── Native select dropdown ───────────────────────────────────────────────────
-.select.select {
-  height: t.$top-controls-control-height;
-  min-width: 0;
-}
-
-.select.select select {
-  height: t.$top-controls-control-height;
-  min-width: 0;
-  border-radius: t.$radius-xs;
-  background: transparent !important;
-  box-shadow: inset 0 0 0 0.0625rem t.$color-workspace-border !important;
-  color: t.$color-header-text-on-color !important;
-  font-family: t.$font-sans;
-  font-size: t.$fs-header-nav;
-  line-height: 1rem;
-}
-
-/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
-.select.select :global(.bp6-icon),
-.select.select :global(.bp5-icon) {
-  color: t.$color-header-text-on-color;
-}
-/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
-
 // ── Switch (data sources) ────────────────────────────────────────────────────
 .switch.switch {
   display: inline-flex;
@@ -332,8 +307,7 @@
 
 // ── Focus-visible for inputs/selects ─────────────────────────────────────────
 .dateTimeInput:focus-visible,
-.searchInput:focus-visible,
-.select.select select:focus-visible {
+.searchInput:focus-visible {
   outline: 0.125rem solid t.$color-header-text-on-color;
   outline-offset: -0.125rem;
 }

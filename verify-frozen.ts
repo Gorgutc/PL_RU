@@ -939,6 +939,10 @@ async function testWorkspaceShellContract() {
     path.join(SRC, 'components', 'TabSidePanel', 'TabSidePanel.module.scss'),
     'utf8',
   );
+  const sharedSelectControl = await readFile(
+    path.join(SRC, 'components', 'controls', 'SelectControl', 'SelectControl.tsx'),
+    'utf8',
+  );
   const workspaceMap = await readFile(
     path.join(SRC, 'components', 'WorkspaceMap', 'WorkspaceMap.tsx'),
     'utf8',
@@ -1224,7 +1228,7 @@ async function testWorkspaceShellContract() {
       (snippet) => `railIcons.ts missing ${snippet}`,
     ),
     ...missingSnippets(tabSidePanel, [
-      'HTMLSelect',
+      "from '@/components/controls/SelectControl/SelectControl'",
       'InputGroup',
       'TextArea',
       'Checkbox',
@@ -1261,6 +1265,9 @@ async function testWorkspaceShellContract() {
       'input:focus-visible',
       '.actionButton.actionButton:focus-visible',
     ]).map((snippet) => `TabSidePanel.module.scss missing ${snippet}`),
+    ...missingSnippets(sharedSelectControl, ['HTMLSelect', 'chevron-down', 'selectShell']).map(
+      (snippet) => `controls/SelectControl.tsx missing ${snippet}`,
+    ),
     ...missingSnippets(workspaceMap, [
       'Card',
       'maplibregl.Map',

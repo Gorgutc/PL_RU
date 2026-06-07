@@ -1,4 +1,5 @@
 @use '../../styles/tokens' as t;
+@use '../../styles/control-field' as cf;
 
 .panel {
   display: flex;
@@ -133,54 +134,20 @@
   border-block-start: 0.0625rem solid t.$color-workspace-divider;
 }
 
-.selectShell {
-  position: relative;
-  width: 100%;
-  min-width: 0;
-}
-
-.selectShellIcon.selectShellIcon {
-  position: absolute;
-  inset-block-start: 50%;
-  inset-inline-end: 0.625rem;
-  color: t.$color-header-text-on-color !important;
-  pointer-events: none;
-  transform: translateY(-50%);
-}
-
-.selectControl.selectControl,
 .inputControl.inputControl,
 .darkInputControl.darkInputControl,
 .textareaControl.textareaControl,
 .checkboxControl {
+  @include cf.control-surface;
+
   width: 100%;
-  min-width: 0;
-  min-height: t.$workspace-control-height;
-  border-radius: t.$workspace-control-radius;
-  outline: 0.0625rem solid t.$color-workspace-border;
-  outline-offset: -0.0625rem;
-  background: transparent;
 }
 
-.selectControl.selectControl select,
 .inputElement.inputElement,
 .textareaControl.textareaControl {
-  width: 100%;
-  min-width: 0;
-  min-height: t.$workspace-control-height;
-  padding: 0.375rem 0.75rem;
-  border: 0;
-  background: transparent !important;
-  box-shadow: none !important;
-  color: t.$color-header-text-on-color !important;
-  font-family: t.$font-sans;
-  font-size: t.$fs-header-nav;
-  line-height: 1rem;
-}
+  @include cf.control-inner;
 
-.selectControl.selectControl select {
-  appearance: none;
-  padding-inline-end: 2rem;
+  width: 100%;
 }
 
 .dateTimeShell {
@@ -224,14 +191,6 @@
 
 .nativeDateTimeInputWithIcon {
   inset-inline: 0 auto;
-}
-
-.selectControl.selectControl > span {
-  display: none;
-}
-
-.placeholderControl.placeholderControl select {
-  color: t.$color-workspace-placeholder !important;
 }
 
 .darkInputControl.darkInputControl {
@@ -356,10 +315,8 @@
 }
 
 .iconButton:focus-visible,
-.selectControl:focus-within,
 .inputControl:focus-within,
 .darkInputControl:focus-within,
 .textareaControl:focus-visible {
-  outline: 0.125rem solid t.$color-header-text-on-color;
-  outline-offset: -0.125rem;
+  @include cf.control-focus;
 }

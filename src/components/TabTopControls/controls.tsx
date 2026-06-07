@@ -1,7 +1,6 @@
 // cspell:disable
 import {
   Button,
-  HTMLSelect,
   Icon,
   InputGroup,
   SegmentedControl as BlueprintSegmentedControl,
@@ -9,6 +8,7 @@ import {
 } from '@blueprintjs/core';
 import type { IconName } from '@blueprintjs/icons';
 import { Fragment, useState, type ReactNode } from 'react';
+import { SelectControl } from '@/components/controls/SelectControl/SelectControl';
 import { cx } from '@/lib/cx';
 import { mapIconLabel, mapIconSrc, type MapIconGroup, type MapIconId } from './mapIcons';
 import styles from './TabTopControls.module.scss';
@@ -149,7 +149,8 @@ export function SearchField({
   );
 }
 
-// Native dropdown (Blueprint HTMLSelect) used for the toolbar selects.
+// Toolbar dropdown — reuses the shared SelectControl so it matches the side
+// panels (Зондирование/Статистика). Content-sized (no `fill`) for the toolbar.
 export function SelectField({
   value,
   options,
@@ -159,14 +160,7 @@ export function SelectField({
   options: readonly string[];
   ariaLabel: string;
 }) {
-  return (
-    <HTMLSelect
-      aria-label={ariaLabel}
-      className={styles.select}
-      defaultValue={value}
-      options={options.length ? [...options] : [value]}
-    />
-  );
+  return <SelectControl ariaLabel={ariaLabel} dense options={options} value={value} />;
 }
 
 // Blueprint Switch + label (e.g. satellite data sources).
