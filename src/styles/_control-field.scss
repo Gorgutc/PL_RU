@@ -1,0 +1,33 @@
+@use 'tokens' as t;
+
+// Shared control-surface contract for native workspace form controls
+// (side-panel selects/inputs/textareas/checkboxes + top-control selects).
+// Width is intentionally left to the consumer: the side panels fill 100% of
+// their field column, while the top-control toolbar sizes selects to content.
+
+@mixin control-surface {
+  min-width: 0;
+  min-height: t.$workspace-control-height;
+  border-radius: t.$workspace-control-radius;
+  outline: 0.0625rem solid t.$color-workspace-border;
+  outline-offset: -0.0625rem;
+  background: transparent;
+}
+
+@mixin control-inner {
+  min-width: 0;
+  min-height: t.$workspace-control-height;
+  padding: 0.375rem 0.75rem;
+  border: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: t.$color-header-text-on-color !important;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  line-height: 1rem;
+}
+
+@mixin control-focus {
+  outline: 0.125rem solid t.$color-header-text-on-color;
+  outline-offset: -0.125rem;
+}

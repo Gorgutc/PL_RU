@@ -156,9 +156,13 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 - Panel-level controls in `kick`, `stats`, and `sat` side panels align their
   right edge to the same right edge as the footer action row, within a `1px` tolerance.
   The shared `TabSidePanel` spacing contract owns this alignment.
-- Launch-parameter selection fields use the shared simple dropdown control:
-  Blueprint `HTMLSelect` rendering a native `<select>`, matching the existing
-  `stats` and `sat` side-panel visual contract. `kick`, `stats`, and `sat`
+- Launch-parameter selection fields use the shared simple dropdown control,
+  extracted as the reusable `SelectControl` component
+  (`src/components/controls/SelectControl/`):
+  Blueprint `HTMLSelect` rendering a native `<select>` with a custom
+  chevron-down overlay, matching the existing `stats` and `sat` side-panel
+  visual contract and now reused by the per-tab top control toolbars so both
+  share one dropdown contract. `kick`, `stats`, and `sat`
   selection fields must not use `InputGroup` plus `datalist`, `aria-autocomplete`,
   the native `list` attribute, or `kick-combobox-*` test IDs.
 - Launch comments are editable `TextArea` controls. Launch date/time and the
@@ -195,6 +199,57 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   sizes from `src/styles/_tokens.scss`.
 - The Header visual contract is not part of this shell contract and must not be
   changed when extending the left side menu or real map.
+
+## Top Control Blocks
+
+- Each top-level tab renders its own per-tab top control block (`TabTopControls`)
+  as a horizontal toolbar at the top of the workspace right column, above the
+  `WorkspaceMap`. The left rail/panel keep their full height; only the map's
+  available height changes, handled by the existing map `ResizeObserver`. The map
+  contract (right-anchored stage, `trackResize: false`) is not weakened.
+- Functionality comes from Blueprint primitives (`SegmentedControl`, `HTMLSelect`,
+  `InputGroup`, `Switch`, `Button`, `Icon`); the look, layout, and copy come from
+  the Figma design. The blocks are presentational with local UI state only (no
+  data backend) until a dedicated task wires real data.
+- Card sections reuse the frozen dropdown/control surface: `#171d20` background,
+  `#727677` 1px outline, `2px` radius, `16px` padding, and `12px`/500 white
+  titles. Controls are `30px` tall with `3px` radius and `#666` outline; the
+  segmented `Тип данных` active pill uses `#2970ff`. All raw values live in
+  `src/styles/_tokens.scss` (`$top-controls-*` plus reused tokens); no inline hex
+  and no `px` font-size.
+- The `Тип данных` group stays pinned to the right. At the target `1920px` with
+  the rail collapsed, the cards flex to fill the full toolbar width with no
+  internal horizontal scroll: the fixed cards (map functions, weather, data-type,
+  animation) keep their intrinsic width, while the per-tab date/time card flexes
+  (`cardFlexible`) and the date/time field shrinks to a min-width so everything
+  fits. Cards stay `10px` apart and the data-type group is never clipped.
+  Responsive reflow for narrower widths is a separate future task.
+- The `map` tab icon-button groups (Инфраструктура / Наложения на карту / Борты /
+  Слои карты + two map toggles) use a dedicated SVG glyph manifest in
+  `public/top-control-icons/` driven by `src/components/TabTopControls/mapIcons.ts`.
+  This is the map-tab equivalent of the left-rail SVG exception: production map
+  control icons use these SVGs via `<img>`, not Blueprint `<Icon>`. The
+  `Слои карты` group maps 1:1 to the map layer providers; the exact glyph↔button
+  assignment in the function groups is adjustable in the manifest.
+- Map icon glyphs render as block `<img>` centered in their `32x30` button, and
+  the four `map` function groups sit `16px` apart (`cardTightGroups`).
+- Toolbar action buttons follow a rest→active model. The `tmi` "Загрузить
+  маршруты" primary action is a filled accent button (`PrimaryActionButton`,
+  `#2970ff` surface). The `sat` "Создать анимацию…" control is a resting-outlined
+  toggle (`ToggleActionButton`): transparent + `#666`/`$color-workspace-border`
+  hairline at rest (the same outlined surface as the `Фильтры` chip), filling with
+  the `#2970ff`/`$color-workspace-button-active` accent only when toggled on, with
+  `aria-pressed`. Do not "restore" the animation toggle to the filled
+  `PrimaryActionButton` — the resting-outlined look is intentional.
+- Toolbar dropdowns reuse the shared `SelectControl` (same component as the side
+  panels) in its `dense` 30px variant, so the per-tab toolbar height stays
+  constant and the map stage never resizes on tab switches. The shared select's
+  control surface comes from the `control-field` SCSS mixins
+  (`src/styles/_control-field.scss`).
+- Reuse before adding: new toolbar controls must reuse Blueprint primitives,
+  the shared `SelectControl`, `src/styles/_tokens.scss`, the shared
+  `src/lib/cx.ts`, and existing patterns rather than duplicating the side-panel
+  controls.
 
 ## Quality Tooling
 

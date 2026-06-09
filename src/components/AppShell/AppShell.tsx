@@ -8,16 +8,14 @@ import {
   type WorkspaceRailState,
 } from '@/components/AppNavigation/navigation';
 import { TabSidePanel } from '@/components/TabSidePanel/TabSidePanel';
+import { TabTopControls } from '@/components/TabTopControls/TabTopControls';
 import { WorkspaceMap } from '@/components/WorkspaceMap/WorkspaceMap';
+import { cx } from '@/lib/cx';
 import styles from './AppShell.module.scss';
 
 type AppShellProps = {
   activeTab: HeaderTabId;
 };
-
-function cx(...classes: Array<string | false | undefined>) {
-  return classes.filter(Boolean).join(' ');
-}
 
 export function AppShell({ activeTab }: AppShellProps) {
   const [isRailExpanded, setIsRailExpanded] = useState(false);
@@ -58,7 +56,12 @@ export function AppShell({ activeTab }: AppShellProps) {
             onRailExpandedChange={setIsRailExpanded}
           />
         </div>
-        <WorkspaceMap />
+        <div className={styles.workspaceColumn}>
+          <TabTopControls activeTab={activeTab} />
+          <div className={styles.mapArea}>
+            <WorkspaceMap />
+          </div>
+        </div>
       </section>
     </main>
   );

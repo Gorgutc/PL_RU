@@ -24,10 +24,12 @@ pnpm codex:ship
 ## Authority Order
 
 ```text
-verify-frozen.ts > current user request > AGENTS.md > plugins/pl-ru-codex/skills/** > design references
+verify-frozen.ts > current user request > AGENTS.md = CLAUDE.md > skills (plugins/pl-ru-codex/skills/** = .claude/skills/**) > design references
 ```
 
-`CLAUDE.md` is kept only as a legacy pointer. The old `.claude/` directory is no longer a source of truth.
+`AGENTS.md` and `CLAUDE.md` are equivalent canons; `.codex/` and `.claude/` are
+the two wrappers. Keep both in sync — the parity guard (rule A16,
+`scripts/verify-claude-codex-parity.mjs`, via `pnpm verify`) fails on drift.
 
 ## Codex Plugin
 
@@ -115,6 +117,12 @@ Rules mirrored by `verify-frozen.ts` are binding:
   MapLibre/OSM map contract stay frozen.
 - A14: app-wide layout sizing follows the `10px` / `8px` / `4px` rhythm, with
   `4px` as the minimum grid step and explicit frozen-radius exceptions allowed.
+- A15: per-tab top control blocks (`TabTopControls`) stay on the frozen
+  control-surface contract (reserved for the top-control-blocks task; see
+  `docs/agent/frozen-decisions.md`).
+- A16: the Claude (`.claude/` + `CLAUDE.md`) and Codex (`.codex/` +
+  `plugins/pl-ru-codex/` + `AGENTS.md`) canons stay in parity
+  (`scripts/verify-claude-codex-parity.mjs`).
 
 Additional project rules:
 

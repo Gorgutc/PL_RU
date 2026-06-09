@@ -1,0 +1,345 @@
+@use '../../styles/tokens' as t;
+
+// ── Toolbar shell ────────────────────────────────────────────────────────────
+.toolbar {
+  display: flex;
+  box-sizing: border-box;
+  align-items: stretch;
+  gap: t.$top-controls-gap;
+  width: 100%;
+  min-width: 0;
+  padding: t.$workspace-map-outer-gutter t.$workspace-map-outer-gutter 0;
+}
+
+.toolbar *,
+.toolbar *::before,
+.toolbar *::after {
+  box-sizing: border-box;
+}
+
+.scroller {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: stretch;
+  gap: t.$top-controls-gap;
+  min-width: 0;
+}
+
+.trailing {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+}
+
+// ── Card section (dark control surface) holding one or more titled fields ────
+.card {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  gap: t.$top-controls-card-gap;
+  padding: t.$top-controls-card-padding;
+  border-radius: t.$radius-dropdown;
+  outline: 0.0625rem solid t.$color-header-dropdown-border;
+  outline-offset: -0.0625rem;
+  background: t.$color-header-dropdown-bg;
+}
+
+// A card that flexes to fill the toolbar width (the date/time card per tab);
+// fixed cards keep flex: 0 0 auto so they hold their intrinsic width.
+.cardFlexible {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+// Tighter 16px gap between the four map icon-button groups (vs the 24px card gap).
+.cardTightGroups {
+  gap: t.$top-controls-group-gap;
+}
+
+.field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: t.$top-controls-stack-gap;
+}
+
+// A field column that grows to fill its flexible card (the date/time field).
+.fieldGrow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.fieldTitle {
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-weight: 500;
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+.fieldRow {
+  display: flex;
+  align-items: center;
+  gap: t.$top-controls-group-gap;
+  min-width: 0;
+}
+
+// ── Segmented control: Blueprint SegmentedControl restyled to the Figma look ──
+/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+.segmented.segmented {
+  height: t.$top-controls-control-height;
+  padding: t.$space-1;
+  border-radius: t.$radius-xs;
+  outline: 0.0625rem solid t.$color-workspace-border;
+  outline-offset: -0.0625rem;
+  background: transparent;
+  box-shadow: none;
+}
+
+.segmented.segmented :global(.bp6-button),
+.segmented.segmented :global(.bp5-button) {
+  min-height: t.$top-controls-segment-height;
+  padding: 0 t.$top-controls-inline-pad;
+  border-radius: t.$radius-xs;
+  background: transparent;
+  box-shadow: none;
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-weight: 400;
+  line-height: 1rem;
+}
+
+.segmented.segmented :global(.bp6-button:hover),
+.segmented.segmented :global(.bp5-button:hover) {
+  background: transparent;
+  color: t.$color-header-action-hover;
+}
+
+.segmented.segmented :global(.bp6-button[aria-checked='true']),
+.segmented.segmented :global(.bp5-button[aria-checked='true']) {
+  background: t.$color-workspace-button-active;
+  color: t.$color-header-text-on-color;
+}
+/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
+
+// ── Text inputs (date-time, search) ──────────────────────────────────────────
+.dateField {
+  flex: 1 1 auto;
+  min-width: t.$top-controls-datetime-min-width;
+}
+
+.search {
+  width: t.$top-controls-search-width;
+  min-width: 0;
+}
+
+.dateTimeInput.dateTimeInput,
+.searchInput.searchInput {
+  width: 100%;
+  height: t.$top-controls-control-height;
+  border-radius: t.$radius-xs;
+  background: transparent !important;
+  box-shadow: inset 0 0 0 0.0625rem t.$color-workspace-border !important;
+  color: t.$color-header-text-on-color !important;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  line-height: 1rem;
+}
+
+.dateTimeInput.dateTimeInput {
+  padding-inline: t.$space-1;
+  font-variant-numeric: tabular-nums;
+}
+
+.leadingIcon.leadingIcon {
+  color: t.$color-header-text-on-color !important;
+}
+
+.dateTimeRange {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: t.$space-1;
+  min-width: 0;
+}
+
+// ── Switch (data sources) ────────────────────────────────────────────────────
+.switch.switch {
+  display: inline-flex;
+  align-items: center;
+  min-height: t.$top-controls-control-height;
+  margin: 0;
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  line-height: 1rem;
+}
+
+/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+.switch.switch :global(input:checked ~ .bp6-control-indicator),
+.switch.switch :global(input:checked ~ .bp5-control-indicator) {
+  background: t.$color-workspace-button-active !important;
+}
+/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
+
+// ── Buttons ──────────────────────────────────────────────────────────────────
+.primaryButton.primaryButton {
+  min-height: t.$top-controls-control-height;
+  padding-inline: t.$top-controls-inline-pad;
+  border-radius: t.$radius-xs;
+  background: t.$color-workspace-button-active !important;
+  box-shadow: none !important;
+  color: t.$color-header-text-on-color !important;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-weight: 400;
+  line-height: 1rem;
+}
+
+.primaryButton.primaryButton:not(:disabled):hover {
+  background: t.$color-workspace-button-hover !important;
+}
+
+// Outlined toolbar buttons: "Фильтры" chip and the "Создать анимацию…" toggle
+// share one resting look (transparent surface + hairline outline).
+// `.toggleActionActive` fills it with the accent when on — the same rest→active
+// principle as the Header account button.
+.chipButton.chipButton,
+.toggleAction.toggleAction {
+  min-height: t.$top-controls-control-height;
+  padding-inline: t.$top-controls-inline-pad;
+  border-radius: t.$radius-xs;
+  outline: 0.0625rem solid t.$color-workspace-border;
+  outline-offset: -0.0625rem;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: t.$color-header-text-on-color !important;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-weight: 400;
+  line-height: 1rem;
+}
+
+.chipButton.chipButton:not(:disabled):hover,
+.toggleAction.toggleAction:not(:disabled):hover {
+  outline-color: t.$color-workspace-button-hover;
+  color: t.$color-header-action-hover !important;
+}
+
+// Toggled-on state ("работать по тому же принципу" as the account button):
+// accent fill, declared after the shared hover so it wins at equal specificity.
+.toggleActionActive.toggleActionActive,
+.toggleActionActive.toggleActionActive:not(:disabled):hover {
+  outline-color: t.$color-workspace-button-active;
+  background: t.$color-workspace-button-active !important;
+  color: t.$color-header-text-on-color !important;
+}
+
+.toggleActionActive.toggleActionActive:not(:disabled):hover {
+  background: t.$color-workspace-button-hover !important;
+}
+
+// The filled primary button has no outlined border, so its focus ring is simply
+// suppressed (re-added for keyboards via :focus-visible below).
+.primaryButton.primaryButton:focus {
+  outline: 0;
+}
+
+// The outlined buttons render their "border" as an outline, so on :focus they must
+// re-assert that hairline instead of dropping to `outline: 0` (which would leave
+// the resting button borderless after a pointer click). Mirrors `.iconButton`.
+.chipButton.chipButton:focus,
+.toggleAction.toggleAction:focus {
+  outline: 0.0625rem solid t.$color-workspace-border;
+  outline-offset: -0.0625rem;
+}
+
+// `:not(:disabled)` raises these to the hover/active-hover specificity (and they
+// are declared last), so the keyboard focus ring stays white even while hovered.
+.primaryButton.primaryButton:not(:disabled):focus-visible,
+.chipButton.chipButton:not(:disabled):focus-visible,
+.toggleAction.toggleAction:not(:disabled):focus-visible {
+  outline: 0.125rem solid t.$color-header-text-on-color;
+  outline-offset: 0.125rem;
+}
+
+// ── Map icon-button groups ───────────────────────────────────────────────────
+.iconRow {
+  display: flex;
+  align-items: center;
+  gap: t.$space-1;
+  min-width: 0;
+}
+
+.iconButton.iconButton {
+  display: inline-flex;
+  width: 2rem;
+  min-width: 2rem;
+  height: t.$top-controls-control-height;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: t.$radius-xs;
+  outline: 0.0625rem solid t.$color-workspace-border;
+  outline-offset: -0.0625rem;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.iconButton.iconButton:not(:disabled):hover {
+  outline-color: t.$color-workspace-button-hover;
+  background: transparent !important;
+}
+
+.iconButtonActive.iconButtonActive {
+  outline-color: t.$color-workspace-button-active;
+  background: t.$color-workspace-button-active !important;
+}
+
+.iconButton.iconButton:focus {
+  outline: 0.0625rem solid t.$color-workspace-border;
+  outline-offset: -0.0625rem;
+}
+
+.iconButton.iconButton:focus-visible {
+  outline: 0.125rem solid t.$color-header-text-on-color;
+  outline-offset: 0.125rem;
+}
+
+.iconGlyph {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+.iconDivider {
+  width: 0;
+  height: 1rem;
+  flex: 0 0 auto;
+  border-inline-start: 0.0625rem solid t.$color-workspace-rail-divider;
+}
+
+.layerToggle.layerToggle {
+  align-self: center;
+  min-height: t.$top-controls-control-height;
+  margin: 0;
+}
+
+/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+.layerToggle.layerToggle :global(input:checked ~ .bp6-control-indicator),
+.layerToggle.layerToggle :global(input:checked ~ .bp5-control-indicator) {
+  background: t.$color-workspace-button-active !important;
+}
+/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
+
+// ── Focus-visible for inputs/selects ─────────────────────────────────────────
+.dateTimeInput:focus-visible,
+.searchInput:focus-visible {
+  outline: 0.125rem solid t.$color-header-text-on-color;
+  outline-offset: -0.125rem;
+}

@@ -939,6 +939,10 @@ async function testWorkspaceShellContract() {
     path.join(SRC, 'components', 'TabSidePanel', 'TabSidePanel.module.scss'),
     'utf8',
   );
+  const sharedSelectControl = await readFile(
+    path.join(SRC, 'components', 'controls', 'SelectControl', 'SelectControl.tsx'),
+    'utf8',
+  );
   const workspaceMap = await readFile(
     path.join(SRC, 'components', 'WorkspaceMap', 'WorkspaceMap.tsx'),
     'utf8',
@@ -1224,7 +1228,7 @@ async function testWorkspaceShellContract() {
       (snippet) => `railIcons.ts missing ${snippet}`,
     ),
     ...missingSnippets(tabSidePanel, [
-      'HTMLSelect',
+      "from '@/components/controls/SelectControl/SelectControl'",
       'InputGroup',
       'TextArea',
       'Checkbox',
@@ -1261,6 +1265,9 @@ async function testWorkspaceShellContract() {
       'input:focus-visible',
       '.actionButton.actionButton:focus-visible',
     ]).map((snippet) => `TabSidePanel.module.scss missing ${snippet}`),
+    ...missingSnippets(sharedSelectControl, ['HTMLSelect', 'chevron-down', 'selectShell']).map(
+      (snippet) => `controls/SelectControl.tsx missing ${snippet}`,
+    ),
     ...missingSnippets(workspaceMap, [
       'Card',
       'maplibregl.Map',
@@ -1389,6 +1396,166 @@ async function testWorkspaceShellContract() {
     failures.length === 0,
     failures.length ? failures.slice(0, 10).join('; ') : undefined,
   );
+}
+
+async function testTopControlBlocksContract() {
+  const failures: string[] = [];
+
+  if (!(await pathExists('src/components/TabTopControls/TabTopControls.tsx')))
+    failures.push('TabTopControls.tsx missing');
+  if (!(await pathExists('src/components/TabTopControls/controls.tsx')))
+    failures.push('TabTopControls controls.tsx missing');
+
+  try {
+    const appShell = await readFile(
+      path.join(SRC, 'components', 'AppShell', 'AppShell.tsx'),
+      'utf8',
+    );
+    if (!appShell.includes('TabTopControls'))
+      failures.push('AppShell.tsx does not render TabTopControls');
+  } catch {
+    failures.push('AppShell.tsx unreadable');
+  }
+
+  try {
+    const tokens = await readFile(path.join(SRC, 'styles', '_tokens.scss'), 'utf8');
+    for (const token of [
+      '$top-controls-control-height',
+      '$top-controls-segment-height',
+      '$top-controls-gap',
+    ]) {
+      if (!tokens.includes(token)) failures.push(`_tokens.scss missing ${token}`);
+    }
+  } catch {
+    failures.push('_tokens.scss unreadable');
+  }
+
+  // Map icon manifest + glyph assets, and Blueprint-primitive reuse for controls.
+  if (!(await pathExists('src/components/TabTopControls/mapIcons.ts')))
+    failures.push('TabTopControls mapIcons.ts missing');
+  if (!(await pathExists('public/top-control-icons')))
+    failures.push('public/top-control-icons SVG manifest dir missing');
+
+  try {
+    const controls = await readFile(
+      path.join(SRC, 'components', 'TabTopControls', 'controls.tsx'),
+      'utf8',
+    );
+    if (!controls.includes("from '@blueprintjs/core'"))
+      failures.push('controls.tsx must build top controls on Blueprint primitives');
+    // Toolbar dropdowns reuse the shared SelectControl in its dense (30px) variant
+    // so the per-tab toolbar height stays constant and the map never resizes.
+    if (!controls.includes("from '@/components/controls/SelectControl/SelectControl'"))
+      failures.push('controls.tsx must reuse the shared SelectControl');
+    if (!controls.includes('dense'))
+      failures.push('controls.tsx toolbar select must use the dense (30px) variant');
+    // The sat animation control is a resting-outlined toggle (rest→active like the
+    // account button), exposed via aria-pressed — not the filled primary button.
+    if (!controls.includes('export function ToggleActionButton'))
+      failures.push('controls.tsx must define the outlined ToggleActionButton');
+    // Toggle-specific (not the unrelated IconButton): the active-fill wiring and
+    // the pressed-state a11y attribute must both stay on ToggleActionButton.
+    if (!controls.includes('aria-pressed={active}'))
+      failures.push(
+        'controls.tsx ToggleActionButton must expose aria-pressed for its toggle state',
+      );
+    if (!controls.includes('toggleActionActive'))
+      failures.push('controls.tsx ToggleActionButton must wire the active accent-fill class');
+  } catch {
+    failures.push('controls.tsx unreadable');
+  }
+
+  try {
+    const topControls = await readFile(
+      path.join(SRC, 'components', 'TabTopControls', 'TabTopControls.tsx'),
+      'utf8',
+    );
+    // Require the JSX render (`<ToggleActionButton`), not just the import, so a
+    // regression of the animation action back to the filled PrimaryActionButton
+    // is actually caught.
+    if (!topControls.includes('<ToggleActionButton'))
+      failures.push('TabTopControls.tsx must render the animation control as <ToggleActionButton>');
+  } catch {
+    failures.push('TabTopControls.tsx unreadable');
+  }
+
+  try {
+    const topControlsStyles = await readFile(
+      path.join(SRC, 'components', 'TabTopControls', 'TabTopControls.module.scss'),
+      'utf8',
+    );
+    // Full-width contract: a per-tab card flexes, the map groups use the 16px gap,
+    // and the scroller is not a horizontal scroll container.
+    for (const cls of [
+      '.cardFlexible',
+      '.cardTightGroups',
+      '.toggleAction',
+      '.toggleActionActive',
+    ]) {
+      if (!topControlsStyles.includes(cls))
+        failures.push(`TabTopControls.module.scss missing ${cls}`);
+    }
+    if (topControlsStyles.includes('overflow: auto hidden'))
+      failures.push('TabTopControls.module.scss scroller must not scroll horizontally');
+  } catch {
+    failures.push('TabTopControls.module.scss unreadable');
+  }
+
+  try {
+    const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+    failures.push(
+      ...missingSnippets(frozen, [
+        'Top Control Blocks',
+        'TabTopControls',
+        'presentational with local UI state',
+        'cardFlexible',
+        'cardTightGroups',
+        'internal horizontal scroll',
+        '`dense` 30px',
+        'rest→active',
+        'ToggleActionButton',
+      ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
+    );
+  } catch {
+    failures.push('frozen-decisions.md unreadable');
+  }
+
+  record(
+    'A15: per-tab top control blocks stay on the frozen control-surface contract',
+    failures.length === 0,
+    failures.length ? failures.slice(0, 10).join('; ') : undefined,
+  );
+}
+
+async function testClaudeCodexParity() {
+  // A16: the Claude (.claude/ + CLAUDE.md) and Codex (.codex/ + plugins/ +
+  // AGENTS.md) wrappers must stay in parity. Logic lives in one place —
+  // scripts/verify-claude-codex-parity.mjs — and is also runnable standalone.
+  try {
+    const out = execFileSync(process.execPath, ['scripts/verify-claude-codex-parity.mjs'], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const lastLine = out.toString().trim().split('\n').pop() ?? '';
+    record(
+      'A16: Claude/Codex wrapper parity',
+      true,
+      lastLine.replace(/^\[PASS\]\s*/, '') || undefined,
+    );
+  } catch (e) {
+    const err = e as { stdout?: Buffer | string; stderr?: Buffer | string; message?: string };
+    const detail = (
+      err.stderr?.toString() ||
+      err.stdout?.toString() ||
+      err.message ||
+      'parity failed'
+    )
+      .trim()
+      .replace(/\s+/g, ' ')
+      .slice(0, 300);
+    record('A16: Claude/Codex wrapper parity', false, detail);
+  }
 }
 
 async function waitForUrl(url: string, timeoutMs: number) {
@@ -1529,6 +1696,8 @@ async function main() {
   await testFrozenQualityToolingContract();
   await testAgentVisualQaContract();
   await testWorkspaceShellContract();
+  await testTopControlBlocksContract();
+  await testClaudeCodexParity();
 
   if (!process.argv.includes('--static')) {
     try {

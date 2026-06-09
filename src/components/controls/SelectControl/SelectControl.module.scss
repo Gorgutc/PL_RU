@@ -1,0 +1,49 @@
+@use '../../../styles/tokens' as t;
+@use '../../../styles/control-field' as cf;
+
+.selectShell {
+  position: relative;
+  min-width: 0;
+}
+
+.selectShellIcon.selectShellIcon {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 0.625rem;
+  color: t.$color-header-text-on-color !important;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.selectControl.selectControl {
+  @include cf.control-surface;
+}
+
+.selectControl.selectControl select {
+  @include cf.control-inner;
+
+  width: 100%;
+  padding-inline-end: 2rem;
+  appearance: none;
+}
+
+// Toolbar variant: 30px control height (matches the other top-control inputs and
+// keeps the per-tab toolbar height constant so the map stage never resizes).
+// Declared after the base rules so it wins at equal specificity.
+.selectControlDense.selectControlDense,
+.selectControlDense.selectControlDense select {
+  min-height: t.$top-controls-control-height;
+}
+
+// Hide Blueprint's built-in caret; the custom chevron-down overlay replaces it.
+.selectControl.selectControl > span {
+  display: none;
+}
+
+.placeholderControl.placeholderControl select {
+  color: t.$color-workspace-placeholder !important;
+}
+
+.selectControl:focus-within {
+  @include cf.control-focus;
+}

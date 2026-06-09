@@ -47,6 +47,20 @@
   width: t.$workspace-panel-width;
 }
 
+.workspaceColumn {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mapArea {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
 .srOnly {
   position: absolute;
   width: 0.0625rem;
