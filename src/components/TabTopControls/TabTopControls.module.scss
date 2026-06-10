@@ -7,6 +7,7 @@
   align-items: stretch;
   gap: t.$top-controls-gap;
   width: 100%;
+  max-width: t.$workspace-content-max; // caps + left-aligns beyond 2560; map/Header stay full-bleed
   min-width: 0;
   padding: t.$workspace-map-outer-gutter t.$workspace-map-outer-gutter 0;
 }
@@ -266,11 +267,24 @@
 }
 
 // ── Map icon-button groups ───────────────────────────────────────────────────
+// An icon group. At >=1920 it is intrinsic (all icons shown). Below 1920 it
+// flexes proportionally to its full icon count (`--group-grow`) and the row
+// trims icons into an overflow chevron (see IconButtonGroup).
+.iconGroup {
+  flex: 0 0 auto;
+  min-width: min-content; // never shrink below the (nowrap) title; the row trims icons instead
+}
+
 .iconRow {
   display: flex;
   align-items: center;
   gap: t.$space-1;
+  width: 100%;
   min-width: 0;
+
+  // No overflow clip here: icons are sliced to fit (so nothing overflows at
+  // >=1920), which keeps the icon-button :focus-visible ring fully visible.
+  // The compact band adds overflow:hidden to absorb the reflow transient.
 }
 
 .iconButton.iconButton {
@@ -324,6 +338,13 @@
   border-inline-start: 0.0625rem solid t.$color-workspace-rail-divider;
 }
 
+// ── Map-layer toggles (Подложка / Сетка) trailing the layer glyphs ───────────
+.layerToggles {
+  display: inline-flex;
+  align-items: center;
+  gap: t.$space-1;
+}
+
 .layerToggle.layerToggle {
   align-self: center;
   min-height: t.$top-controls-control-height;
@@ -342,4 +363,51 @@
 .searchInput:focus-visible {
   outline: 0.125rem solid t.$color-header-text-on-color;
   outline-offset: -0.125rem;
+}
+
+// ── Compact band (< 1920): fixed-chrome responsive reflow ────────────────────
+// The frozen 1920 layout (date card flexes, fixed cards keep intrinsic width)
+// is unchanged at >= 1920. Below it the date/time card becomes intrinsic, the
+// map-functions card becomes the flexible (shrinking) card, and its icon groups
+// share the width proportionally to their full icon count so the overflow
+// chevrons appear — no horizontal scroll, no shrunken buttons.
+@media (max-width: t.$workspace-bp-compact-max) {
+  .toolbar,
+  .scroller {
+    gap: t.$top-controls-gap-compact;
+  }
+
+  // Scoped to the toolbar so the shared ControlCard `cardFlexible` class used by
+  // the map bottom panel legend keeps flexing (rubber middle) below 1920.
+  .toolbar .cardFlexible {
+    flex: 0 0 auto;
+  }
+
+  .cardTightGroups {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: t.$top-controls-gap-compact;
+  }
+
+  .dateField {
+    min-width: t.$top-controls-datetime-min-width-compact;
+  }
+
+  .iconGroup {
+    flex: var(--group-grow, 1) 1 0;
+  }
+
+  // Decouple the row width from its icon content so the group can shrink to its
+  // title and the overflow chevron trims the icons (only in the compact band).
+  // overflow:hidden absorbs the one-frame reflow transient before trimming.
+  .iconRow {
+    overflow: hidden;
+    contain: inline-size;
+  }
+
+  // The map toggles fold away with the layer icons in the compact band (they
+  // reappear in the layers dropdown), matching the 1280 reference.
+  .layerToggles {
+    display: none;
+  }
 }

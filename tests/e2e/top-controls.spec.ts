@@ -14,6 +14,9 @@ const TOP_CONTROLS_HEIGHT = 96;
 
 const ALL_TABS = ['map', 'bar', 'tmi', 'sat', 'kick', 'stats'] as const;
 const PANEL_TABS = ['kick', 'stats', 'sat'] as const;
+// Reference adaptation widths (16:9) and the chrome content max-width.
+const RESPONSIVE_WIDTHS = [1280, 1920, 2560, 3840] as const;
+const CONTENT_MAX_WIDTH = 2560;
 
 async function openWorkspace(page: Page) {
   await page.setViewportSize(VIEWPORT);
@@ -86,7 +89,9 @@ test.describe('Per-tab top control blocks', () => {
       .getByTestId('tab-top-controls')
       .locator('section[aria-label="Функции карты"]');
     await expect(functions).toBeVisible();
-    // Инфраструктура (11) + Наложения (8) + Борты (4) + Слои карты (9) = 32 icon buttons.
+    // Инфраструктура (11) + Наложения (8) + Борты (4) + Слои карты (9) = 32 icon
+    // buttons. At 1920 everything fits, so no overflow chevron appears; the
+    // Слои карты group also carries the two map toggles.
     await expect(functions.locator('button')).toHaveCount(32);
     await expect(functions.locator('img')).toHaveCount(32);
     await expect(functions.locator('.bp6-switch')).toHaveCount(2);
@@ -251,6 +256,54 @@ test.describe('Per-tab top control blocks', () => {
       const toolbar = page.getByTestId('tab-top-controls');
       await expect(toolbar).toBeVisible();
       expect(Math.round((await requireBox(toolbar)).x)).toBe(PANEL_WIDTH);
+    }
+  });
+
+  test('keeps the map toolbar fitting and capped across viewport widths', async ({ page }) => {
+    for (const width of RESPONSIVE_WIDTHS) {
+      const height = Math.round((width * 9) / 16);
+      await page.setViewportSize({ width, height });
+      await page.goto('/');
+
+      const toolbar = page.getByTestId('tab-top-controls');
+      await expect(toolbar).toBeVisible();
+      const dataType = toolbar.locator('section[aria-label="Тип данных"]');
+      const collapseToggle = page.getByTestId('left-rail-button-collapse');
+
+      for (const state of ['collapsed', 'expanded'] as const) {
+        if (state === 'expanded') {
+          await collapseToggle.click();
+          await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
+        }
+
+        const railWidth = state === 'expanded' ? RAIL_EXPANDED_WIDTH : RAIL_COLLAPSED_WIDTH;
+        // The toolbar starts at the rail's right edge.
+        expect(Math.round((await requireBox(toolbar)).x)).toBe(railWidth);
+
+        // The data-type group stays visible, within the viewport, and never past
+        // the capped chrome width (rail + content max-width — matters at 3840).
+        await expect(dataType).toBeVisible();
+        const dt = await requireBox(dataType);
+        expect(Math.round(dt.x + dt.width)).toBeLessThanOrEqual(width);
+        expect(Math.round(dt.x + dt.width)).toBeLessThanOrEqual(railWidth + CONTENT_MAX_WIDTH + 1);
+
+        // No horizontal page scroll and no internal scroller overflow at any width.
+        const scroll = await page.evaluate(() => ({
+          clientWidth: document.documentElement.clientWidth,
+          scrollWidth: document.documentElement.scrollWidth,
+        }));
+        expect(scroll.scrollWidth).toBeLessThanOrEqual(scroll.clientWidth);
+        const scrollerOverflow = await toolbar.evaluate((el) => {
+          const scroller = el.firstElementChild as HTMLElement;
+          return scroller.scrollWidth - scroller.clientWidth;
+        });
+        expect(scrollerOverflow).toBeLessThanOrEqual(1);
+
+        if (state === 'expanded') {
+          await collapseToggle.click();
+          await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
+        }
+      }
     }
   });
 

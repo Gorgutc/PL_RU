@@ -59,10 +59,16 @@ function DataTypeCard({ items }: { items: readonly SegmentItem[] }) {
   );
 }
 
-function DateTimeCard() {
+function DateTimeCard({
+  from = DATETIME_FROM,
+  to = DATETIME_TO,
+}: {
+  from?: string;
+  to?: string;
+} = {}) {
   return (
     <ControlField grow title="Дата и время от и до:">
-      <DateTimeRange from={DATETIME_FROM} to={DATETIME_TO} />
+      <DateTimeRange from={from} to={to} />
     </ControlField>
   );
 }
@@ -72,6 +78,8 @@ const MAP_DATA_TYPES: readonly SegmentItem[] = [
   { id: 'operational', label: 'Оперативная', icon: 'list' },
   { id: 'analysis', label: 'Анализ данных', icon: 'list' },
 ];
+// The map date/time card shows date-only values in the reference (no time).
+const MAP_DATETIME = '24-04-2025';
 
 function MapTopControls() {
   return (
@@ -80,7 +88,7 @@ function MapTopControls() {
       trailing={<DataTypeCard items={MAP_DATA_TYPES} />}
     >
       <ControlCard ariaLabel="Дата и время" flexible>
-        <DateTimeCard />
+        <DateTimeCard from={MAP_DATETIME} to={MAP_DATETIME} />
       </ControlCard>
       <ControlCard ariaLabel="Функции карты" tightGroups>
         {MAP_FUNCTION_GROUPS.map((group) => (
@@ -88,9 +96,13 @@ function MapTopControls() {
         ))}
         <IconButtonGroup
           group={MAP_LAYER_GROUP}
-          trailing={MAP_LAYER_TOGGLES.map((label) => (
-            <LayerToggle key={label} label={label} />
-          ))}
+          trailing={
+            <span className={styles.layerToggles}>
+              {MAP_LAYER_TOGGLES.map((label) => (
+                <LayerToggle key={label} label={label} />
+              ))}
+            </span>
+          }
         />
       </ControlCard>
     </Toolbar>

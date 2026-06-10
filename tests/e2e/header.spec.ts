@@ -5,7 +5,7 @@ import { collectConsoleErrors } from './helpers/console-errors';
 const HEADER_HEIGHT = 48;
 const VIEWPORT_HEIGHT = 1080;
 const COMPACT_WIDTHS = [1280, 1440] as const;
-const EXPANDED_WIDTHS = [1920, 2560, 3860] as const;
+const EXPANDED_WIDTHS = [1920, 2560, 3840] as const;
 const TAB_NAMES = [
   'Оперативная карта',
   'Маршруты',

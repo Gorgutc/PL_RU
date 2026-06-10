@@ -7,11 +7,12 @@
  * SVG manifest exception: production map control icons use these SVGs via <img>,
  * not Blueprint <Icon>.
  *
- * The "Слои карты" (map layers) group maps 1:1 to the MapLayers SVGs (providers).
- * The Инфраструктура / Наложения / Борты grouping follows the Figma block order
- * and the SVG names; the exact glyph<->button assignment in those three groups is
- * a best-effort match pending a pixel pass against the reference (the layer group
- * is exact). Adjust the arrays below to re-map without touching components.
+ * Glyph<->button assignments are mapped to the reference (the
+ * "Верхние блоки управления" block slices): the "Слои карты" group has nine
+ * layer-provider glyphs plus two map toggles; the Инфраструктура / Наложения /
+ * Борты groups follow the reference glyph order. At narrow widths each group's
+ * icons overflow into a chevron "more" dropdown (handled by IconButtonGroup).
+ * Adjust the arrays below to re-map without touching components.
  */
 
 export type MapIconId =
@@ -100,58 +101,62 @@ export type MapIconGroup = {
 };
 
 // Инфраструктура / Наложения / Борты — function groups (icon buttons only).
+// Glyph order mapped to the reference PNG.
 export const MAP_FUNCTION_GROUPS: readonly MapIconGroup[] = [
   {
     title: 'Инфраструктура',
     items: [
-      'radar',
+      'important-object',
       'points',
-      'coord',
+      'radar',
       'plane',
+      'barrel',
       'anchor',
       'flash',
       'rails',
       'road',
-      'gex',
+      'globe',
       'build',
-      'barrel',
     ],
     dividerAfter: [2],
   },
   {
     title: 'Наложения на карту',
     items: [
-      'megafon',
-      'cloud',
-      'sun-calc',
-      'danger-map',
-      'conflict-off',
-      'eye',
       'satellite-img',
-      'globe',
+      'megafon',
+      'sun-calc',
+      'cloud',
+      'conflict-off',
+      'satellite',
+      'eye',
+      'coord',
     ],
   },
   {
     title: 'Борты',
-    items: ['satellite', 'redis-boat', 'important-object', 'calendar'],
+    items: ['danger-map', 'gex', 'calendar', 'redis-boat'],
   },
 ];
 
-// Слои карты — map layer providers (exact MapLayers mapping) + two map toggles.
+// Слои карты — map layer providers (9 glyphs, order mapped to the reference) plus
+// the two map toggles (MAP_LAYER_TOGGLES). Dividers after the 1st and 3rd glyph
+// per the Figma spec. At narrow widths the icons overflow into a chevron.
 export const MAP_LAYER_GROUP: MapIconGroup = {
   title: 'Слои карты',
   items: [
-    'osm',
+    'hydromap',
     'google',
+    'yandex-plus',
     'googlegibrid',
     'yandex',
-    'yandex-plus',
     'esri',
     'otp',
-    'hydromap',
+    'osm',
     'clearmap',
   ],
   dividerAfter: [0, 2],
 };
 
+// Two map toggles trailing the layer providers ("Подложка" / "Сетка").
 export const MAP_LAYER_TOGGLES: readonly string[] = ['Подложка', 'Сетка'];

@@ -1,0 +1,107 @@
+@use '../../styles/tokens' as t;
+
+// Footer strip under the map. Mirrors the top-controls toolbar rhythm: a fixed
+// height (10px gutter + 86px card) so it only changes the map's available
+// height, never the map's horizontal stage contract. The card surfaces come
+// from the reused ControlCard primitive (frozen dark surface / 1px outline / 2px radius).
+.panel {
+  display: flex;
+  box-sizing: border-box;
+  align-items: stretch;
+  gap: t.$workspace-bottom-panel-gap;
+  width: 100%;
+  max-width: t.$workspace-content-max; // caps at 2560 + left-aligns beyond it (matches the top controls)
+  height: t.$workspace-bottom-panel-height;
+  min-width: 0;
+  padding: 0 t.$workspace-bottom-panel-padding t.$workspace-bottom-panel-padding;
+  background: t.$color-workspace-bg;
+}
+
+.panel *,
+.panel *::before,
+.panel *::after {
+  box-sizing: border-box;
+}
+
+// ── Cloud-base rainbow legend (flexible middle block) ────────────────────────
+.legend {
+  display: flex;
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.legendHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: t.$space-2;
+}
+
+.legendTitle {
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-weight: 500;
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+.legendUnit {
+  color: t.$color-workspace-placeholder;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  line-height: 1rem;
+}
+
+.legendBar {
+  width: 100%;
+  height: t.$cloud-legend-bar-height;
+  border-radius: t.$radius-dropdown;
+  background: t.$gradient-cloud-legend;
+}
+
+.legendTicks {
+  display: flex;
+  justify-content: space-between;
+  color: t.$color-workspace-placeholder;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-variant-numeric: tabular-nums;
+  line-height: 1rem;
+}
+
+// ── Data-management actions: blue glyph on the reused outlined ChipButton ─────
+.actionIcon.actionIcon {
+  color: t.$color-workspace-button-active;
+}
+
+// ── Compact band (< 1920): fold extra filter toggles into the overflow chevron
+// and shorten the load action label, matching the 1280 reference. ─────────────
+.filterOverflow {
+  display: none;
+}
+
+.shortLabel {
+  display: none;
+}
+
+@media (max-width: t.$workspace-bp-compact-max) {
+  .filterExtra {
+    display: none;
+  }
+
+  .filterOverflow {
+    display: inline-flex;
+  }
+
+  .fullLabel {
+    display: none;
+  }
+
+  .shortLabel {
+    display: inline;
+  }
+}

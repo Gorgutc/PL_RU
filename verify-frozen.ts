@@ -1527,6 +1527,167 @@ async function testTopControlBlocksContract() {
   );
 }
 
+async function testResponsiveAndBottomPanelContract() {
+  const failures: string[] = [];
+  const tokens = await readFile(path.join(SRC, 'styles', '_tokens.scss'), 'utf8');
+
+  const expectedTokens = new Map([
+    ['$workspace-bp-compact', '120rem'],
+    ['$workspace-bp-compact-max', '119.9375rem'],
+    ['$workspace-content-max', '160rem'],
+    ['$workspace-bottom-panel-height', '6rem'],
+    ['$workspace-bottom-panel-gap', '0.625rem'],
+    ['$workspace-bottom-panel-padding', '0.625rem'],
+    ['$cloud-legend-bar-height', '0.75rem'],
+  ]);
+  for (const [token, expected] of expectedTokens) {
+    const actual = getScssTokenValue(tokens, token);
+    if (actual !== expected) failures.push(`_tokens.scss ${token}=${actual ?? '(missing)'}`);
+  }
+  for (const snippet of [
+    '$color-cloud-legend-0',
+    '$color-cloud-legend-10',
+    '$gradient-cloud-legend: linear-gradient(',
+  ]) {
+    if (!tokens.includes(snippet)) failures.push(`_tokens.scss missing ${snippet}`);
+  }
+
+  if (!(await pathExists('src/components/MapBottomPanel/MapBottomPanel.tsx')))
+    failures.push('MapBottomPanel.tsx missing');
+  if (!(await pathExists('src/components/MapBottomPanel/MapBottomPanel.module.scss')))
+    failures.push('MapBottomPanel.module.scss missing');
+
+  try {
+    const appShell = await readFile(
+      path.join(SRC, 'components', 'AppShell', 'AppShell.tsx'),
+      'utf8',
+    );
+    if (!appShell.includes('<MapBottomPanel'))
+      failures.push('AppShell.tsx does not render MapBottomPanel');
+  } catch {
+    failures.push('AppShell.tsx unreadable');
+  }
+
+  try {
+    const panel = await readFile(
+      path.join(SRC, 'components', 'MapBottomPanel', 'MapBottomPanel.tsx'),
+      'utf8',
+    );
+    failures.push(
+      ...missingSnippets(panel, [
+        "from '@/components/TabTopControls/controls'",
+        'ControlCard',
+        'SwitchToggle',
+        'ChipButton',
+        'data-testid="map-bottom-panel"',
+        'Фильтрация на карте',
+        'Нижняя граница облаков',
+        'Управление данными',
+        'Загрузить свои данные',
+        'Скачать отчет',
+      ]).map((snippet) => `MapBottomPanel.tsx missing ${snippet}`),
+    );
+  } catch {
+    failures.push('MapBottomPanel.tsx unreadable');
+  }
+
+  try {
+    const panelStyles = await readFile(
+      path.join(SRC, 'components', 'MapBottomPanel', 'MapBottomPanel.module.scss'),
+      'utf8',
+    );
+    failures.push(
+      ...missingSnippets(panelStyles, [
+        "@use '../../styles/tokens'",
+        't.$gradient-cloud-legend',
+        't.$workspace-bottom-panel-height',
+        't.$workspace-content-max',
+      ]).map((snippet) => `MapBottomPanel.module.scss missing ${snippet}`),
+    );
+  } catch {
+    failures.push('MapBottomPanel.module.scss unreadable');
+  }
+
+  try {
+    const controls = await readFile(
+      path.join(SRC, 'components', 'TabTopControls', 'controls.tsx'),
+      'utf8',
+    );
+    failures.push(
+      ...missingSnippets(controls, [
+        'export function MapLayerDropdown',
+        'ResizeObserver',
+        'export function LayerToggle',
+      ]).map((snippet) => `controls.tsx missing ${snippet}`),
+    );
+  } catch {
+    failures.push('controls.tsx unreadable');
+  }
+
+  try {
+    const topStyles = await readFile(
+      path.join(SRC, 'components', 'TabTopControls', 'TabTopControls.module.scss'),
+      'utf8',
+    );
+    failures.push(
+      ...missingSnippets(topStyles, [
+        'max-width: t.$workspace-content-max',
+        '@media (max-width: t.$workspace-bp-compact-max)',
+        'contain: inline-size',
+      ]).map((snippet) => `TabTopControls.module.scss missing ${snippet}`),
+    );
+  } catch {
+    failures.push('TabTopControls.module.scss unreadable');
+  }
+
+  try {
+    const topSpec = await readFile(path.join(ROOT, 'tests', 'e2e', 'top-controls.spec.ts'), 'utf8');
+    failures.push(
+      ...missingSnippets(topSpec, ['RESPONSIVE_WIDTHS', 'fitting and capped']).map(
+        (snippet) => `top-controls.spec.ts missing ${snippet}`,
+      ),
+    );
+  } catch {
+    failures.push('top-controls.spec.ts unreadable');
+  }
+
+  try {
+    const wsSpec = await readFile(
+      path.join(ROOT, 'tests', 'e2e', 'workspace-shell.spec.ts'),
+      'utf8',
+    );
+    failures.push(
+      ...missingSnippets(wsSpec, ['map-bottom-panel', 'chrome caps at an ultrawide']).map(
+        (snippet) => `workspace-shell.spec.ts missing ${snippet}`,
+      ),
+    );
+  } catch {
+    failures.push('workspace-shell.spec.ts unreadable');
+  }
+
+  try {
+    const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+    failures.push(
+      ...missingSnippets(frozen, [
+        '## Workspace Responsive Adaptation And Map Bottom Panel',
+        'fixed-chrome + rubber map',
+        '$workspace-content-max',
+        'MapBottomPanel',
+        '$gradient-cloud-legend',
+        'full-bleed',
+      ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
+    );
+  } catch {
+    failures.push('frozen-decisions.md unreadable');
+  }
+
+  record(
+    'A17: responsive chrome adaptation and map bottom panel stay frozen',
+    failures.length === 0,
+    failures.length ? failures.slice(0, 10).join('; ') : undefined,
+  );
+}
+
 async function testClaudeCodexParity() {
   // A16: the Claude (.claude/ + CLAUDE.md) and Codex (.codex/ + plugins/ +
   // AGENTS.md) wrappers must stay in parity. Logic lives in one place —
@@ -1697,6 +1858,7 @@ async function main() {
   await testAgentVisualQaContract();
   await testWorkspaceShellContract();
   await testTopControlBlocksContract();
+  await testResponsiveAndBottomPanelContract();
   await testClaudeCodexParity();
 
   if (!process.argv.includes('--static')) {
