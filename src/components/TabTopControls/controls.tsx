@@ -7,7 +7,7 @@ import {
   Switch,
 } from '@blueprintjs/core';
 import type { IconName } from '@blueprintjs/icons';
-import { Fragment, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { SelectControl } from '@/components/controls/SelectControl/SelectControl';
 import { cx } from '@/lib/cx';
 import { mapIconLabel, mapIconSrc, type MapIconGroup, type MapIconId } from './mapIcons';
@@ -226,11 +226,27 @@ export function ToggleActionButton({
   );
 }
 
-// Outlined utility button with a trailing icon ("Фильтры").
-export function ChipButton({ children, icon }: { children: ReactNode; icon?: IconName }) {
+// Outlined utility button. Supports a trailing icon ("Фильтры" chip) and/or a
+// leading icon (map bottom-panel "Управление данными" actions).
+export function ChipButton({
+  children,
+  icon,
+  leadingIcon,
+  leadingIconClassName,
+}: {
+  children: ReactNode;
+  icon?: IconName;
+  leadingIcon?: IconName;
+  leadingIconClassName?: string;
+}) {
   return (
     <Button
       className={styles.chipButton}
+      icon={
+        leadingIcon ? (
+          <Icon className={leadingIconClassName} icon={leadingIcon} size={16} />
+        ) : undefined
+      }
       endIcon={icon ? <Icon icon={icon} size={16} /> : undefined}
       text={children}
       type="button"
@@ -267,8 +283,12 @@ export function IconButton({ id }: { id: MapIconId }) {
   );
 }
 
-// A titled group of icon buttons with optional vertical dividers and trailing
-// content (e.g. the map-layer toggles).
+// A titled group of icon buttons. Adapts to the available width (fixed-chrome
+// responsive rule): it shows as many icons as fit and collapses the rest into a
+// chevron "more" dropdown at narrow widths, matching the reference compact
+// layout. Optional `trailing` content (the map-layer toggles) renders after the
+// icons. The toolbar height stays constant (single row), so the map stage never
+// resizes on reflow.
 export function IconButtonGroup({
   group,
   trailing,
@@ -276,19 +296,53 @@ export function IconButtonGroup({
   group: MapIconGroup;
   trailing?: ReactNode;
 }) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const total = group.items.length;
+  const [visibleCount, setVisibleCount] = useState(total);
+  const [overflowing, setOverflowing] = useState(false);
+
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+
+    const compute = () => {
+      const maxFit = Math.max(1, Math.floor((row.clientWidth + 4) / ICON_GROUP_PITCH_PX));
+      if (maxFit >= total) {
+        setVisibleCount(total);
+        setOverflowing(false);
+      } else {
+        // Reserve one slot for the overflow chevron.
+        setVisibleCount(Math.max(1, maxFit - 1));
+        setOverflowing(true);
+      }
+    };
+
+    const observer = new ResizeObserver(compute);
+    observer.observe(row);
+    compute();
+
+    return () => observer.disconnect();
+  }, [total]);
+
   const dividerAfter = new Set(group.dividerAfter ?? []);
+  const shown = group.items.slice(0, visibleCount);
+
   return (
-    <div className={styles.field}>
+    <div
+      className={cx(styles.field, styles.iconGroup)}
+      style={{ '--group-grow': total } as CSSProperties}
+    >
       <span className={styles.fieldTitle}>{group.title}</span>
-      <div className={styles.iconRow}>
-        {group.items.map((id, index) => (
+      <div className={styles.iconRow} ref={rowRef}>
+        {shown.map((id, index) => (
           <Fragment key={id}>
             <IconButton id={id} />
-            {dividerAfter.has(index) ? (
+            {dividerAfter.has(index) && index < shown.length - 1 ? (
               <span aria-hidden="true" className={styles.iconDivider} />
             ) : null}
           </Fragment>
         ))}
+        {overflowing ? <MapLayerDropdown ariaLabel={`Ещё: ${group.title}`} /> : null}
         {trailing}
       </div>
     </div>
@@ -299,3 +353,22 @@ export function IconButtonGroup({
 export function LayerToggle({ label }: { label: string }) {
   return <Switch aria-label={label} className={styles.layerToggle} defaultChecked />;
 }
+
+// Chevron overflow dropdown trigger: appears at the end of a group when its
+// icons overflow the available width (the trimmed icons would open from here).
+// Presentational icon-sized button (Blueprint chevron, not an SVG-manifest glyph).
+export function MapLayerDropdown({ ariaLabel = 'Ещё слои карты' }: { ariaLabel?: string }) {
+  return (
+    <Button
+      aria-label={ariaLabel}
+      className={styles.iconButton}
+      icon={<Icon icon="chevron-down" size={16} />}
+      title={ariaLabel}
+      type="button"
+      variant="minimal"
+    />
+  );
+}
+
+// Approx button pitch used to estimate how many icons fit: 32px button + 4px gap.
+const ICON_GROUP_PITCH_PX = 36;

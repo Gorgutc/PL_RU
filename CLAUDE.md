@@ -114,6 +114,7 @@ Rules mirrored by `verify-frozen.ts` are binding (`pnpm verify`):
 - A14: app-wide layout sizing follows the `10px` / `8px` / `4px` rhythm, with `4px` as the minimum grid step and explicit frozen-radius exceptions allowed.
 - A15: per-tab top control blocks (`TabTopControls`) stay on the frozen control-surface contract (see `docs/agent/frozen-decisions.md`).
 - A16: the Claude (`.claude/` + `CLAUDE.md`) and Codex (`.codex/` + `plugins/pl-ru-codex/` + `AGENTS.md`) canons stay in parity.
+- A17: per-tab chrome responsive adaptation (compact overflow-to-dropdown below `1920`, `2560` content max-width) and the map bottom panel (`MapBottomPanel`) stay on their frozen contract (see `docs/agent/frozen-decisions.md`).
 
 Additional project rules:
 

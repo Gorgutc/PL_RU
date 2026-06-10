@@ -16,7 +16,7 @@ and `verify-frozen.ts`. Do not edit files when using this as a review skill.
   decision. If not, frozen behavior must remain intact.
 - Header responsive-tab behavior remains fixed:
   - compact tabs at `1280px` and `1440px`;
-  - expanded labeled tabs at `1920px`, `2560px`, and `3860px`;
+  - expanded labeled tabs at `1920px`, `2560px`, and `3840px`;
   - Figma active/hover colors;
   - no persistent base-tab outline;
   - keyboard focus remains visible.

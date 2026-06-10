@@ -80,7 +80,7 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 - Header brand/actions side zones stay `330px`.
 - At `1280px` and `1440px`, tabs are compact: six `80px` tab buttons with
   icons visible and text hidden visually.
-- At `1920px`, `2560px`, and `3860px`, tab text is visible. The first two tabs
+- At `1920px`, `2560px`, and `3840px`, tab text is visible. The first two tabs
   are `154px`; the remaining four are `153px`.
 - Active tab uses `#2970ff`; hover tab uses `#528bff`.
 - Base tabs have transparent background and no persistent outline, border, or
@@ -223,14 +223,18 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   animation) keep their intrinsic width, while the per-tab date/time card flexes
   (`cardFlexible`) and the date/time field shrinks to a min-width so everything
   fits. Cards stay `10px` apart and the data-type group is never clipped.
-  Responsive reflow for narrower widths is a separate future task.
+  Responsive reflow for narrower widths follows the Workspace Responsive
+  Adaptation And Map Bottom Panel contract below.
 - The `map` tab icon-button groups (Инфраструктура / Наложения на карту / Борты /
-  Слои карты + two map toggles) use a dedicated SVG glyph manifest in
-  `public/top-control-icons/` driven by `src/components/TabTopControls/mapIcons.ts`.
-  This is the map-tab equivalent of the left-rail SVG exception: production map
-  control icons use these SVGs via `<img>`, not Blueprint `<Icon>`. The
-  `Слои карты` group maps 1:1 to the map layer providers; the exact glyph↔button
-  assignment in the function groups is adjustable in the manifest.
+  Слои карты) use a dedicated SVG glyph manifest in `public/top-control-icons/`
+  driven by `src/components/TabTopControls/mapIcons.ts`. This is the map-tab
+  equivalent of the left-rail SVG exception: production map control icons use
+  these SVGs via `<img>`, not Blueprint `<Icon>`. The glyph↔button order across
+  the four groups is mapped to the reference (`Верхние блоки управления` block
+  slices). The `Слои карты` group shows the map layer providers plus two map
+  toggles (`Подложка` / `Сетка`); at narrow widths its icons overflow into a
+  chevron "more" dropdown and the toggles fold away. The exact assignment stays
+  adjustable in the manifest.
 - Map icon glyphs render as block `<img>` centered in their `32x30` button, and
   the four `map` function groups sit `16px` apart (`cardTightGroups`).
 - Toolbar action buttons follow a rest→active model. The `tmi` "Загрузить
@@ -250,6 +254,50 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   the shared `SelectControl`, `src/styles/_tokens.scss`, the shared
   `src/lib/cx.ts`, and existing patterns rather than duplicating the side-panel
   controls.
+
+## Workspace Responsive Adaptation And Map Bottom Panel
+
+- Adaptation principle: fixed-chrome + rubber map. The per-tab chrome (top
+  controls, map bottom panel) keeps fixed pixel control sizes on the `10px` /
+  `8px` / `4px` rhythm; the map (and the bottom-panel cloud legend) absorb the
+  free space. There is one workspace breakpoint, `$workspace-bp-compact` (`120rem`
+  / `1920px`), mirroring the Header expanded threshold. At `>= 1920` the frozen
+  `1920` layout is unchanged (date/time card flexes, the map-functions card keeps
+  intrinsic width, all icons visible). It is not proportional zoom.
+- Compact band (`< 1920`, the `1280` / `1440` references): the date/time card
+  becomes intrinsic and the map-functions card becomes the flexible (shrinking)
+  card. Each `map` function group shows as many icons as fit and collapses the
+  rest into a chevron "more" dropdown (`MapLayerDropdown`), driven by a
+  `ResizeObserver` on the icon row. A group never shrinks below its (nowrap)
+  title; the icon row uses `contain: inline-size` so the icon count never forces
+  the group wider than its title. The toolbar height stays constant (single row),
+  so the map stage never resizes on reflow; there is no horizontal scroll and the
+  `32x30` buttons are never shrunk. The `Слои карты` map toggles (`Подложка` /
+  `Сетка`) fold away in the compact band. At `>= 1920` every group shows all its
+  icons (no overflow chevron). Exact per-group icon counts in the compact band
+  approximate the reference (they are width-driven, not byte-exact).
+- Content max-width: the chrome caps at `$workspace-content-max` (`160rem` /
+  `2560px`) and left-aligns beyond it, while the map and Header stay full-bleed.
+  At `<= 2560` the chrome fills the width; at `3840` (the canonical maximum width)
+  the top controls and bottom panel stop at `2560` and the map fills to the edge.
+- Map bottom panel (`MapBottomPanel`): a presentational footer strip rendered on
+  the `map` tab as a sibling of the map in the workspace column. Local UI state
+  only (no data backend), like `TabTopControls`. Fixed height
+  (`$workspace-bottom-panel-height`, `96px` — `10px` gutter + `86px` card,
+  mirroring the top controls), so it only changes the map's available height
+  (handled by the existing map `ResizeObserver`); the map's horizontal stage
+  contract (right-anchored stage, `trackResize: false`) is not weakened. Three
+  sub-blocks left→right: `Фильтрация на карте` (a row of `SwitchToggle`s),
+  `Нижняя граница облаков` (the flexible rubber middle block — a rainbow gradient
+  legend with `(м)` unit and `0…5000` tick labels), and `Управление данными`
+  (`Загрузить свои данные` / `Скачать отчет` outlined `ChipButton`s). It reuses
+  the frozen `ControlCard` / `ControlField` / `SwitchToggle` / `ChipButton`
+  primitives (the same `#171d20` card surface) and `src/styles/_tokens.scss`;
+  no new card abstraction.
+- Cloud-base legend gradient: the rainbow stop colors are sampled from the
+  reference PNG and live only in `src/styles/_tokens.scss`
+  (`$color-cloud-legend-*`), consumed through `$gradient-cloud-legend`. No inline
+  hex and no `px` font-size in the module (A5 / A8).
 
 ## Quality Tooling
 

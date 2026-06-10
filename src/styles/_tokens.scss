@@ -49,6 +49,35 @@ $color-workspace-map-line: rgb(255 255 255 / 8%);
 $color-workspace-map-road: rgb(132 173 255 / 28%);
 $color-workspace-map-grid: rgb(255 255 255 / 5%);
 
+// Cloud-base legend ("Нижняя граница облаков") rainbow ramp — the only place these
+// raw stop colors live (A5). Stops sampled pixel-by-pixel from the reference PNG
+// (0 m red → 5000 m violet). Consumed only through $gradient-cloud-legend.
+$color-cloud-legend-0: #fe0001; // 0 m — red
+$color-cloud-legend-1: #ff6300;
+$color-cloud-legend-2: #ffc601;
+$color-cloud-legend-3: #ccf803;
+$color-cloud-legend-4: #66fb0a;
+$color-cloud-legend-5: #0f1;
+$color-cloud-legend-6: #00f470;
+$color-cloud-legend-7: #00ebd0;
+$color-cloud-legend-8: #22b8ff;
+$color-cloud-legend-9: #685cff;
+$color-cloud-legend-10: #ae00ff; // 5000 m — violet
+$gradient-cloud-legend: linear-gradient(
+  90deg,
+  $color-cloud-legend-0 0%,
+  $color-cloud-legend-1 10%,
+  $color-cloud-legend-2 20%,
+  $color-cloud-legend-3 30%,
+  $color-cloud-legend-4 40%,
+  $color-cloud-legend-5 50%,
+  $color-cloud-legend-6 60%,
+  $color-cloud-legend-7 70%,
+  $color-cloud-legend-8 80%,
+  $color-cloud-legend-9 90%,
+  $color-cloud-legend-10 100%
+);
+
 // ─── Spacing (4 px grid expressed in rem) ────────────────────────────────────
 $space-1: 0.25rem;
 $space-2: 0.5rem;
@@ -103,6 +132,17 @@ $workspace-control-radius: 0.1875rem;
 $workspace-panel-button-radius: 0.375rem;
 $workspace-motion-duration: 220ms;
 $workspace-motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
+
+// Workspace responsive breakpoint: below this the per-tab chrome tightens
+// (compact band 1280/1440); at/above it the frozen 1920 layout is unchanged.
+// Mirrors the Header expanded threshold ($header-expanded-breakpoint = 120rem).
+$workspace-bp-compact: 120rem;
+$workspace-bp-compact-max: 119.9375rem;
+
+// Max content width for the per-tab chrome (top controls + map bottom panel):
+// beyond this the chrome stops stretching and left-aligns, while the map and
+// Header stay full-bleed (reference 3840). At <= 2560 the chrome fills the width.
+$workspace-content-max: 160rem;
 $header-edge-padding: 0.5rem;
 $header-side-width: 20.625rem;
 $header-tab-compact-width: 5rem;
@@ -131,6 +171,19 @@ $top-controls-search-width: 16rem; // 256px search field
 $top-controls-datetime-min-width: 7rem; // 112px min before the flexible date-time field stops shrinking
 $top-controls-card-gap: 1.5rem; // 24px between titled fields inside one card section
 $top-controls-inline-pad: 0.625rem; // 10px inline padding for segments / action buttons
+
+// Compact band (<1920) deltas — tighten only below the frozen 1920 contract.
+$top-controls-gap-compact: $space-2; // 8px between card sections <1920
+$top-controls-datetime-min-width-compact: 5rem; // 80px min date/time field <1920
+
+// ─── Map bottom panel (under the map, map tab) ───────────────────────────────
+// Presentational footer strip; reuses the frozen #171d20 card surface. Fixed
+// height so it only changes the map's available height (handled by the map
+// ResizeObserver), never the map's horizontal stage contract.
+$workspace-bottom-panel-height: 6rem;
+$workspace-bottom-panel-gap: 0.625rem;
+$workspace-bottom-panel-padding: 0.625rem;
+$cloud-legend-bar-height: 0.75rem;
 
 // ─── Radii / shadows ─────────────────────────────────────────────────────────
 $radius-xs: 0.1875rem;

@@ -644,6 +644,11 @@ test.describe('PraiOS workspace shell', () => {
     const leftBox = await requireBox(leftArea);
     const mapBox = await requireBox(map);
     const topControlsBox = await requireBox(page.getByTestId('tab-top-controls'));
+    // The map tab also renders a fixed-height bottom panel under the map; the
+    // map fills the height between the toolbar and that panel.
+    const bottomPanel = page.getByTestId('map-bottom-panel');
+    await expect(bottomPanel).toBeVisible();
+    const bottomPanelBox = await requireBox(bottomPanel);
 
     expect(Math.round(headerBox.height)).toBe(HEADER_HEIGHT);
     expect(Math.round(shellBox.y)).toBe(HEADER_HEIGHT);
@@ -652,12 +657,15 @@ test.describe('PraiOS workspace shell', () => {
     expect(Math.round(mapBox.x)).toBe(Math.round(leftBox.x + leftBox.width));
     expect(Math.round(mapBox.width)).toBe(VIEWPORT_WIDTH - Math.round(leftBox.width));
     // The per-tab top control toolbar sits above the map; the map fills the
-    // remaining height below it.
+    // remaining height between the toolbar and the bottom panel.
     expect(Math.round(topControlsBox.y)).toBe(HEADER_HEIGHT);
     expect(Math.round(mapBox.y)).toBe(HEADER_HEIGHT + Math.round(topControlsBox.height));
     expect(Math.round(mapBox.height)).toBe(
-      1080 - HEADER_HEIGHT - Math.round(topControlsBox.height),
+      1080 - HEADER_HEIGHT - Math.round(topControlsBox.height) - Math.round(bottomPanelBox.height),
     );
+    // The bottom panel sits directly below the map and shares its left edge.
+    expect(Math.round(bottomPanelBox.y)).toBe(Math.round(mapBox.y + mapBox.height));
+    expect(Math.round(bottomPanelBox.x)).toBe(Math.round(mapBox.x));
     await expectMapContainerSpacing(page);
   });
 
@@ -790,10 +798,16 @@ test.describe('PraiOS workspace shell', () => {
     await expectMapCanvasStableStageDuringMotionSamples(page, 'stats to map');
     await waitForWorkspaceMotion(page);
     await expectMapCanvasUsesStableStageWidth(page, 'map after stats reveal');
+    // Entering the map tab mounts the fixed bottom panel, which legitimately
+    // changes the map HEIGHT once (handled by the ResizeObserver). The
+    // right-anchored stage WIDTH must stay stable — assert no horizontal resize.
     const statsToMapResizeEvents = await readMapCanvasResizeMutationEvents(page);
-    expect(statsToMapResizeEvents, 'stats to map should not resize MapLibre canvas').toHaveLength(
-      0,
-    );
+    for (const event of statsToMapResizeEvents) {
+      expect(
+        Math.abs(Number(event.width) - MAX_COLLAPSED_MAP_CANVAS_WIDTH),
+        'stats to map must not change the right-anchored stage width',
+      ).toBeLessThanOrEqual(MAP_MASK_COVERAGE_TOLERANCE_PX);
+    }
     await stopWatchingMapCanvasResizeMutations(page);
 
     await toggle.click();
@@ -834,6 +848,61 @@ test.describe('PraiOS workspace shell', () => {
       'viewport resize should resize MapLibre canvas for the new stage',
     ).not.toHaveLength(0);
     await stopWatchingMapCanvasResizeMutations(page);
+  });
+
+  test('keeps the map full-bleed while the chrome caps at an ultrawide viewport', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 3840, height: 2160 });
+    await page.goto('/');
+    await expect(page.getByTestId('workspace-map')).toBeVisible();
+    await expect(page.getByTestId('map-bottom-panel')).toBeVisible();
+
+    const map = await requireBox(page.getByTestId('workspace-map'));
+    const toolbar = await requireBox(page.getByTestId('tab-top-controls'));
+    const panel = await requireBox(page.getByTestId('map-bottom-panel'));
+    const CONTENT_MAX_WIDTH = 2560;
+
+    // The map stays full-bleed: from the rail's right edge to the viewport edge.
+    expect(Math.round(map.x)).toBe(RAIL_COLLAPSED_WIDTH);
+    expect(Math.round(map.x + map.width)).toBe(3840);
+
+    // The chrome (top controls + bottom panel) caps at the content max-width and
+    // left-aligns with the map's left edge.
+    expect(Math.round(toolbar.width)).toBeLessThanOrEqual(CONTENT_MAX_WIDTH);
+    expect(Math.round(panel.width)).toBeLessThanOrEqual(CONTENT_MAX_WIDTH);
+    expect(Math.round(toolbar.x)).toBe(RAIL_COLLAPSED_WIDTH);
+    expect(Math.round(panel.x)).toBe(RAIL_COLLAPSED_WIDTH);
+  });
+
+  test('folds the bottom-panel filters and shortens actions at compact widths', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/');
+    const panel = page.getByTestId('map-bottom-panel');
+    await expect(panel).toBeVisible();
+
+    // Tightest compact case: expand the rail so the bottom panel has the least width.
+    await page.getByTestId('left-rail-button-collapse').click();
+    await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
+
+    // Filter toggles fold into the overflow chevron: at most 3 switches stay visible.
+    const visibleSwitches = panel.locator('.bp6-switch:visible');
+    expect(await visibleSwitches.count()).toBeLessThanOrEqual(3);
+
+    // Nothing in the panel is clipped past its right edge (the data actions fit).
+    const panelBox = await requireBox(panel);
+    const buttons = panel.locator('button');
+    const buttonCount = await buttons.count();
+    expect(buttonCount).toBeGreaterThan(0);
+    for (let index = 0; index < buttonCount; index += 1) {
+      const box = await buttons.nth(index).boundingBox();
+      if (!box) continue;
+      expect(Math.round(box.x + box.width)).toBeLessThanOrEqual(
+        Math.round(panelBox.x + panelBox.width) + 1,
+      );
+    }
   });
 
   test('removes meaningful rail motion for reduced-motion users', async ({ page }) => {
