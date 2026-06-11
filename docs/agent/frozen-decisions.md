@@ -224,7 +224,7 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   (`cardFlexible`) and the date/time field shrinks to a min-width so everything
   fits. Cards stay `10px` apart and the data-type group is never clipped.
   Responsive reflow for narrower widths follows the Workspace Responsive
-  Adaptation And Map Bottom Panel contract below.
+  Adaptation And Tab Bottom Panels contract below.
 - The `map` tab icon-button groups (Инфраструктура / Наложения на карту / Борты /
   Слои карты) use a dedicated SVG glyph manifest in `public/top-control-icons/`
   driven by `src/components/TabTopControls/mapIcons.ts`. This is the map-tab
@@ -255,10 +255,10 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   `src/lib/cx.ts`, and existing patterns rather than duplicating the side-panel
   controls.
 
-## Workspace Responsive Adaptation And Map Bottom Panel
+## Workspace Responsive Adaptation And Tab Bottom Panels
 
 - Adaptation principle: fixed-chrome + rubber map. The per-tab chrome (top
-  controls, map bottom panel) keeps fixed pixel control sizes on the `10px` /
+  controls, bottom panels) keeps fixed pixel control sizes on the `10px` /
   `8px` / `4px` rhythm; the map (and the bottom-panel cloud legend) absorb the
   free space. There is one workspace breakpoint, `$workspace-bp-compact` (`120rem`
   / `1920px`), mirroring the Header expanded threshold. At `>= 1920` the frozen
@@ -280,20 +280,26 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   `2560px`) and left-aligns beyond it, while the map and Header stay full-bleed.
   At `<= 2560` the chrome fills the width; at `3840` (the canonical maximum width)
   the top controls and bottom panel stop at `2560` and the map fills to the edge.
-- Map bottom panel (`MapBottomPanel`): a presentational footer strip rendered on
-  the `map` tab as a sibling of the map in the workspace column. Local UI state
-  only (no data backend), like `TabTopControls`. Fixed height
+- Per-tab bottom panels (`TabBottomPanel`): a presentational footer strip
+  rendered as a sibling of the map in the workspace column, dispatched by the
+  active tab (`switch (activeTab)`, mirroring `TabTopControls`). Local UI state
+  only (no data backend). Every panel uses the shared `PanelShell` section
+  (`data-testid="tab-bottom-panel"` + `data-tab`) and a fixed height
   (`$workspace-bottom-panel-height`, `96px` — `10px` gutter + `86px` card,
   mirroring the top controls), so it only changes the map's available height
   (handled by the existing map `ResizeObserver`); the map's horizontal stage
-  contract (right-anchored stage, `trackResize: false`) is not weakened. Three
-  sub-blocks left→right: `Фильтрация на карте` (a row of `SwitchToggle`s),
-  `Нижняя граница облаков` (the flexible rubber middle block — a rainbow gradient
-  legend with `(м)` unit and `0…5000` tick labels), and `Управление данными`
-  (`Загрузить свои данные` / `Скачать отчет` outlined `ChipButton`s). It reuses
-  the frozen `ControlCard` / `ControlField` / `SwitchToggle` / `ChipButton`
-  primitives (the same `#171d20` card surface) and `src/styles/_tokens.scss`;
-  no new card abstraction.
+  contract (right-anchored stage, `trackResize: false`) is not weakened. The
+  rainbow legend is the shared `GradientLegend` building block (the flexible
+  rubber middle block of a panel). The `map` panel keeps the original frozen
+  content — three sub-blocks left→right: `Фильтрация на карте` (a row of
+  `SwitchToggle`s), `Нижняя граница облаков` (`GradientLegend` with `(м)` unit
+  and `0…5000` tick labels), and `Управление данными` (`Загрузить свои данные`
+  / `Скачать отчет` outlined `ChipButton`s). The `bar` and `tmi` panels are
+  being added by the approved tabs-pixel-fit task (see
+  `docs/agent/tabs-pixel-fit-handoff.md`); tabs without an approved panel
+  render none. Panels reuse the frozen `ControlCard` / `ControlField` /
+  `SwitchToggle` / `ChipButton` primitives (the same `#171d20` card surface)
+  and `src/styles/_tokens.scss`; no new card abstraction.
 - Cloud-base legend gradient: the rainbow stop colors are sampled from the
   reference PNG and live only in `src/styles/_tokens.scss`
   (`$color-cloud-legend-*`), consumed through `$gradient-cloud-legend`. No inline

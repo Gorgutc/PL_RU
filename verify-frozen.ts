@@ -1552,25 +1552,29 @@ async function testResponsiveAndBottomPanelContract() {
     if (!tokens.includes(snippet)) failures.push(`_tokens.scss missing ${snippet}`);
   }
 
-  if (!(await pathExists('src/components/MapBottomPanel/MapBottomPanel.tsx')))
-    failures.push('MapBottomPanel.tsx missing');
-  if (!(await pathExists('src/components/MapBottomPanel/MapBottomPanel.module.scss')))
-    failures.push('MapBottomPanel.module.scss missing');
+  if (!(await pathExists('src/components/TabBottomPanel/TabBottomPanel.tsx')))
+    failures.push('TabBottomPanel.tsx missing');
+  if (!(await pathExists('src/components/TabBottomPanel/TabBottomPanel.module.scss')))
+    failures.push('TabBottomPanel.module.scss missing');
+  // The dispatcher superseded the map-only component; a resurrected copy would
+  // silently fork the frozen panel contract.
+  if (await pathExists('src/components/MapBottomPanel'))
+    failures.push('MapBottomPanel must stay removed (superseded by TabBottomPanel)');
 
   try {
     const appShell = await readFile(
       path.join(SRC, 'components', 'AppShell', 'AppShell.tsx'),
       'utf8',
     );
-    if (!appShell.includes('<MapBottomPanel'))
-      failures.push('AppShell.tsx does not render MapBottomPanel');
+    if (!appShell.includes('<TabBottomPanel'))
+      failures.push('AppShell.tsx does not render TabBottomPanel');
   } catch {
     failures.push('AppShell.tsx unreadable');
   }
 
   try {
     const panel = await readFile(
-      path.join(SRC, 'components', 'MapBottomPanel', 'MapBottomPanel.tsx'),
+      path.join(SRC, 'components', 'TabBottomPanel', 'TabBottomPanel.tsx'),
       'utf8',
     );
     failures.push(
@@ -1579,21 +1583,23 @@ async function testResponsiveAndBottomPanelContract() {
         'ControlCard',
         'SwitchToggle',
         'ChipButton',
-        'data-testid="map-bottom-panel"',
+        'switch (activeTab)',
+        'GradientLegend',
+        'data-testid="tab-bottom-panel"',
         'Фильтрация на карте',
         'Нижняя граница облаков',
         'Управление данными',
         'Загрузить свои данные',
         'Скачать отчет',
-      ]).map((snippet) => `MapBottomPanel.tsx missing ${snippet}`),
+      ]).map((snippet) => `TabBottomPanel.tsx missing ${snippet}`),
     );
   } catch {
-    failures.push('MapBottomPanel.tsx unreadable');
+    failures.push('TabBottomPanel.tsx unreadable');
   }
 
   try {
     const panelStyles = await readFile(
-      path.join(SRC, 'components', 'MapBottomPanel', 'MapBottomPanel.module.scss'),
+      path.join(SRC, 'components', 'TabBottomPanel', 'TabBottomPanel.module.scss'),
       'utf8',
     );
     failures.push(
@@ -1602,10 +1608,10 @@ async function testResponsiveAndBottomPanelContract() {
         't.$gradient-cloud-legend',
         't.$workspace-bottom-panel-height',
         't.$workspace-content-max',
-      ]).map((snippet) => `MapBottomPanel.module.scss missing ${snippet}`),
+      ]).map((snippet) => `TabBottomPanel.module.scss missing ${snippet}`),
     );
   } catch {
-    failures.push('MapBottomPanel.module.scss unreadable');
+    failures.push('TabBottomPanel.module.scss unreadable');
   }
 
   try {
@@ -1657,7 +1663,7 @@ async function testResponsiveAndBottomPanelContract() {
       'utf8',
     );
     failures.push(
-      ...missingSnippets(wsSpec, ['map-bottom-panel', 'chrome caps at an ultrawide']).map(
+      ...missingSnippets(wsSpec, ['tab-bottom-panel', 'chrome caps at an ultrawide']).map(
         (snippet) => `workspace-shell.spec.ts missing ${snippet}`,
       ),
     );
@@ -1669,10 +1675,10 @@ async function testResponsiveAndBottomPanelContract() {
     const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
     failures.push(
       ...missingSnippets(frozen, [
-        '## Workspace Responsive Adaptation And Map Bottom Panel',
+        '## Workspace Responsive Adaptation And Tab Bottom Panels',
         'fixed-chrome + rubber map',
         '$workspace-content-max',
-        'MapBottomPanel',
+        'TabBottomPanel',
         '$gradient-cloud-legend',
         'full-bleed',
       ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
@@ -1682,7 +1688,7 @@ async function testResponsiveAndBottomPanelContract() {
   }
 
   record(
-    'A17: responsive chrome adaptation and map bottom panel stay frozen',
+    'A17: responsive chrome adaptation and per-tab bottom panels stay frozen',
     failures.length === 0,
     failures.length ? failures.slice(0, 10).join('; ') : undefined,
   );

@@ -646,7 +646,7 @@ test.describe('PraiOS workspace shell', () => {
     const topControlsBox = await requireBox(page.getByTestId('tab-top-controls'));
     // The map tab also renders a fixed-height bottom panel under the map; the
     // map fills the height between the toolbar and that panel.
-    const bottomPanel = page.getByTestId('map-bottom-panel');
+    const bottomPanel = page.getByTestId('tab-bottom-panel');
     await expect(bottomPanel).toBeVisible();
     const bottomPanelBox = await requireBox(bottomPanel);
 
@@ -856,11 +856,11 @@ test.describe('PraiOS workspace shell', () => {
     await page.setViewportSize({ width: 3840, height: 2160 });
     await page.goto('/');
     await expect(page.getByTestId('workspace-map')).toBeVisible();
-    await expect(page.getByTestId('map-bottom-panel')).toBeVisible();
+    await expect(page.getByTestId('tab-bottom-panel')).toBeVisible();
 
     const map = await requireBox(page.getByTestId('workspace-map'));
     const toolbar = await requireBox(page.getByTestId('tab-top-controls'));
-    const panel = await requireBox(page.getByTestId('map-bottom-panel'));
+    const panel = await requireBox(page.getByTestId('tab-bottom-panel'));
     const CONTENT_MAX_WIDTH = 2560;
 
     // The map stays full-bleed: from the rail's right edge to the viewport edge.
@@ -880,7 +880,7 @@ test.describe('PraiOS workspace shell', () => {
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/');
-    const panel = page.getByTestId('map-bottom-panel');
+    const panel = page.getByTestId('tab-bottom-panel');
     await expect(panel).toBeVisible();
 
     // Tightest compact case: expand the rail so the bottom panel has the least width.

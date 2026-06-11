@@ -139,7 +139,7 @@ $workspace-motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
 $workspace-bp-compact: 120rem;
 $workspace-bp-compact-max: 119.9375rem;
 
-// Max content width for the per-tab chrome (top controls + map bottom panel):
+// Max content width for the per-tab chrome (top controls + bottom panels):
 // beyond this the chrome stops stretching and left-aligns, while the map and
 // Header stay full-bleed (reference 3840). At <= 2560 the chrome fills the width.
 $workspace-content-max: 160rem;
@@ -176,7 +176,7 @@ $top-controls-inline-pad: 0.625rem; // 10px inline padding for segments / action
 $top-controls-gap-compact: $space-2; // 8px between card sections <1920
 $top-controls-datetime-min-width-compact: 5rem; // 80px min date/time field <1920
 
-// ─── Map bottom panel (under the map, map tab) ───────────────────────────────
+// ─── Per-tab bottom panels (TabBottomPanel, under the map) ───────────────────
 // Presentational footer strip; reuses the frozen #171d20 card surface. Fixed
 // height so it only changes the map's available height (handled by the map
 // ResizeObserver), never the map's horizontal stage contract.

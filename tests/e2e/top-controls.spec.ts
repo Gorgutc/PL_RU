@@ -260,6 +260,9 @@ test.describe('Per-tab top control blocks', () => {
   });
 
   test('keeps the map toolbar fitting and capped across viewport widths', async ({ page }) => {
+    // 4 widths x 2 rail states with motion waits run ~25s solo; under parallel
+    // worker load the default 30s budget flakes, so triple it.
+    test.slow();
     for (const width of RESPONSIVE_WIDTHS) {
       const height = Math.round((width * 9) / 16);
       await page.setViewportSize({ width, height });

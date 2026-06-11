@@ -7,7 +7,7 @@ import {
   getWorkspaceSidebarMode,
   type WorkspaceRailState,
 } from '@/components/AppNavigation/navigation';
-import { MapBottomPanel } from '@/components/MapBottomPanel/MapBottomPanel';
+import { TabBottomPanel } from '@/components/TabBottomPanel/TabBottomPanel';
 import { TabSidePanel } from '@/components/TabSidePanel/TabSidePanel';
 import { TabTopControls } from '@/components/TabTopControls/TabTopControls';
 import { WorkspaceMap } from '@/components/WorkspaceMap/WorkspaceMap';
@@ -62,7 +62,7 @@ export function AppShell({ activeTab }: AppShellProps) {
           <div className={styles.mapArea}>
             <WorkspaceMap />
           </div>
-          {activeTab === 'map' ? <MapBottomPanel /> : null}
+          <TabBottomPanel activeTab={activeTab} />
         </div>
       </section>
     </main>

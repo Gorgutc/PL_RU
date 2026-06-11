@@ -124,8 +124,9 @@ Rules mirrored by `verify-frozen.ts` are binding:
   `plugins/pl-ru-codex/` + `AGENTS.md`) canons stay in parity
   (`scripts/verify-claude-codex-parity.mjs`).
 - A17: per-tab chrome responsive adaptation (compact overflow-to-dropdown below
-  `1920`, `2560` content max-width) and the map bottom panel (`MapBottomPanel`)
-  stay on their frozen contract (see `docs/agent/frozen-decisions.md`).
+  `1920`, `2560` content max-width) and the per-tab bottom panels
+  (`TabBottomPanel`) stay on their frozen contract (see
+  `docs/agent/frozen-decisions.md`).
 
 Additional project rules:
 
