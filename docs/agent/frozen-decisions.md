@@ -264,18 +264,26 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   / `1920px`), mirroring the Header expanded threshold. At `>= 1920` the frozen
   `1920` layout is unchanged (date/time card flexes, the map-functions card keeps
   intrinsic width, all icons visible). It is not proportional zoom.
-- Compact band (`< 1920`, the `1280` / `1440` references): the date/time card
-  becomes intrinsic and the map-functions card becomes the flexible (shrinking)
-  card. Each `map` function group shows as many icons as fit and collapses the
-  rest into a chevron "more" dropdown (`MapLayerDropdown`), driven by a
-  `ResizeObserver` on the icon row. A group never shrinks below its (nowrap)
-  title; the icon row uses `contain: inline-size` so the icon count never forces
-  the group wider than its title. The toolbar height stays constant (single row),
-  so the map stage never resizes on reflow; there is no horizontal scroll and the
-  `32x30` buttons are never shrunk. The `Слои карты` map toggles (`Подложка` /
-  `Сетка`) fold away in the compact band. At `>= 1920` every group shows all its
-  icons (no overflow chevron). Exact per-group icon counts in the compact band
-  approximate the reference (they are width-driven, not byte-exact).
+- Compact band (`< 1920`, the `1280` / `1440` references): the rubber element
+  is per-tab. Tabs with an icon-group card (`map`) pin their date/time card to
+  its intrinsic width (`compactIntrinsic`) and the icon-group card
+  (`cardTightGroups`) becomes the flexible (shrinking) card; tabs whose compact
+  reference keeps the lead search card flexing (currently `bar`) let the search
+  field absorb the width change (floor:
+  `$top-controls-search-min-width-compact`). Date/time fields swap to a
+  date-only compact value at their natural width (the dual-render
+  `compactBandOnly` / `fullBandOnly` pattern), matching the references where
+  the `| 00:00` time part is dropped below `1920`. Each `map` function group
+  shows as many icons as fit and collapses the rest into a chevron "more"
+  dropdown (`MapLayerDropdown`), driven by a `ResizeObserver` on the icon row.
+  A group never shrinks below its (nowrap) title; the icon row uses
+  `contain: inline-size` so the icon count never forces the group wider than
+  its title. The toolbar height stays constant (single row), so the map stage
+  never resizes on reflow; there is no horizontal scroll and the `32x30`
+  buttons are never shrunk. The `Слои карты` map toggles (`Подложка` /
+  `Сетка`) fold away in the compact band. At `>= 1920` every group shows all
+  its icons (no overflow chevron). Exact per-group icon counts in the compact
+  band approximate the reference (they are width-driven, not byte-exact).
 - Content max-width: the chrome caps at `$workspace-content-max` (`160rem` /
   `2560px`) and left-aligns beyond it, while the map and Header stay full-bleed.
   At `<= 2560` the chrome fills the width; at `3840` (the canonical maximum width)

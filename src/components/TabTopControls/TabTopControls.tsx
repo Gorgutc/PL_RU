@@ -21,6 +21,8 @@ import styles from './TabTopControls.module.scss';
 
 const DATETIME_FROM = '24-04-2025 | 00:00';
 const DATETIME_TO = '24-04-2025 | 00:00';
+// In the compact band (< 1920) the references drop the time part of the value.
+const DATETIME_COMPACT = '24-04-2025';
 
 // ── Shell ────────────────────────────────────────────────────────────────────
 // At 1920 with the rail collapsed the cards fill the full toolbar width with no
@@ -62,13 +64,20 @@ function DataTypeCard({ items }: { items: readonly SegmentItem[] }) {
 function DateTimeCard({
   from = DATETIME_FROM,
   to = DATETIME_TO,
+  compactDateOnly,
 }: {
   from?: string;
   to?: string;
+  compactDateOnly?: boolean;
 } = {}) {
   return (
     <ControlField grow title="Дата и время от и до:">
-      <DateTimeRange from={from} to={to} />
+      <DateTimeRange
+        compactFrom={compactDateOnly ? DATETIME_COMPACT : undefined}
+        compactTo={compactDateOnly ? DATETIME_COMPACT : undefined}
+        from={from}
+        to={to}
+      />
     </ControlField>
   );
 }
@@ -87,7 +96,7 @@ function MapTopControls() {
       label="Управление: оперативная карта"
       trailing={<DataTypeCard items={MAP_DATA_TYPES} />}
     >
-      <ControlCard ariaLabel="Дата и время" flexible>
+      <ControlCard ariaLabel="Дата и время" compactIntrinsic flexible>
         <DateTimeCard from={MAP_DATETIME} to={MAP_DATETIME} />
       </ControlCard>
       <ControlCard ariaLabel="Функции карты" tightGroups>
@@ -128,10 +137,16 @@ function WeatherCard() {
       <ControlField title="Погодные параметры">
         <SegmentedControl
           ariaLabel="Погодные параметры"
+          bandClassName={styles.fullBandOnly}
           items={BAR_WEATHER}
           onChange={setValue}
           value={value}
         />
+        {/* In the compact band the segments fold into a single dropdown ("Все"),
+            matching the 1280 reference. */}
+        <span className={styles.compactBandOnly}>
+          <SelectField ariaLabel="Погодные параметры" options={['Все']} value="Все" />
+        </span>
       </ControlField>
     </ControlCard>
   );
@@ -144,7 +159,7 @@ function RoutesTopControls() {
         <ControlField title="Работа с данными по карте">
           <SearchField placeholder="Поиск по названию, координатам" />
         </ControlField>
-        <DateTimeCard />
+        <DateTimeCard compactDateOnly />
       </ControlCard>
       <WeatherCard />
     </Toolbar>
@@ -160,8 +175,12 @@ const TMI_DATA_TYPES: readonly SegmentItem[] = [
 function TelemetryTopControls() {
   return (
     <Toolbar label="Управление: телеметрия" trailing={<DataTypeCard items={TMI_DATA_TYPES} />}>
-      <ControlCard ariaLabel="Дата и загрузка маршрутов" flexible>
-        <DateTimeCard />
+      {/* compactIntrinsic is interim: the tmi compact fold (Серия/Номер stay,
+          the other selects collapse into "Доп. параметры" + "Фильтры") lands
+          with the telemetry iteration; until then the tab keeps the pre-fix
+          intrinsic behavior in the compact band. */}
+      <ControlCard ariaLabel="Дата и загрузка маршрутов" compactIntrinsic flexible>
+        <DateTimeCard compactDateOnly />
         <ControlField title=" ">
           <PrimaryActionButton icon="flows">Загрузить маршруты</PrimaryActionButton>
         </ControlField>
@@ -213,7 +232,7 @@ const SAT_DATA_TYPES: readonly SegmentItem[] = [
 function SatTopControls() {
   return (
     <Toolbar label="Управление: зондирование" trailing={<DataTypeCard items={SAT_DATA_TYPES} />}>
-      <ControlCard ariaLabel="Временной диапазон" flexible>
+      <ControlCard ariaLabel="Временной диапазон" compactIntrinsic flexible>
         <ControlField grow title="Временной диапазон">
           <DateTimeRange from={DATETIME_FROM} to={DATETIME_TO} />
         </ControlField>
@@ -249,7 +268,7 @@ function KickTopControls() {
       label="Управление: введение пусков"
       trailing={<DataTypeCard items={KICK_DATA_TYPES} />}
     >
-      <ControlCard ariaLabel="Текущие пуски" flexible>
+      <ControlCard ariaLabel="Текущие пуски" compactIntrinsic flexible>
         <ControlField title="Текущие пуски">
           <SearchField placeholder="Поиск по таблице" />
           <ChipButton icon="filter">Фильтры</ChipButton>
@@ -272,7 +291,7 @@ const STATS_DATA_TYPES: readonly SegmentItem[] = [
 function StatsTopControls() {
   return (
     <Toolbar label="Управление: статистика" trailing={<DataTypeCard items={STATS_DATA_TYPES} />}>
-      <ControlCard ariaLabel="Работа с таблицей" flexible>
+      <ControlCard ariaLabel="Работа с таблицей" compactIntrinsic flexible>
         <ControlField title="Работа с таблицей">
           <SearchField placeholder="Поиск по таблице" />
           <ChipButton icon="filter">Фильтры</ChipButton>

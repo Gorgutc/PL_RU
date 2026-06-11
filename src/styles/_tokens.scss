@@ -174,7 +174,7 @@ $top-controls-inline-pad: 0.625rem; // 10px inline padding for segments / action
 
 // Compact band (<1920) deltas — tighten only below the frozen 1920 contract.
 $top-controls-gap-compact: $space-2; // 8px between card sections <1920
-$top-controls-datetime-min-width-compact: 5rem; // 80px min date/time field <1920
+$top-controls-search-min-width-compact: 10rem; // 160px search floor <1920 (bar rubber)
 
 // ─── Per-tab bottom panels (TabBottomPanel, under the map) ───────────────────
 // Presentational footer strip; reuses the frozen #171d20 card surface. Fixed

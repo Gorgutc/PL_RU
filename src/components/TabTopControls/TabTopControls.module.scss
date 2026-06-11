@@ -131,6 +131,13 @@
   min-width: t.$top-controls-datetime-min-width;
 }
 
+// Band visibility for the dual date/time values: the full "date | time" pair
+// renders at >= 1920 and the date-only pair in the compact band (the media
+// query below swaps them, like fullLabel/shortLabel in the bottom panel).
+.compactBandOnly {
+  display: none;
+}
+
 .search {
   width: t.$top-controls-search-width;
   min-width: 0;
@@ -367,19 +374,25 @@
 
 // ── Compact band (< 1920): fixed-chrome responsive reflow ────────────────────
 // The frozen 1920 layout (date card flexes, fixed cards keep intrinsic width)
-// is unchanged at >= 1920. Below it the date/time card becomes intrinsic, the
-// map-functions card becomes the flexible (shrinking) card, and its icon groups
+// is unchanged at >= 1920. Below it the rubber element is per-tab: tabs with an
+// icon-group card (map) pin their date card to its intrinsic width
+// (`cardCompactIntrinsic`) and let `cardTightGroups` shrink — its icon groups
 // share the width proportionally to their full icon count so the overflow
-// chevrons appear — no horizontal scroll, no shrunken buttons.
+// chevrons appear; tabs whose lead card holds a search field (bar) keep the
+// lead card flexing and the search absorbs the width change. No horizontal
+// scroll, no shrunken buttons. Date fields swap to the date-only compact value
+// (`compactBandOnly`) per the 1280 references.
 @media (max-width: t.$workspace-bp-compact-max) {
   .toolbar,
   .scroller {
     gap: t.$top-controls-gap-compact;
   }
 
-  // Scoped to the toolbar so the shared ControlCard `cardFlexible` class used by
-  // the map bottom panel legend keeps flexing (rubber middle) below 1920.
-  .toolbar .cardFlexible {
+  // Scoped to the toolbar so the shared ControlCard `cardFlexible` class used
+  // elsewhere (bottom-panel legend) keeps flexing below 1920. Only cards that
+  // opt in via `compactIntrinsic` stop flexing here; the remaining flexible
+  // cards keep absorbing the width on their tab.
+  .toolbar .cardCompactIntrinsic {
     flex: 0 0 auto;
   }
 
@@ -389,8 +402,27 @@
     gap: t.$top-controls-gap-compact;
   }
 
-  .dateField {
-    min-width: t.$top-controls-datetime-min-width-compact;
+  // Band swap: hide the >=1920 variants, show the compact ones.
+  .compactBandOnly.compactBandOnly {
+    display: flex;
+  }
+
+  .fullBandOnly.fullBandOnly {
+    display: none;
+  }
+
+  // The compact date-only fields hold their natural width instead of flexing;
+  // the search field is the bar-tab shock absorber.
+  .dateField.compactBandOnly {
+    flex: 0 0 auto;
+    width: t.$top-controls-datetime-min-width;
+    min-width: 0;
+  }
+
+  .search {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: t.$top-controls-search-min-width-compact;
   }
 
   .iconGroup {

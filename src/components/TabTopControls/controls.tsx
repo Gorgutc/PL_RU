@@ -22,15 +22,21 @@ import styles from './TabTopControls.module.scss';
 
 // Card section: the dark control-surface card that holds one or more titled fields.
 // `flexible` lets the card grow/shrink to fill the toolbar width (the per-tab
-// date/time card); `tightGroups` uses the 16px group gap (map function groups).
+// date/time card); `tightGroups` uses the 16px group gap (map function groups);
+// `compactIntrinsic` pins the card to its intrinsic width in the compact band
+// (< 1920) so another element on the tab can be the rubber one — the map (and
+// the tabs without compact references yet) hand the free space to their
+// icon-group card instead of the date card.
 export function ControlCard({
   children,
   ariaLabel,
+  compactIntrinsic,
   flexible,
   tightGroups,
 }: {
   children: ReactNode;
   ariaLabel?: string;
+  compactIntrinsic?: boolean;
   flexible?: boolean;
   tightGroups?: boolean;
 }) {
@@ -41,6 +47,7 @@ export function ControlCard({
         styles.card,
         flexible && styles.cardFlexible,
         tightGroups && styles.cardTightGroups,
+        compactIntrinsic && styles.cardCompactIntrinsic,
       )}
     >
       {children}
@@ -75,18 +82,20 @@ export function SegmentedControl({
   value,
   onChange,
   ariaLabel,
+  bandClassName,
 }: {
   items: readonly SegmentItem[];
   value: string;
   onChange: (id: string) => void;
   ariaLabel: string;
+  bandClassName?: string;
 }) {
   // Reuse Blueprint's SegmentedControl: it provides the radiogroup/radio roles
   // and Arrow/Home/End keyboard handling; we only restyle it to the Figma look.
   return (
     <BlueprintSegmentedControl
       aria-label={ariaLabel}
-      className={styles.segmented}
+      className={cx(styles.segmented, bandClassName)}
       intent="primary"
       onValueChange={onChange}
       options={items.map((item) => ({ label: item.label, value: item.id, icon: item.icon }))}
@@ -97,11 +106,19 @@ export function SegmentedControl({
 }
 
 // Presentational date-time text field ("24-04-2025 | 00:00").
-function DateTimeField({ value, ariaLabel }: { value: string; ariaLabel: string }) {
+function DateTimeField({
+  value,
+  ariaLabel,
+  bandClassName,
+}: {
+  value: string;
+  ariaLabel: string;
+  bandClassName?: string;
+}) {
   return (
     <InputGroup
       aria-label={ariaLabel}
-      className={styles.dateField}
+      className={cx(styles.dateField, bandClassName)}
       defaultValue={value}
       inputClassName={styles.dateTimeInput}
       type="text"
@@ -109,22 +126,53 @@ function DateTimeField({ value, ariaLabel }: { value: string; ariaLabel: string 
   );
 }
 
-// A "от и до" pair of date-time fields.
+// A "от и до" pair of date-time fields. When `compactFrom`/`compactTo` are
+// given, the pair is rendered twice and CSS swaps the bands (the same
+// fullLabel/shortLabel pattern as the bottom panel): the full values show at
+// >= 1920 and the shorter date-only values show in the compact band, matching
+// the 1280 references where the time part is dropped.
 export function DateTimeRange({
   from,
   to,
+  compactFrom,
+  compactTo,
   fromLabel = 'Дата и время — от',
   toLabel = 'Дата и время — до',
 }: {
   from: string;
   to: string;
+  compactFrom?: string;
+  compactTo?: string;
   fromLabel?: string;
   toLabel?: string;
 }) {
+  const dual = compactFrom != null && compactTo != null;
   return (
     <div className={styles.dateTimeRange}>
-      <DateTimeField ariaLabel={fromLabel} value={from} />
-      <DateTimeField ariaLabel={toLabel} value={to} />
+      <DateTimeField
+        ariaLabel={fromLabel}
+        bandClassName={dual ? styles.fullBandOnly : undefined}
+        value={from}
+      />
+      <DateTimeField
+        ariaLabel={toLabel}
+        bandClassName={dual ? styles.fullBandOnly : undefined}
+        value={to}
+      />
+      {dual ? (
+        <>
+          <DateTimeField
+            ariaLabel={fromLabel}
+            bandClassName={styles.compactBandOnly}
+            value={compactFrom}
+          />
+          <DateTimeField
+            ariaLabel={toLabel}
+            bandClassName={styles.compactBandOnly}
+            value={compactTo}
+          />
+        </>
+      ) : null}
     </div>
   );
 }
