@@ -905,6 +905,30 @@ test.describe('PraiOS workspace shell', () => {
     }
   });
 
+  test('shows the routes bottom panel and keeps tabs without content panel-free', async ({
+    page,
+  }) => {
+    await openWorkspace(page);
+    await page.getByRole('banner').locator('#praios-header-tab-bar').click();
+    await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
+
+    const panel = page.getByTestId('tab-bottom-panel');
+    await expect(panel).toBeVisible();
+    await expect(panel).toHaveAttribute('data-tab', 'bar');
+
+    // Same frozen footer geometry as the map panel: fixed height, sitting
+    // directly under the map stage.
+    const panelBox = await requireBox(panel);
+    expect(Math.round(panelBox.height)).toBe(96);
+    const map = await requireBox(page.getByTestId('workspace-map'));
+    expect(Math.round(panelBox.y)).toBe(Math.round(map.y + map.height));
+
+    // Tabs whose panel content has not landed yet render no panel at all.
+    await page.getByRole('banner').locator('#praios-header-tab-tmi').click();
+    await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
+    await expect(page.getByTestId('tab-bottom-panel')).toHaveCount(0);
+  });
+
   test('removes meaningful rail motion for reduced-motion users', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
 

@@ -15,6 +15,11 @@
   min-width: 0;
   padding: 0 t.$workspace-bottom-panel-padding t.$workspace-bottom-panel-padding;
   background: t.$color-workspace-bg;
+
+  // Container for the space-driven second fold tier (the reference folds by
+  // available panel width, not only by the viewport band — e.g. 1280 with the
+  // rail expanded loses one more switch than 1280 with it collapsed).
+  container-type: inline-size;
 }
 
 .panel *,
@@ -38,6 +43,12 @@
   align-items: baseline;
   justify-content: space-between;
   gap: t.$space-2;
+}
+
+// Barometric legends keep the unit right after the title (bar/tmi reference).
+.legendHeaderInline {
+  justify-content: flex-start;
+  gap: t.$space-1;
 }
 
 .legendTitle {
@@ -102,6 +113,27 @@
   }
 
   .shortLabel {
+    display: inline;
+  }
+}
+
+// ── Second fold tier, driven by the panel width itself (1080px threshold):
+// the narrowest reference (1280 + expanded rail = 1040px panel) drops one more
+// filter switch and shortens "Яндекс карты Я" to its glyph. ──────────────────
+.yandexShort {
+  display: none;
+}
+
+@container (max-width: 67.5rem) {
+  .filterTier2 {
+    display: none;
+  }
+
+  .yandexFull {
+    display: none;
+  }
+
+  .yandexShort {
     display: inline;
   }
 }

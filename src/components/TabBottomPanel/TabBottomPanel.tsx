@@ -7,6 +7,7 @@ import {
   ControlCard,
   ControlField,
   MapLayerDropdown,
+  SelectField,
   SwitchToggle,
 } from '@/components/TabTopControls/controls';
 import { cx } from '@/lib/cx';
@@ -48,6 +49,8 @@ export function TabBottomPanel({ activeTab }: { activeTab: HeaderTabId }) {
   switch (activeTab) {
     case 'map':
       return <MapPanel />;
+    case 'bar':
+      return <RoutesPanel />;
     default:
       return null;
   }
@@ -76,18 +79,22 @@ function PanelShell({
 }
 
 // Rainbow gradient legend (the flexible rubber middle block of a panel).
+// `inlineUnit` keeps the unit right next to the title (the bar/tmi barometric
+// legend); the map cloud legend keeps its split title…unit header.
 function GradientLegend({
   ticks,
   title,
   unit,
+  inlineUnit,
 }: {
   ticks: readonly string[];
   title: string;
   unit: string;
+  inlineUnit?: boolean;
 }) {
   return (
     <div className={styles.legend} data-testid="tab-bottom-panel-legend">
-      <div className={styles.legendHeader}>
+      <div className={cx(styles.legendHeader, inlineUnit && styles.legendHeaderInline)}>
         <span className={styles.legendTitle}>{title}</span>
         <span className={styles.legendUnit}>{unit}</span>
       </div>
@@ -98,6 +105,84 @@ function GradientLegend({
         ))}
       </div>
     </div>
+  );
+}
+
+// "Фильтрация на карте" toggles of the routes panel (1920 reference). The
+// folding is space-driven in the reference: six switches at >= 1920, three at
+// 1280 with the rail collapsed, two at 1280 with the rail expanded — the first
+// tier folds with the compact band (filterExtra), the second by panel width
+// (filterTier2 container query).
+const BAR_FILTER_TOGGLES = [
+  'Включить угрозы',
+  'РЭБ угрозы',
+  'Карта ЛБС',
+  'Пусковые точки',
+  'Номера точек',
+  'Номера',
+] as const;
+
+// "Высота по барометру" tick labels (metres) — six ticks in the reference.
+const BAR_LEGEND_TICKS = ['0', '1000', '2000', '3000', '4000', '5000'] as const;
+
+function RoutesPanel() {
+  return (
+    <PanelShell ariaLabel="Нижняя панель маршрутов" tab="bar">
+      <ControlCard ariaLabel="Фильтрация на карте">
+        <ControlField title="Фильтрация на карте">
+          {BAR_FILTER_TOGGLES.map((label, index) => (
+            <span
+              key={label}
+              className={cx(
+                index >= COMPACT_VISIBLE_FILTERS && styles.filterExtra,
+                index >= 2 && styles.filterTier2,
+              )}
+            >
+              <SwitchToggle defaultChecked label={label} />
+            </span>
+          ))}
+          <span className={styles.filterOverflow}>
+            <MapLayerDropdown ariaLabel="Ещё фильтры" />
+          </span>
+        </ControlField>
+      </ControlCard>
+
+      <ControlCard ariaLabel="Настройки карты">
+        <ControlField title="Настройки карты">
+          <SelectField
+            ariaLabel="Контурность карты"
+            options={['Контурность карты']}
+            value="Контурность карты"
+          />
+          <ChipButton>
+            <span className={styles.yandexFull}>Яндекс карты Я</span>
+            <span className={styles.yandexShort}>Я</span>
+          </ChipButton>
+        </ControlField>
+      </ControlCard>
+
+      <ControlCard ariaLabel="Высота по барометру" flexible>
+        <GradientLegend
+          inlineUnit
+          ticks={BAR_LEGEND_TICKS}
+          title="Высота по барометру"
+          unit="(м)"
+        />
+      </ControlCard>
+
+      <ControlCard ariaLabel="Управление данными">
+        <ControlField title="Управление данными">
+          <ChipButton leadingIcon="grid-view" leadingIconClassName={styles.actionIcon}>
+            <span className={styles.fullLabel}>Загрузить свои цели</span>
+            <span className={styles.shortLabel}>Загрузить</span>
+          </ChipButton>
+          <ChipButton leadingIcon="grid-view" leadingIconClassName={styles.actionIcon}>
+            <span className={styles.fullLabel}>Скачать все цели</span>
+            <span className={styles.shortLabel}>Скачать цели</span>
+          </ChipButton>
+        </ControlField>
+      </ControlCard>
+    </PanelShell>
   );
 }
 
