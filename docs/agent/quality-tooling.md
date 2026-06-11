@@ -21,8 +21,13 @@ before CI and before a draft PR is opened.
   local PNG pairs from `pixelComparison.cases`, and writes diff PNGs only to
   ignored artifact folders.
 - Playwright: browser smoke tests.
-- axe through Playwright: browser accessibility smoke.
-- Pa11y: page-level accessibility check.
+- axe through Playwright: browser accessibility smoke. Known frozen-palette
+  exception: the `color-contrast` rule is disabled because the Figma-frozen
+  `#2970ff` accent with white text measures ~4.3:1 (below WCAG AA 4.5:1) by
+  design; see `docs/agent/tabs-pixel-fit-handoff.md`.
+- Pa11y: page-level accessibility check. Same frozen-palette exception: the
+  `WCAG2AA...G18.Fail` text-contrast code is ignored; large-text contrast
+  (G145) stays enforced.
 - Lighthouse CI: production-page quality budget.
 - Lefthook: optional local pre-commit/pre-push hooks.
 
