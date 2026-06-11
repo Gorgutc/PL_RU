@@ -3,6 +3,8 @@ description: Пиксельное визуальное QA UI-изменения 
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
+# /visual-qa
+
 Выполни навык `pl-ru-visual-qa` (`.claude/skills/pl-ru-visual-qa/SKILL.md`) или подними
 субагента `visual_qa_guardian` (`.claude/agents/visual_qa_guardian.md`).
 Сними Playwright-скриншоты по нужным viewport и состояниям, сравни попиксельно с
