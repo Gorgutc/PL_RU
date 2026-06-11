@@ -42,4 +42,4 @@ spec-guardian: FAIL
 - A5: inline hex at src/components/Foo/Foo.module.scss:18; add a token instead
 ```
 
-This skill replaces the former Claude agent `.claude/agents/ts-spec-guardian.md`.
+> The Claude mirror of this skill is .claude/skills/pl-ru-spec-guardian/SKILL.md - keep both canons in sync (parity guard A16).
