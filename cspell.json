@@ -5,6 +5,7 @@
   "ignorePaths": [
     "codex_*.md",
     "AGENTS.md",
+    "CLAUDE.md",
     "README.md",
     "docs/**",
     "pnpm-lock.yaml",
@@ -26,6 +27,7 @@
     "reports/**",
     "scratch/**",
     "public/left-rail-icons/**",
+    "public/top-control-icons/**",
     "tests/visual-qa/latest.json",
     ".codex-refs-baseline/**",
     "Blueprints_lib/**",
@@ -48,6 +50,8 @@
     "pampushka",
     "praios",
     "sfmono",
+    "textareas",
+    "ultrawide",
     "viewports",
     "zerolinetool"
   ]
