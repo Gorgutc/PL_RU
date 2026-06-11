@@ -31,6 +31,8 @@
     "check:dead": "knip --exclude unlisted --no-config-hints",
     "check:duplicates": "jscpd --config .jscpd.json --noTips .",
     "check:visual": "node scripts/check-visual-evidence.mjs",
+    "design:crop": "node scripts/visual/crop-designer-refs.mjs",
+    "design:check": "node scripts/visual/compare-designer-crops.mjs",
     "check:audit": "pnpm audit --prod --audit-level high",
     "check:a11y": "playwright test --config=playwright.quality.config.ts && node scripts/run-pa11y.mjs",
     "check:lighthouse": "pnpm build && node scripts/run-lhci.mjs",

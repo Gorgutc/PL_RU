@@ -468,6 +468,36 @@ export function createPngAnalysisProbe() {
       }
     }
 
+    if (operation === 'crop') {
+      const actualImage = await loadImage(actualDataUrl);
+      const cropCanvas = globalThis.document.createElement('canvas');
+      cropCanvas.width = region.width;
+      cropCanvas.height = region.height;
+      const cropContext = cropCanvas.getContext('2d');
+
+      if (cropContext == null) throw new Error('Unable to create PNG crop canvas context');
+
+      cropContext.drawImage(
+        actualImage,
+        region.x,
+        region.y,
+        region.width,
+        region.height,
+        0,
+        0,
+        region.width,
+        region.height,
+      );
+
+      return {
+        height: region.height,
+        pngBase64: cropCanvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, ''),
+        sourceHeight: actualImage.naturalHeight,
+        sourceWidth: actualImage.naturalWidth,
+        width: region.width,
+      };
+    }
+
     const [referenceImage, actualImage] = await Promise.all([
       loadImage(referenceDataUrl),
       loadImage(actualDataUrl),
