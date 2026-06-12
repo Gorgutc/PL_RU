@@ -16,6 +16,7 @@ const inter = Inter({
   subsets: ['latin', 'cyrillic'],
   variable: '--font-inter',
   display: 'swap',
+  axes: ['opsz'],
 });
 
 const roboto = Roboto({

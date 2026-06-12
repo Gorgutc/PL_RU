@@ -553,8 +553,8 @@
     flex: var(--group-grow, 1) 1 0;
 
     // Exactly 2 icon slots (32 + 4 + 32); the floor must not depend on text
-    // metrics, and with bundled Inter the four floors plus the natural-width
-    // date card need the extra 4px per group to fit the 1280-expanded band.
+    // metrics, and with bundled Inter the four floors plus the intrinsic date
+    // card need the extra 4px per group to fit the 1280-expanded band.
     min-width: 4.25rem;
   }
 

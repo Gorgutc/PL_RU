@@ -21,6 +21,21 @@ body {
   background: t.$color-bg;
 }
 
+// The designer artboards are set in Inter Display: at the Display optical
+// size the live switch labels land on the reference columns within ±1px,
+// while the default Text optical size runs ~4.7% wide (measured on the bar
+// bottom-panel crops). Form controls are listed explicitly because the UA
+// stylesheet's `font:` shorthand resets inherited variation settings.
+// Roboto (Header) has no opsz axis and ignores the setting.
+body,
+button,
+input,
+select,
+textarea {
+  font-optical-sizing: none;
+  font-variation-settings: 'opsz' 32;
+}
+
 main {
   max-width: t.$container-max;
   margin: 0 auto;

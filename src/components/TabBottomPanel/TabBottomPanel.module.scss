@@ -96,8 +96,11 @@
 }
 
 // ── Data-management actions: blue glyph on the reused outlined ChipButton ─────
-.actionIcon.actionIcon {
-  color: t.$color-workspace-button-active;
+// Scoped under .panel so the rule outweighs Blueprint's dark-theme icon color
+// (`.bp6-dark .bp6-button .bp6-icon`, 0-3-0) — without it the glyphs silently
+// rendered Blueprint gray while every panel reference draws them blue.
+.panel .actionIcon.actionIcon {
+  color: t.$color-panel-action-icon;
 }
 
 // ── Routes-panel geometry measured off the bar designer crops ─────────────────
@@ -123,12 +126,9 @@
   gap: 0.125rem;
 }
 
-// +3px on the trailing edge: the live 10px switch labels render a hair narrower
-// than the reference export, so the card needs the residual to end on the
-// reference border column (655px at >= 1920).
-.panel .filtersCard.filtersCard {
-  padding-inline-end: 1.1875rem;
-}
+// (The Segoe-era +3px trailing residual is gone: with Inter Display the live
+// 10px switch labels match the reference advances, so the standard card
+// padding ends the card on the 655px reference border column by itself.)
 
 .panel .denseRow.denseRow select {
   min-height: 2rem; // the reference select is 32px tall (the other row controls stay 30px)
@@ -170,7 +170,7 @@
 /* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
 
 .panel .panelAction.panelAction {
-  padding-inline: 0.75rem 0.6875rem; // 12/11px: lands the box on the reference border columns
+  padding-inline: 0.8125rem 0.75rem; // 13/12px: lands the box on the reference border columns (Inter Display advances)
   font-size: t.$fs-small;
 }
 
