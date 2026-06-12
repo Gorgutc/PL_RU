@@ -492,14 +492,15 @@ async function testFrozenQualityToolingContract() {
   if (!ci.includes('FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true')) {
     failures.push('ci.yml must force GitHub JavaScript actions to Node 24');
   }
-  if (!ci.includes('PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: /usr/bin/google-chrome')) {
-    failures.push('ci.yml must point browser checks at system Chrome in CI');
+  // CI must run Playwright's bundled Chromium (version pinned by the lockfile)
+  // instead of the runner's system Chrome: the 2026-06 runner image bumped
+  // Chrome 148 -> 149 and its font metrics broke the visual + fitting gates with
+  // zero repo changes. User-approved unfreeze, 2026-06-12.
+  if (ci.includes('PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH')) {
+    failures.push('ci.yml must not pin browser checks to the runner system Chrome');
   }
-  if (!ci.includes('pnpm exec playwright install-deps chromium')) {
-    failures.push('ci.yml must install Playwright system dependencies');
-  }
-  if (/pnpm exec playwright install(?!-deps)\b/.test(ci)) {
-    failures.push('ci.yml must not download Playwright Chromium in GitHub Actions');
+  if (!ci.includes('pnpm exec playwright install --with-deps chromium')) {
+    failures.push('ci.yml must install the lockfile-pinned Playwright Chromium (with deps)');
   }
   if (!codexConfig.includes('node = "24"')) failures.push('.codex/config.toml must use Node 24');
   for (const [label, text] of [

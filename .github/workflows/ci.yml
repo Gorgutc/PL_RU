@@ -7,7 +7,6 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: /usr/bin/google-chrome
 
 jobs:
   ship:
@@ -30,14 +29,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright system dependencies
-        run: pnpm exec playwright install-deps chromium
-
-      - name: Verify CI Chrome
-        shell: bash
-        run: |
-          test -x "$PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH"
-          "$PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH" --version
+      # Lockfile-pinned browser: the runner's system Chrome changes with the
+      # image (148 -> 149 broke font metrics in 2026-06), the bundled Chromium
+      # only changes when the Playwright dependency is bumped on purpose.
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Quality gate
         run: pnpm quality:all
