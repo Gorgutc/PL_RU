@@ -97,7 +97,7 @@ export function SegmentedControl({
 }
 
 // Presentational date-time text field ("24-04-2025 | 00:00").
-export function DateTimeField({ value, ariaLabel }: { value: string; ariaLabel: string }) {
+function DateTimeField({ value, ariaLabel }: { value: string; ariaLabel: string }) {
   return (
     <InputGroup
       aria-label={ariaLabel}
@@ -258,7 +258,7 @@ export function ChipButton({
 // Square icon button (32x30 outline) with a custom SVG glyph from the manifest.
 // Uses the Blueprint Button primitive (the SVG-manifest exception only covers
 // the glyph rendered via <img>); presentational local pressed toggle.
-export function IconButton({ id }: { id: MapIconId }) {
+function IconButton({ id }: { id: MapIconId }) {
   const label = mapIconLabel(id);
   const [pressed, setPressed] = useState(false);
   return (

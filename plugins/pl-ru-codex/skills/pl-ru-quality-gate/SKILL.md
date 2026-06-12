@@ -52,4 +52,4 @@ fix-before-merge (1)
 - src/app/page.tsx:8: bundled image should use next/image with dimensions.
 ```
 
-This skill replaces the former Claude agent `.claude/agents/ts-quality-gate.md`.
+> The Claude mirror of this skill is .claude/skills/pl-ru-quality-gate/SKILL.md - keep both canons in sync (parity guard A16).

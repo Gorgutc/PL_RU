@@ -15,6 +15,6 @@ Claude mirror of the Codex role `.codex/agents/instruction_drift_auditor.toml`. 
 - `AGENTS.md`, `README.md`, `CLAUDE.md`
 - `plugins/pl-ru-codex/**`, `.agents/**`, `.codex/**`, `.claude/**`, `docs/agent/**`
 
-**Method:** Follow the PL_RU subagent contract in `docs/agent/orchestration.md`. Cross-check that frozen rules (A1–A16) and the authority order are stated consistently in both canons, and that `scripts/verify-claude-codex-parity.mjs` still passes.
+**Method:** Follow the PL_RU subagent contract in `docs/agent/orchestration.md`. Cross-check that the frozen rules (the full A-series from `verify-frozen.ts`) and the authority order are stated consistently in both canons, and that `scripts/verify-claude-codex-parity.mjs` still passes.
 
 **Output:** Instruction-drift report with concrete update targets (file + line) and a `PASS`/`FAIL`.

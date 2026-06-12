@@ -14,4 +14,4 @@ Return:
 - no whole file over 80 lines unless explicitly requested
 - a concise summary under 300 words
 
-This skill replaces the former Claude agent `.claude/agents/ts-context-keeper.md`.
+> The Claude mirror of this skill is .claude/skills/pl-ru-context-keeper/SKILL.md - keep both canons in sync (parity guard A16).

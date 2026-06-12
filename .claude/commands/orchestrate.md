@@ -2,6 +2,8 @@
 description: Запустить воспроизводимый аудит-воркфлоу PL_RU для широких/рискованных задач.
 ---
 
+# /orchestrate
+
 Следуй `docs/agent/orchestration.md` и навыку `pl-ru-audit-orchestrator`
 (`.claude/skills/pl-ru-audit-orchestrator/SKILL.md`).
 Запиши Routing Decision (`Documentation` / `Selected skills` / `Selected agents` /

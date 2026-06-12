@@ -4,6 +4,7 @@
   "ignore": [
     "**/node_modules/**",
     "**/.next/**",
+    "**/.claude/**",
     "**/Blueprints_lib/**",
     "**/Osiris_ref/**",
     "**/plugins/pl-ru-codex/skills/blueprint-design/**",

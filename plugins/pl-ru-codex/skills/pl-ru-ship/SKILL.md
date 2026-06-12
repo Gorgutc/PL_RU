@@ -55,4 +55,4 @@ canonical ledger, raw external shell/python scripts as repo policy, global
 startup hooks, or copied large external templates without license/provenance
 review.
 
-This skill replaces the former Claude command `.claude/commands/ship.md`.
+> The Claude mirror of this skill is .claude/skills/pl-ru-ship/SKILL.md - keep both canons in sync (parity guard A16).

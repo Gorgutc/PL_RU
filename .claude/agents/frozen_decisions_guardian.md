@@ -16,6 +16,6 @@ Claude mirror of the Codex role `.codex/agents/frozen_decisions_guardian.toml`. 
 - `plugins/pl-ru-codex/skills/pl-ru-frozen-decisions/**`, `src/components/Header/**`, `src/styles/_tokens.scss`
 - `tests/e2e/header.spec.ts`, `package.json`, `playwright*.config.ts`, `scripts/**`
 
-**Method:** Follow the PL_RU subagent contract in `docs/agent/orchestration.md`. Verify the frozen guards (A1–A16) and the documented decisions still hold for the diff; a frozen-contract mismatch is a delivery blocker.
+**Method:** Follow the PL_RU subagent contract in `docs/agent/orchestration.md`. Verify the frozen guards (the full A-series from `verify-frozen.ts`) and the documented decisions still hold for the diff; a frozen-contract mismatch is a delivery blocker.
 
 **Output:** Frozen-decision `PASS`/`FAIL` report with explicit drift and any decision that requires user approval, with concrete paths.

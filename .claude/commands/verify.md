@@ -3,6 +3,8 @@ description: Прогнать frozen-верификатор PL_RU (и быстр
 allowed-tools: Bash
 ---
 
-Запусти `pnpm verify` (это `tsx verify-frozen.ts`, правила A1..A16). При необходимости
+# /verify
+
+Запусти `pnpm verify` (это `tsx verify-frozen.ts`, все frozen-правила A-серии). При необходимости
 добавь `pnpm quality:fast`. Отчитайся PASS/FAIL по каждому затронутому правилу с
 конкретными путями. Не исправляй молча — покажи провалы и предложи минимальные фиксы.

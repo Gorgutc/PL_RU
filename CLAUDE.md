@@ -22,7 +22,7 @@ parity guard (rule **A16**, `scripts/verify-claude-codex-parity.mjs`, run by
 ```text
 pnpm install
 pnpm dev
-pnpm verify          # tsx verify-frozen.ts (frozen rules A1..A16)
+pnpm verify          # tsx verify-frozen.ts (all frozen A-rules)
 pnpm quality:fast    # fast local gate during iteration
 pnpm codex:ship      # full delivery gate (heavy: build + e2e + a11y + lighthouse)
 ```
@@ -170,7 +170,7 @@ Google Drive connector output is external source material. Do not commit downloa
 
 - Every Codex skill (`plugins/pl-ru-codex/skills/<name>/`) has a Claude mirror (`.claude/skills/<name>/SKILL.md`) with the same `name`, and vice versa.
 - Every Codex agent (`.codex/agents/<role>.toml`) has a Claude mirror (`.claude/agents/<role>.md`) with the same `name`, and vice versa.
-- `AGENTS.md` and `CLAUDE.md` both state the same authority order and frozen rules A1..A16.
+- `AGENTS.md` and `CLAUDE.md` both state the same authority order and the same frozen-rule list as `verify-frozen.ts`.
 - When you change one canon, change the other in the same commit; `pnpm verify` (A16) and `scripts/verify-claude-codex-parity.mjs` catch drift.
 
 ## What Not To Do

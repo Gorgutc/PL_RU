@@ -5,6 +5,7 @@
   "ignorePaths": [
     "codex_*.md",
     "AGENTS.md",
+    "CLAUDE.md",
     "README.md",
     "docs/**",
     "pnpm-lock.yaml",
@@ -26,6 +27,7 @@
     "reports/**",
     "scratch/**",
     "public/left-rail-icons/**",
+    "public/top-control-icons/**",
     "tests/visual-qa/latest.json",
     ".codex-refs-baseline/**",
     "Blueprints_lib/**",
@@ -34,8 +36,8 @@
   ],
   "ignoreRegExpList": ["[\\u0400-\\u04FF]+"],
   "words": [
-    "Prai",
-    "PraiOS",
+    "artboard",
+    "artboards",
     "blueprintjs",
     "labelledby",
     "lighthouseci",
@@ -46,8 +48,11 @@
     "nums",
     "OpenStreetMap",
     "pampushka",
-    "praios",
+    "Prai",
+    "PraiOS",
     "sfmono",
+    "textareas",
+    "ultrawide",
     "viewports",
     "zerolinetool"
   ]
