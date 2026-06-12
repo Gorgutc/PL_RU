@@ -395,6 +395,16 @@
 
   .iconGroup {
     flex: var(--group-grow, 1) 1 0;
+    min-width: 4.5rem; // ~2 icon slots; the floor must not depend on text metrics
+  }
+
+  // Keep the (wider) nowrap group titles out of the min-content calculation:
+  // browser/OS font-rendering differences (e.g. the CI Chrome 148 -> 149 bump)
+  // can widen the titles by a few px each, and with title-driven floors the
+  // four map groups would overflow the scroller instead of trimming icons.
+  .iconGroup .fieldTitle {
+    width: 0;
+    min-width: 100%;
   }
 
   // Decouple the row width from its icon content so the group can shrink to its
