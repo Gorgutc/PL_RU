@@ -23,7 +23,13 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 24
+          # 24.15.0 exactly (matches the local dev machine): Node 24.16+
+          # makes `playwright install` (< 1.60) hang silently after the
+          # browser download completes (microsoft/playwright#41000); both PR
+          # runs on 2026-06-12 burned the full 30-minute job budget on that
+          # hang. Unpin back to a bare 24 when Playwright is bumped to 1.60+
+          # (queued for the I9 audit - a browser bump moves visual baselines).
+          node-version: 24.15.0
           cache: pnpm
 
       - name: Install dependencies
@@ -33,6 +39,9 @@ jobs:
       # image (148 -> 149 broke font metrics in 2026-06), the bundled Chromium
       # only changes when the Playwright dependency is bumped on purpose.
       - name: Install Playwright Chromium
+        # Fail fast if the download or extraction ever stalls again instead
+        # of eating the whole 30-minute job budget.
+        timeout-minutes: 8
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Quality gate
