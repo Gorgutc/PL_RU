@@ -30,12 +30,16 @@ import styles from './TabTopControls.module.scss';
 export function ControlCard({
   children,
   ariaLabel,
+  className,
+  compactFlexible,
   compactIntrinsic,
   flexible,
   tightGroups,
 }: {
   children: ReactNode;
   ariaLabel?: string;
+  className?: string;
+  compactFlexible?: boolean;
   compactIntrinsic?: boolean;
   flexible?: boolean;
   tightGroups?: boolean;
@@ -48,6 +52,8 @@ export function ControlCard({
         flexible && styles.cardFlexible,
         tightGroups && styles.cardTightGroups,
         compactIntrinsic && styles.cardCompactIntrinsic,
+        compactFlexible && styles.cardCompactFlexible,
+        className,
       )}
     >
       {children}
@@ -57,19 +63,25 @@ export function ControlCard({
 
 // A titled field column: a 12px/500 label above its control row. `grow` lets the
 // column fill its flexible card so the date/time control stretches dynamically.
+// `rowClassName`/`titleClassName` let a consumer retune the control row and the
+// title line (e.g. the bottom-panel geometry measured off the designer references).
 export function ControlField({
   title,
   children,
   grow,
+  rowClassName,
+  titleClassName,
 }: {
   title: string;
   children: ReactNode;
   grow?: boolean;
+  rowClassName?: string;
+  titleClassName?: string;
 }) {
   return (
     <div className={cx(styles.field, grow && styles.fieldGrow)}>
-      <span className={styles.fieldTitle}>{title}</span>
-      <div className={styles.fieldRow}>{children}</div>
+      <span className={cx(styles.fieldTitle, titleClassName)}>{title}</span>
+      <div className={cx(styles.fieldRow, rowClassName)}>{children}</div>
     </div>
   );
 }
@@ -211,15 +223,24 @@ export function SelectField({
   return <SelectControl ariaLabel={ariaLabel} dense options={options} value={value} />;
 }
 
-// Blueprint Switch + label (e.g. satellite data sources).
+// Blueprint Switch + label (e.g. satellite data sources). `className` lets a
+// consumer retune the label typography (bottom-panel reference geometry).
 export function SwitchToggle({
   label,
   defaultChecked,
+  className,
 }: {
   label: string;
   defaultChecked?: boolean;
+  className?: string;
 }) {
-  return <Switch className={styles.switch} defaultChecked={defaultChecked} label={label} />;
+  return (
+    <Switch
+      className={cx(styles.switch, className)}
+      defaultChecked={defaultChecked}
+      label={label}
+    />
+  );
 }
 
 // Primary accent button — solid accent fill ("Загрузить маршруты"). The sat
@@ -275,21 +296,24 @@ export function ToggleActionButton({
 }
 
 // Outlined utility button. Supports a trailing icon ("Фильтры" chip) and/or a
-// leading icon (map bottom-panel "Управление данными" actions).
+// leading icon (map bottom-panel "Управление данными" actions). `className`
+// lets a consumer retune typography/padding (bottom-panel reference geometry).
 export function ChipButton({
   children,
   icon,
   leadingIcon,
   leadingIconClassName,
+  className,
 }: {
   children: ReactNode;
   icon?: IconName;
   leadingIcon?: IconName;
   leadingIconClassName?: string;
+  className?: string;
 }) {
   return (
     <Button
-      className={styles.chipButton}
+      className={cx(styles.chipButton, className)}
       icon={
         leadingIcon ? (
           <Icon className={leadingIconClassName} icon={leadingIcon} size={16} />
@@ -404,13 +428,20 @@ export function LayerToggle({ label }: { label: string }) {
 
 // Chevron overflow dropdown trigger: appears at the end of a group when its
 // icons overflow the available width (the trimmed icons would open from here).
-// Presentational icon-sized button (Blueprint chevron, not an SVG-manifest glyph).
-export function MapLayerDropdown({ ariaLabel = 'Ещё слои карты' }: { ariaLabel?: string }) {
+// Presentational icon-sized button (Blueprint chevron, not an SVG-manifest
+// glyph). The bottom-panel overflow opens upwards, hence the `icon` override.
+export function MapLayerDropdown({
+  ariaLabel = 'Ещё слои карты',
+  icon = 'chevron-down',
+}: {
+  ariaLabel?: string;
+  icon?: IconName;
+}) {
   return (
     <Button
       aria-label={ariaLabel}
       className={styles.iconButton}
-      icon={<Icon icon="chevron-down" size={16} />}
+      icon={<Icon icon={icon} size={16} />}
       title={ariaLabel}
       type="button"
       variant="minimal"

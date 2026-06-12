@@ -12,6 +12,18 @@
   padding: t.$workspace-map-outer-gutter t.$workspace-map-outer-gutter 0;
 }
 
+// Rail-state toolbar modifiers (the bar/tmi frozen-band tabs): the 2560/3840
+// references reproduce the 1920 artboards per rail state, so the toolbar stops
+// growing at 1920 − current rail width; the compact band also folds some
+// controls per rail state (the weather tiers below).
+.toolbarRailCollapsed {
+  max-width: t.$workspace-chrome-cap-rail-collapsed;
+}
+
+.toolbarRailExpanded {
+  max-width: t.$workspace-chrome-cap-rail-expanded;
+}
+
 .toolbar *,
 .toolbar *::before,
 .toolbar *::after {
@@ -138,9 +150,93 @@
   display: none;
 }
 
+// The bar weather tiers below the full band: short segment labels while the
+// toolbar is wide enough (rail collapsed) and the "Все" dropdown once the
+// toolbar drops under the container threshold (rail expanded at 1280).
+.weatherShortBand,
+.weatherSelectBand {
+  display: none;
+}
+
 .search {
   width: t.$top-controls-search-width;
   min-width: 0;
+}
+
+// The bar lead card on the full-band expanded rail: the reference narrows the
+// search field to 181px so the date fields keep their share of the 478px card.
+@media (min-width: t.$workspace-bp-compact) {
+  .toolbarRailExpanded .barDataCard .search {
+    width: 11.3125rem;
+  }
+}
+
+// Keep the (wider) nowrap field titles out of the column-width calculation so
+// the bar search column can be narrower than its title, like the references.
+.barDataCard .fieldTitle {
+  width: 0;
+  min-width: 100%;
+}
+
+/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+// The bar full-band weather segments carry wider 17px inline padding than the
+// stock segments (measured 612px box for the three long labels).
+.barWeatherSegment.barWeatherSegment :global(.bp6-button),
+.barWeatherSegment.barWeatherSegment :global(.bp5-button) {
+  padding: 0 1.0625rem;
+}
+
+// The bar full-band "Тип данных" card is wider than its content in the
+// reference (487px segmented box with evenly stretched segments).
+@media (min-width: t.$workspace-bp-compact) {
+  .barTypeSegment.barTypeSegment {
+    width: 30.4375rem;
+  }
+
+  .barTypeSegment.barTypeSegment :global(.bp6-button),
+  .barTypeSegment.barTypeSegment :global(.bp5-button) {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+}
+/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
+
+@media (max-width: t.$workspace-bp-compact-max) {
+  // In the compact band the weather card is the rubber (the lead card freezes
+  // at 408px via compactIntrinsic) and its active tier fills the card width:
+  // short segment labels with the rail collapsed, the "Все" dropdown with it
+  // expanded (the 1280 references per rail state).
+  .weatherShortBand {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .weatherShortBand .segmented {
+    width: 100%;
+  }
+
+  /* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+  .weatherShortBand .segmented :global(.bp6-button),
+  .weatherShortBand .segmented :global(.bp5-button) {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+  /* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
+
+  .toolbarRailExpanded .weatherShortBand {
+    display: none;
+  }
+
+  .toolbarRailExpanded .weatherSelectBand {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .weatherSelectBand > div {
+    width: 100%;
+  }
 }
 
 .dateTimeInput.dateTimeInput,
@@ -396,6 +492,12 @@
     flex: 0 0 auto;
   }
 
+  // The mirror modifier: a card that is intrinsic at >= 1920 but becomes the
+  // band rubber below it (the bar weather card per the 1280 references).
+  .toolbar .cardCompactFlexible {
+    flex: 1 1 auto;
+  }
+
   .cardTightGroups {
     flex: 1 1 auto;
     min-width: 0;
@@ -424,6 +526,28 @@
     flex: 1 1 auto;
     min-width: t.$top-controls-search-min-width-compact;
   }
+
+  // The bar lead card freezes at its 408px reference width in the compact band
+  // (160px search + two 100px date fields); the weather card is the rubber.
+  .barDataCard .search {
+    width: t.$top-controls-search-min-width-compact;
+    flex: 0 0 auto;
+  }
+
+  .barDataCard .dateField {
+    width: t.$top-controls-datetime-min-width;
+    min-width: 0;
+    flex: 0 0 auto;
+  }
+
+  /* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+  // Compact "Тип данных" segments carry 13px inline padding in the reference
+  // (305px segmented box), wider than the stock 10px.
+  .barTypeSegment.barTypeSegment :global(.bp6-button),
+  .barTypeSegment.barTypeSegment :global(.bp5-button) {
+    padding: 0 0.8125rem;
+  }
+  /* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
 
   .iconGroup {
     flex: var(--group-grow, 1) 1 0;

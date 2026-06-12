@@ -22,6 +22,17 @@
   container-type: inline-size;
 }
 
+// Above the compact band the panel keeps its 1920-band layout: the 2560/3840
+// references reproduce the 1920 artboards per rail state, so the effective cap
+// is 1920 − current rail width (tighter than the 2560 content cap above).
+.panelRailCollapsed {
+  max-width: t.$workspace-chrome-cap-rail-collapsed;
+}
+
+.panelRailExpanded {
+  max-width: t.$workspace-chrome-cap-rail-expanded;
+}
+
 .panel *,
 .panel *::before,
 .panel *::after {
@@ -89,6 +100,110 @@
   color: t.$color-workspace-button-active;
 }
 
+// ── Routes-panel geometry measured off the bar designer crops ─────────────────
+// Switch rows: 10px labels, 8px pill↔label, 12px between items; action rows:
+// 14px labels with 12px inline padding and a 4px sibling gap; the select keeps
+// 12px text but gets the wider 16px leading padding from the reference.
+.filtersRow {
+  gap: 0.625rem; // 10px between switch items (label-end → next pill in the crops)
+}
+
+.denseRow {
+  gap: t.$space-1;
+}
+
+// The map-settings card is tighter than the others in the references: 14px card
+// padding, a 2px select↔chip gap, a 32px-tall select with the chevron pushed to
+// the right edge, and a 14px-padded "Яндекс карты Я" chip.
+.panel .settingsCard.settingsCard {
+  padding-inline: 0.875rem;
+}
+
+.settingsRow.settingsRow {
+  gap: 0.125rem;
+}
+
+// +3px on the trailing edge: the live 10px switch labels render a hair narrower
+// than the reference export, so the card needs the residual to end on the
+// reference border column (655px at >= 1920).
+.panel .filtersCard.filtersCard {
+  padding-inline-end: 1.1875rem;
+}
+
+.panel .denseRow.denseRow select {
+  min-height: 2rem; // the reference select is 32px tall (the other row controls stay 30px)
+  padding-inline: 1rem 2.5rem;
+}
+
+/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+// Only the absolutely-positioned select chevron reacts to the inset (the static
+// chip glyphs ignore it), so this is safe to scope per row.
+.panel .settingsRow.settingsRow :global(.bp6-icon),
+.panel .settingsRow.settingsRow :global(.bp5-icon) {
+  inset-inline-end: 0.25rem;
+}
+/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
+
+// Card titles render 1px lower in Chrome than in the reference exports; the
+// switch row sits 4px higher — both nudged back with layout-neutral transforms.
+.panel .panelTitle.panelTitle {
+  transform: translateY(-0.0625rem);
+}
+
+.panel .panelSwitch.panelSwitch {
+  font-size: t.$fs-caption;
+  transform: translateY(0.25rem);
+}
+
+/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+.panel .panelSwitch.panelSwitch :global(.bp6-control-indicator),
+.panel .panelSwitch.panelSwitch :global(.bp5-control-indicator) {
+  margin-right: t.$space-2;
+}
+
+// The reference switch pill keeps Blueprint's stock checked blue, unlike the
+// brighter action accent used by the top-control switches.
+.panel .panelSwitch.panelSwitch :global(input:checked ~ .bp6-control-indicator),
+.panel .panelSwitch.panelSwitch :global(input:checked ~ .bp5-control-indicator) {
+  background: t.$color-switch-checked !important;
+}
+/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
+
+.panel .panelAction.panelAction {
+  padding-inline: 0.75rem 0.6875rem; // 12/11px: lands the box on the reference border columns
+  font-size: t.$fs-small;
+}
+
+// Declared after panelAction so the wider 14px chip padding wins at equal
+// specificity ("Яндекс карты Я" is 126px wide in the reference).
+.panel .yandexChip.yandexChip {
+  padding-inline: 0.875rem;
+}
+
+// Barometric legend (bar/tmi): bright inline unit, pill gradient, 10px
+// proportional white ticks — all measured off the bar reference crops. The
+// header gets the same 1px nudge as the card titles; the negative tick margin
+// re-distributes the space-between column so the gradient and the tick row land
+// on the reference rows (bar +3px, ticks +6px).
+.legendBarometric .legendHeader {
+  transform: translateY(-0.0625rem);
+}
+
+.legendBarometric .legendUnit {
+  color: t.$color-header-text-on-color;
+}
+
+.legendBarometric .legendBar {
+  border-radius: t.$radius-lg; // ≥ half the bar height — browsers clamp it to a pill
+}
+
+.legendBarometric .legendTicks {
+  margin-bottom: -0.375rem;
+  color: t.$color-header-text-on-color;
+  font-size: t.$fs-caption;
+  font-variant-numeric: normal;
+}
+
 // ── Compact band (< 1920): fold extra filter toggles into the overflow chevron
 // and shorten the load action label, matching the 1280 reference. ─────────────
 .filterOverflow {
@@ -114,6 +229,12 @@
 
   .shortLabel {
     display: inline;
+  }
+
+  // The 1280 artboard draws the filter-card title 6px higher than every other
+  // card title, so only that title extends the base -1px nudge to -7px.
+  .panel .filtersTitle.filtersTitle {
+    transform: translateY(-0.4375rem);
   }
 }
 

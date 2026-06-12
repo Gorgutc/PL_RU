@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "taskScope": "Оперативная карта tab: top-controls remapped to the reference (Слои карты = 9 providers + 2 toggles) with compact icon/toggle overflow and a 2560 content cap, plus the map-tab bottom panel — now rendered by the TabBottomPanel dispatcher (filters · cloud-base gradient legend · data actions) — under the map; baselines refreshed for the map-tab bottom panel",
+  "taskScope": "Оперативная карта tab top-controls (Слои карты = 9 providers + 2 toggles, compact overflow, 2560 cap) plus the per-tab bottom panels via the TabBottomPanel dispatcher: map (filters · cloud-base legend · data actions) and the bar Маршруты panel/toolbar pixel-fitted to the designer reference crops (10px switch labels, 14px action labels, Blueprint-blue pills, barometric legend, rail-state 1920 chrome caps, weather tiers, date-only bar dates); routes + telemetry baselines refreshed for the bar pixel-fit (telemetry: interim 100px compact date width until I6)",
   "references": [
     "Figma per-tab block exports: Desktop/Work/Верхние блоки управления/*_общий блок.png and *_code.md (design source for sizing/colors)",
     "Numeric spec: card #171d20 surface, #727677 1px outline, 2px radius, 16px padding, 30px controls, 24px #2970ff active segment",
@@ -34,7 +34,7 @@
       "The map toolbar (icon-heavy) keeps a cropped pixel baseline; the other tabs are covered by DOM/CSS metrics + e2e instead of a pixel baseline, because dense text labels (font anti-aliasing) and the 50px->300px panel motion make a cropped toolbar pixel-diff non-deterministic. Panel tabs align the toolbar to the 300px panel (e2e toolbar.x === 300).",
       "The map function block renders 11 + 8 + 4 + 9 Blueprint icon buttons + 2 layer toggles; every glyph SVG loads and every icon button keeps an aria-label (e2e).",
       "Map height/offset now account for the toolbar and the map-tab bottom panel; the frozen map gutter (10px), inner inset (8px), and radii (2px/4px) are unchanged (workspace-shell.spec.ts).",
-      "The map-tab bottom panel (TabBottomPanel dispatcher, data-testid=tab-bottom-panel) is a fixed 96px footer reusing the frozen ControlCard surface, with three sub-blocks (Фильтрация switches · Нижняя граница облаков rainbow gradient legend · Управление данными actions). The rainbow stops live only in _tokens.scss ($gradient-cloud-legend, sampled from the reference); it only reduces the map height, leaving the right-anchored stage contract unchanged.",
+      "The per-tab bottom panels (TabBottomPanel dispatcher, data-testid=tab-bottom-panel) are fixed 96px footers reusing the frozen ControlCard surface: map (Фильтрация switches · Нижняя граница облаков rainbow legend · Управление данными actions) and bar (six filter switches with the space-driven second fold tier · Настройки карты select + Яндекс chip · barometric legend · target actions), pixel-fitted to the bar designer crops. The rainbow stops live only in _tokens.scss ($gradient-cloud-legend); panels only reduce the map height, leaving the right-anchored stage contract unchanged. Above 1920 the bar panel and toolbar freeze at their 1920-band width per rail state ($workspace-chrome-cap-rail-*).",
       "Actual and diff artifacts stay under reports/visual-qa/."
     ]
   },

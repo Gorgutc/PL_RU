@@ -123,7 +123,7 @@ test.describe('Per-tab top control blocks', () => {
     const toolbar = page.getByTestId('tab-top-controls');
 
     await selectTab(page, 'bar');
-    await expect(toolbar.getByPlaceholder('Поиск по названию, координатам')).toBeVisible();
+    await expect(toolbar.getByPlaceholder('Поиск по названию')).toBeVisible();
 
     await selectTab(page, 'tmi');
     await expect(toolbar.getByText('Загрузить маршруты')).toBeVisible();

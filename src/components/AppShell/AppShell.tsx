@@ -58,11 +58,11 @@ export function AppShell({ activeTab }: AppShellProps) {
           />
         </div>
         <div className={styles.workspaceColumn}>
-          <TabTopControls activeTab={activeTab} />
+          <TabTopControls activeTab={activeTab} railExpanded={railState === 'expanded'} />
           <div className={styles.mapArea}>
             <WorkspaceMap />
           </div>
-          <TabBottomPanel activeTab={activeTab} />
+          <TabBottomPanel activeTab={activeTab} railExpanded={railState === 'expanded'} />
         </div>
       </section>
     </main>

@@ -45,31 +45,45 @@ const MAP_FILTER_TOGGLES = [
 // "Нижняя граница облаков" tick labels (metres) under the rainbow legend.
 const CLOUD_LEGEND_TICKS = ['0', '500', '1000', '1500', '2000', '3000', '4000', '5000'] as const;
 
-export function TabBottomPanel({ activeTab }: { activeTab: HeaderTabId }) {
+export function TabBottomPanel({
+  activeTab,
+  railExpanded,
+}: {
+  activeTab: HeaderTabId;
+  railExpanded: boolean;
+}) {
   switch (activeTab) {
     case 'map':
-      return <MapPanel />;
+      return <MapPanel railExpanded={railExpanded} />;
     case 'bar':
-      return <RoutesPanel />;
+      return <RoutesPanel railExpanded={railExpanded} />;
     default:
       return null;
   }
 }
 
 // Shared <section> shell so every tab panel carries the same testid + data-tab.
+// Above the compact band the panel keeps its 1920-band layout: the 2560/3840
+// references reproduce the 1920 artboards per rail state, so the panel width
+// caps at 1920 − current rail width instead of growing with the viewport.
 function PanelShell({
   ariaLabel,
   children,
+  railExpanded,
   tab,
 }: {
   ariaLabel: string;
   children: React.ReactNode;
+  railExpanded: boolean;
   tab: HeaderTabId;
 }) {
   return (
     <section
       aria-label={ariaLabel}
-      className={styles.panel}
+      className={cx(
+        styles.panel,
+        railExpanded ? styles.panelRailExpanded : styles.panelRailCollapsed,
+      )}
       data-tab={tab}
       data-testid="tab-bottom-panel"
     >
@@ -79,22 +93,27 @@ function PanelShell({
 }
 
 // Rainbow gradient legend (the flexible rubber middle block of a panel).
-// `inlineUnit` keeps the unit right next to the title (the bar/tmi barometric
-// legend); the map cloud legend keeps its split title…unit header.
+// `barometric` switches to the bar/tmi reference styling: the unit sits right
+// next to the title (both bright), the ticks are 10px proportional white
+// digits, and the gradient is a fully rounded pill. The map cloud legend keeps
+// its split title…unit header and dim tabular ticks.
 function GradientLegend({
   ticks,
   title,
   unit,
-  inlineUnit,
+  barometric,
 }: {
   ticks: readonly string[];
   title: string;
   unit: string;
-  inlineUnit?: boolean;
+  barometric?: boolean;
 }) {
   return (
-    <div className={styles.legend} data-testid="tab-bottom-panel-legend">
-      <div className={cx(styles.legendHeader, inlineUnit && styles.legendHeaderInline)}>
+    <div
+      className={cx(styles.legend, barometric && styles.legendBarometric)}
+      data-testid="tab-bottom-panel-legend"
+    >
+      <div className={cx(styles.legendHeader, barometric && styles.legendHeaderInline)}>
         <span className={styles.legendTitle}>{title}</span>
         <span className={styles.legendUnit}>{unit}</span>
       </div>
@@ -125,11 +144,15 @@ const BAR_FILTER_TOGGLES = [
 // "Высота по барометру" tick labels (metres) — six ticks in the reference.
 const BAR_LEGEND_TICKS = ['0', '1000', '2000', '3000', '4000', '5000'] as const;
 
-function RoutesPanel() {
+function RoutesPanel({ railExpanded }: { railExpanded: boolean }) {
   return (
-    <PanelShell ariaLabel="Нижняя панель маршрутов" tab="bar">
-      <ControlCard ariaLabel="Фильтрация на карте">
-        <ControlField title="Фильтрация на карте">
+    <PanelShell ariaLabel="Нижняя панель маршрутов" railExpanded={railExpanded} tab="bar">
+      <ControlCard ariaLabel="Фильтрация на карте" className={styles.filtersCard}>
+        <ControlField
+          rowClassName={styles.filtersRow}
+          titleClassName={cx(styles.panelTitle, styles.filtersTitle)}
+          title="Фильтрация на карте"
+        >
           {BAR_FILTER_TOGGLES.map((label, index) => (
             <span
               key={label}
@@ -138,23 +161,27 @@ function RoutesPanel() {
                 index >= 2 && styles.filterTier2,
               )}
             >
-              <SwitchToggle defaultChecked label={label} />
+              <SwitchToggle className={styles.panelSwitch} defaultChecked label={label} />
             </span>
           ))}
           <span className={styles.filterOverflow}>
-            <MapLayerDropdown ariaLabel="Ещё фильтры" />
+            <MapLayerDropdown ariaLabel="Ещё фильтры" icon="chevron-up" />
           </span>
         </ControlField>
       </ControlCard>
 
-      <ControlCard ariaLabel="Настройки карты">
-        <ControlField title="Настройки карты">
+      <ControlCard ariaLabel="Настройки карты" className={styles.settingsCard}>
+        <ControlField
+          rowClassName={cx(styles.denseRow, styles.settingsRow)}
+          titleClassName={styles.panelTitle}
+          title="Настройки карты"
+        >
           <SelectField
             ariaLabel="Контурность карты"
             options={['Контурность карты']}
             value="Контурность карты"
           />
-          <ChipButton>
+          <ChipButton className={cx(styles.panelAction, styles.yandexChip)}>
             <span className={styles.yandexFull}>Яндекс карты Я</span>
             <span className={styles.yandexShort}>Я</span>
           </ChipButton>
@@ -163,7 +190,7 @@ function RoutesPanel() {
 
       <ControlCard ariaLabel="Высота по барометру" flexible>
         <GradientLegend
-          inlineUnit
+          barometric
           ticks={BAR_LEGEND_TICKS}
           title="Высота по барометру"
           unit="(м)"
@@ -171,12 +198,24 @@ function RoutesPanel() {
       </ControlCard>
 
       <ControlCard ariaLabel="Управление данными">
-        <ControlField title="Управление данными">
-          <ChipButton leadingIcon="grid-view" leadingIconClassName={styles.actionIcon}>
+        <ControlField
+          rowClassName={styles.denseRow}
+          titleClassName={styles.panelTitle}
+          title="Управление данными"
+        >
+          <ChipButton
+            className={styles.panelAction}
+            leadingIcon="grid-view"
+            leadingIconClassName={styles.actionIcon}
+          >
             <span className={styles.fullLabel}>Загрузить свои цели</span>
             <span className={styles.shortLabel}>Загрузить</span>
           </ChipButton>
-          <ChipButton leadingIcon="grid-view" leadingIconClassName={styles.actionIcon}>
+          <ChipButton
+            className={styles.panelAction}
+            leadingIcon="grid-view"
+            leadingIconClassName={styles.actionIcon}
+          >
             <span className={styles.fullLabel}>Скачать все цели</span>
             <span className={styles.shortLabel}>Скачать цели</span>
           </ChipButton>
@@ -186,9 +225,9 @@ function RoutesPanel() {
   );
 }
 
-function MapPanel() {
+function MapPanel({ railExpanded }: { railExpanded: boolean }) {
   return (
-    <PanelShell ariaLabel="Нижняя панель карты" tab="map">
+    <PanelShell ariaLabel="Нижняя панель карты" railExpanded={railExpanded} tab="map">
       <ControlCard ariaLabel="Фильтрация на карте">
         <ControlField title="Фильтрация на карте">
           {MAP_FILTER_TOGGLES.map((label, index) => (

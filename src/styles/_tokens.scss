@@ -43,6 +43,7 @@ $color-workspace-rail-divider: rgb(213 215 218 / 50%);
 $color-workspace-button-hover: #528bff;
 $color-workspace-button-active: #2970ff;
 $color-workspace-placeholder: #d5d7da;
+$color-switch-checked: #2d72d2; // Blueprint blue-3: the bottom-panel switch pill in the designer refs
 $color-workspace-icon-disabled: #a4a7ae;
 $color-workspace-map-bg: #17262c;
 $color-workspace-map-line: rgb(255 255 255 / 8%);
@@ -104,6 +105,7 @@ $font-header:
 $font-header-mono: var(--font-roboto-mono), 'Roboto Mono', ui-monospace, sfmono-regular, monospace;
 $fs-body: 1rem;
 $fs-small: 0.875rem;
+$fs-caption: 0.625rem; // 10px caption labels (bottom-panel switch labels / legend ticks)
 $fs-header-brand: 1.75rem;
 $fs-header-nav: 0.75rem;
 $fs-header-action: 0.875rem;
@@ -139,6 +141,11 @@ $workspace-motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
 $workspace-bp-compact: 120rem;
 $workspace-bp-compact-max: 119.9375rem;
 
+// ≥1920 the bar/tmi chrome (toolbar + bottom panel) freezes at its 1920-band
+// layout per rail state: cap = 1920 − current rail width (designer refs law).
+$workspace-chrome-cap-rail-collapsed: $workspace-bp-compact - $workspace-rail-width;
+$workspace-chrome-cap-rail-expanded: $workspace-bp-compact - $workspace-rail-expanded-width;
+
 // Max content width for the per-tab chrome (top controls + bottom panels):
 // beyond this the chrome stops stretching and left-aligns, while the map and
 // Header stay full-bleed (reference 3840). At <= 2560 the chrome fills the width.
@@ -168,7 +175,7 @@ $top-controls-control-height: $header-action-height; // 30px inputs/segmented (H
 $top-controls-segment-height: 1.5rem; // 24px active/inactive segment pill
 $top-controls-segment-gap: $space-1; // 4px between segments
 $top-controls-search-width: 16rem; // 256px search field
-$top-controls-datetime-min-width: 7rem; // 112px min before the flexible date-time field stops shrinking
+$top-controls-datetime-min-width: 6.25rem; // 100px min before the flexible date-time field stops shrinking (bar 1280 refs)
 $top-controls-card-gap: 1.5rem; // 24px between titled fields inside one card section
 $top-controls-inline-pad: 0.625rem; // 10px inline padding for segments / action buttons
 

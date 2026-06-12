@@ -1,6 +1,7 @@
 // cspell:disable
 import { useState, type ReactNode } from 'react';
 import type { HeaderTabId } from '@/components/Header/Header';
+import { cx } from '@/lib/cx';
 import {
   ChipButton,
   ControlCard,
@@ -27,19 +28,29 @@ const DATETIME_COMPACT = '24-04-2025';
 // ── Shell ────────────────────────────────────────────────────────────────────
 // At 1920 with the rail collapsed the cards fill the full toolbar width with no
 // internal horizontal scroll; the "Тип данных" group stays pinned on the right.
+// `cap1920` freezes the toolbar at its 1920-band width per rail state: the
+// 2560/3840 bar references reproduce the 1920 artboards instead of letting the
+// cards grow with the viewport (the map toolbar keeps the 2560 content cap).
 function Toolbar({
   label,
   children,
   trailing,
+  cap1920,
+  railExpanded,
 }: {
   label: string;
   children: ReactNode;
   trailing: ReactNode;
+  cap1920?: boolean;
+  railExpanded?: boolean;
 }) {
   return (
     <div
       aria-label={label}
-      className={styles.toolbar}
+      className={cx(
+        styles.toolbar,
+        cap1920 && (railExpanded ? styles.toolbarRailExpanded : styles.toolbarRailCollapsed),
+      )}
       data-testid="tab-top-controls"
       role="toolbar"
     >
@@ -49,13 +60,27 @@ function Toolbar({
   );
 }
 
-// "Тип данных" segmented card with local selection state.
-function DataTypeCard({ items }: { items: readonly SegmentItem[] }) {
+// "Тип данных" segmented card with local selection state. `segmentClassName`
+// lets a tab retune the segmented control (the bar full-band reference
+// stretches the segments evenly across a fixed-width card).
+function DataTypeCard({
+  items,
+  segmentClassName,
+}: {
+  items: readonly SegmentItem[];
+  segmentClassName?: string;
+}) {
   const [value, setValue] = useState(items[0]?.id ?? '');
   return (
     <ControlCard ariaLabel="Тип данных">
       <ControlField title="Тип данных">
-        <SegmentedControl ariaLabel="Тип данных" items={items} onChange={setValue} value={value} />
+        <SegmentedControl
+          ariaLabel="Тип данных"
+          bandClassName={segmentClassName}
+          items={items}
+          onChange={setValue}
+          value={value}
+        />
       </ControlField>
     </ControlCard>
   );
@@ -124,27 +149,46 @@ const BAR_WEATHER: readonly SegmentItem[] = [
   { id: 'clouds', label: 'Облачность и намерзание', icon: 'pie-chart' },
   { id: 'precip', label: 'Осадки и ветренность', icon: 'pie-chart' },
 ];
+// Short labels of the compact-band segmented tier (1280-with-collapsed-rail
+// reference); below the container threshold the control folds into "Все".
+const BAR_WEATHER_SHORT: readonly SegmentItem[] = [
+  { id: 'wind', label: 'Погода', icon: 'list' },
+  { id: 'clouds', label: 'Облачность', icon: 'pie-chart' },
+  { id: 'precip', label: 'Осадки', icon: 'pie-chart' },
+];
 const BAR_DATA_TYPES: readonly SegmentItem[] = [
   { id: 'targets', label: 'Цели', icon: 'list' },
   { id: 'routes', label: 'Маршруты', icon: 'pie-chart' },
   { id: 'simulation', label: 'Имитация', icon: 'list' },
 ];
+// The bar references keep the date fields date-only at every width.
+const BAR_DATETIME = '24-04-2025';
 
+// Three space-driven tiers, matching the references: long segment labels at
+// >= 1920, short labels in the compact band while the toolbar is wide enough
+// (rail collapsed), and a single "Все" dropdown below the container threshold
+// (rail expanded at 1280).
 function WeatherCard() {
   const [value, setValue] = useState(BAR_WEATHER[0].id);
   return (
-    <ControlCard ariaLabel="Погодные параметры">
-      <ControlField title="Погодные параметры">
+    <ControlCard ariaLabel="Погодные параметры" compactFlexible>
+      <ControlField grow title="Погодные параметры">
         <SegmentedControl
           ariaLabel="Погодные параметры"
-          bandClassName={styles.fullBandOnly}
+          bandClassName={cx(styles.fullBandOnly, styles.barWeatherSegment)}
           items={BAR_WEATHER}
           onChange={setValue}
           value={value}
         />
-        {/* In the compact band the segments fold into a single dropdown ("Все"),
-            matching the 1280 reference. */}
-        <span className={styles.compactBandOnly}>
+        <span className={styles.weatherShortBand}>
+          <SegmentedControl
+            ariaLabel="Погодные параметры"
+            items={BAR_WEATHER_SHORT}
+            onChange={setValue}
+            value={value}
+          />
+        </span>
+        <span className={styles.weatherSelectBand}>
           <SelectField ariaLabel="Погодные параметры" options={['Все']} value="Все" />
         </span>
       </ControlField>
@@ -152,14 +196,24 @@ function WeatherCard() {
   );
 }
 
-function RoutesTopControls() {
+function RoutesTopControls({ railExpanded }: { railExpanded: boolean }) {
   return (
-    <Toolbar label="Управление: маршруты" trailing={<DataTypeCard items={BAR_DATA_TYPES} />}>
-      <ControlCard ariaLabel="Работа с данными по карте" flexible>
+    <Toolbar
+      cap1920
+      label="Управление: маршруты"
+      railExpanded={railExpanded}
+      trailing={<DataTypeCard items={BAR_DATA_TYPES} segmentClassName={styles.barTypeSegment} />}
+    >
+      <ControlCard
+        ariaLabel="Работа с данными по карте"
+        className={styles.barDataCard}
+        compactIntrinsic
+        flexible
+      >
         <ControlField title="Работа с данными по карте">
-          <SearchField placeholder="Поиск по названию, координатам" />
+          <SearchField placeholder="Поиск по названию" />
         </ControlField>
-        <DateTimeCard compactDateOnly />
+        <DateTimeCard from={BAR_DATETIME} to={BAR_DATETIME} />
       </ControlCard>
       <WeatherCard />
     </Toolbar>
@@ -308,12 +362,18 @@ function StatsTopControls() {
   );
 }
 
-export function TabTopControls({ activeTab }: { activeTab: HeaderTabId }) {
+export function TabTopControls({
+  activeTab,
+  railExpanded,
+}: {
+  activeTab: HeaderTabId;
+  railExpanded: boolean;
+}) {
   switch (activeTab) {
     case 'map':
       return <MapTopControls />;
     case 'bar':
-      return <RoutesTopControls />;
+      return <RoutesTopControls railExpanded={railExpanded} />;
     case 'tmi':
       return <TelemetryTopControls />;
     case 'sat':

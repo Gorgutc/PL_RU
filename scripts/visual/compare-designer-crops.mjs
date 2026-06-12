@@ -34,9 +34,16 @@ if (refs.length === 0) {
   process.exit(1);
 }
 
-const chromiumLaunchOptions = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-  ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
-  : {};
+// --disable-lcd-text normalises the capture to grayscale text antialiasing:
+// the designer PNGs are Figma exports (grayscale AA), while Chromium on Windows
+// defaults to subpixel (ClearType) AA whose RGB fringes exceed the per-pixel
+// delta on every glyph edge. Capture-side normalisation only — the app is untouched.
+const chromiumLaunchOptions = {
+  args: ['--disable-lcd-text'],
+  ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+    ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+    : {}),
+};
 const MOTION_SETTLE_MS = 320; // 220ms rail/grid motion + settle margin.
 
 function pngDataUrl(file) {
