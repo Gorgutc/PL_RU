@@ -551,7 +551,11 @@
 
   .iconGroup {
     flex: var(--group-grow, 1) 1 0;
-    min-width: 4.5rem; // ~2 icon slots; the floor must not depend on text metrics
+
+    // Exactly 2 icon slots (32 + 4 + 32); the floor must not depend on text
+    // metrics, and with bundled Inter the four floors plus the natural-width
+    // date card need the extra 4px per group to fit the 1280-expanded band.
+    min-width: 4.25rem;
   }
 
   // Keep the (wider) nowrap group titles out of the min-content calculation:
@@ -561,6 +565,13 @@
   .iconGroup .fieldTitle {
     width: 0;
     min-width: 100%;
+
+    // Clip the title at the group edge: painted (visible) overflow still adds
+    // to the scroller's scrollWidth, so a title wider than the floored group
+    // box would trip the frozen fitting gate — bundled Inter renders the long
+    // titles a few px wider than the old OS-fallback font did.
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   // Decouple the row width from its icon content so the group can shrink to its

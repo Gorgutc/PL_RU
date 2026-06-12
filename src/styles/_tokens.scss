@@ -90,7 +90,11 @@ $space-7: 3rem;
 $space-8: 4rem;
 
 // ─── Typography ──────────────────────────────────────────────────────────────
+// Inter is self-hosted via next/font (--font-inter, layout.tsx): the designer
+// artboards are set in Inter, and relying on the OS fallback chain made local
+// (Segoe UI) and CI (DejaVu Sans) render different glyph widths.
 $font-sans:
+  var(--font-inter),
   'Inter',
   system-ui,
   -apple-system,
