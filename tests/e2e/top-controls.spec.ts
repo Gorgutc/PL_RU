@@ -260,6 +260,14 @@ test.describe('Per-tab top control blocks', () => {
   });
 
   test('keeps the map toolbar fitting and capped across viewport widths', async ({ page }) => {
+    const measurements: Array<{
+      width: number;
+      state: string;
+      overflow: number;
+      client: number;
+      kids: number[];
+      trailing: number;
+    }> = [];
     for (const width of RESPONSIVE_WIDTHS) {
       const height = Math.round((width * 9) / 16);
       await page.setViewportSize({ width, height });
@@ -293,17 +301,33 @@ test.describe('Per-tab top control blocks', () => {
           scrollWidth: document.documentElement.scrollWidth,
         }));
         expect(scroll.scrollWidth).toBeLessThanOrEqual(scroll.clientWidth);
-        const scrollerOverflow = await toolbar.evaluate((el) => {
+        const fit = await toolbar.evaluate((el) => {
           const scroller = el.firstElementChild as HTMLElement;
-          return scroller.scrollWidth - scroller.clientWidth;
+          const trailing = el.lastElementChild as HTMLElement;
+          const kids = Array.from(scroller.children).map((child) =>
+            Math.round((child as HTMLElement).getBoundingClientRect().width),
+          );
+          return {
+            overflow: scroller.scrollWidth - scroller.clientWidth,
+            client: scroller.clientWidth,
+            kids,
+            trailing: Math.round(trailing.getBoundingClientRect().width),
+          };
         });
-        expect(scrollerOverflow).toBeLessThanOrEqual(1);
+        measurements.push({ width, state, ...fit });
 
         if (state === 'expanded') {
           await collapseToggle.click();
           await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
         }
       }
+    }
+    const summary = JSON.stringify(measurements);
+    for (const m of measurements) {
+      expect(
+        m.overflow,
+        `overflow ${m.width}/${m.state}=${m.overflow} client=${m.client} kids=${JSON.stringify(m.kids)} trailing=${m.trailing} | ALL=${summary}`,
+      ).toBeLessThanOrEqual(1);
     }
   });
 
