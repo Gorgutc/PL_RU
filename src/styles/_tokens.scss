@@ -172,7 +172,7 @@ $top-controls-control-height: $header-action-height; // 30px inputs/segmented (H
 $top-controls-segment-height: 1.5rem; // 24px active/inactive segment pill
 $top-controls-segment-gap: $space-1; // 4px between segments
 $top-controls-search-width: 16rem; // 256px search field
-$top-controls-datetime-min-width: 7rem; // 112px min before the flexible date-time field stops shrinking
+$top-controls-datetime-min-width: 6rem; // 96px floor; lets the date card shrink ~32px more so the 1920 rail-expanded map toolbar keeps real fitting slack (compact band already floors at 5rem)
 $top-controls-card-gap: 1.5rem; // 24px between titled fields inside one card section
 $top-controls-inline-pad: 0.625rem; // 10px inline padding for segments / action buttons
 

@@ -308,17 +308,21 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   local Windows runs and Linux CI scan the same target set.
 - Shared Playwright config lives in `playwright.shared.config.ts`; e2e and
   quality configs should extend it instead of duplicating the full config body.
-- Linux CI runs Playwright browser checks against the hosted runner's system
-  Google Chrome via the shared `channel: 'chrome'` config and the
-  `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` environment variable. Do not download
-  Playwright Chromium in GitHub Actions; the CDN install can stall after the
-  archive reaches 100% and block the full ship gate.
+- Every Playwright browser check (e2e, quality, pa11y, visual) runs Playwright's
+  lockfile-pinned bundled Chromium, installed in CI via
+  `pnpm exec playwright install --with-deps chromium`. The shared config sets no
+  `channel`, so the runner's system Google Chrome is never used: the 2026-06
+  runner image auto-bumped Chrome 148 -> 149 and its wider font metrics broke the
+  top-controls fitting + visual gates with zero repo changes (user-approved
+  unfreeze, 2026-06-12). Pinning browser checks to system Chrome — via
+  `channel: 'chrome'` or by exporting `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` in
+  GitHub Actions — is forbidden; `verify-frozen.ts` (A11) guards both halves.
 - Reference manifest hashing lives in `scripts/lib/reference-manifest.mjs`;
   `scripts/sync-refs.mjs` and `scripts/verify-reference.js` should share it.
-- Pa11y uses the Playwright Chromium executable from `playwright` by default
-  for local runs, and uses `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` in Linux CI so
-  it stays on the same Chromium browser family without requiring a Playwright
-  browser download.
+- Pa11y, `check:visual`, and the `verify-frozen.ts` runtime block launch that same
+  bundled Chromium through `chromium.executablePath()` (with an optional
+  `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` override for non-default install paths),
+  so every browser family stays identical without a separate browser download.
 - `pnpm check:visual` stays in the deep quality gate. It must require visual QA
   evidence for UI-surface changes detected in the base diff, unstaged worktree
   diff, staged diff, or untracked files.

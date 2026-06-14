@@ -502,6 +502,15 @@ async function testFrozenQualityToolingContract() {
   if (!ci.includes('pnpm exec playwright install --with-deps chromium')) {
     failures.push('ci.yml must install the lockfile-pinned Playwright Chromium (with deps)');
   }
+  // The Playwright runner (e2e + quality) must launch that same bundled Chromium:
+  // a `channel: 'chrome'` override would silently divert the suite to the runner's
+  // drifting system Chrome (the 148 -> 149 font-metric break that fails the
+  // top-controls fitting gate). Guard its absence so the regression can't return.
+  if (shared.includes("channel: 'chrome'")) {
+    failures.push(
+      'playwright.shared.config.ts must not pin browser checks to the system Chrome channel',
+    );
+  }
   if (!codexConfig.includes('node = "24"')) failures.push('.codex/config.toml must use Node 24');
   for (const [label, text] of [
     ['AGENTS.md', agents],
@@ -535,11 +544,9 @@ async function testFrozenQualityToolingContract() {
     ...((await pathExists('scripts/check-visual-evidence.mjs'))
       ? []
       : ['scripts/check-visual-evidence.mjs missing']),
-    ...missingSnippets(shared, [
-      'createPlaywrightConfig',
-      'Desktop Chrome',
-      "channel: 'chrome'",
-    ]).map((snippet) => `playwright.shared.config.ts missing ${snippet}`),
+    ...missingSnippets(shared, ['createPlaywrightConfig', 'Desktop Chrome']).map(
+      (snippet) => `playwright.shared.config.ts missing ${snippet}`,
+    ),
     ...missingSnippets(e2e, ["createPlaywrightConfig('./tests/e2e')"]).map(
       (snippet) => `playwright.config.ts missing ${snippet}`,
     ),
