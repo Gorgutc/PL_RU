@@ -208,9 +208,17 @@ function TableBottomPanel({
     <section aria-label={testLabel} className={styles.panel} data-testid="tab-bottom-panel">
       <ControlCard ariaLabel="Дополнительная фильтрация">
         <ControlField title="Дополнительная фильтрация">
-          {filters.map((label) => (
-            <SwitchToggle defaultChecked key={label} label={label} />
+          {filters.map((label, index) => (
+            <span
+              key={label}
+              className={cx(index >= COMPACT_VISIBLE_FILTERS && styles.filterExtra)}
+            >
+              <SwitchToggle defaultChecked label={label} />
+            </span>
           ))}
+          <span className={styles.filterOverflow}>
+            <MapLayerDropdown ariaLabel="Ещё фильтры" />
+          </span>
         </ControlField>
       </ControlCard>
 
@@ -282,9 +290,17 @@ function SatBottomPanel() {
     >
       <ControlCard ariaLabel="Дополнительная фильтрация">
         <ControlField title="Дополнительная фильтрация">
-          {SAT_FILTERS.map((label) => (
-            <SwitchToggle defaultChecked key={label} label={label} />
+          {SAT_FILTERS.map((label, index) => (
+            <span
+              key={label}
+              className={cx(index >= COMPACT_VISIBLE_FILTERS && styles.filterExtra)}
+            >
+              <SwitchToggle defaultChecked label={label} />
+            </span>
           ))}
+          <span className={styles.filterOverflow}>
+            <MapLayerDropdown ariaLabel="Ещё фильтры" />
+          </span>
         </ControlField>
       </ControlCard>
 
