@@ -154,6 +154,45 @@
   display: inline-flex;
 }
 
+// ── Overflow chevron + its filter Popover (the hidden toggles live here) ───────
+.overflowChevron.overflowChevron {
+  display: inline-flex;
+  width: 2rem;
+  min-width: 2rem;
+  height: t.$top-controls-control-height;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: t.$radius-xs;
+  outline: 0.0625rem solid t.$color-workspace-border;
+  outline-offset: -0.0625rem;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: t.$color-header-text-on-color !important;
+}
+
+.overflowChevron.overflowChevron:not(:disabled):hover {
+  outline-color: t.$color-workspace-button-hover;
+}
+
+.overflowChevron.overflowChevron:focus-visible {
+  outline: 0.125rem solid t.$color-header-text-on-color;
+  outline-offset: 0.125rem;
+}
+
+.filterMenu {
+  display: grid;
+  gap: t.$space-2;
+  padding: t.$space-3;
+  border: 0.0625rem solid t.$color-header-dropdown-border;
+  border-radius: t.$radius-dropdown;
+  background: t.$color-header-dropdown-bg;
+}
+
+.filterMenuPopover {
+  box-shadow: none !important;
+}
+
 // ── Compact band (< 1920): fold extra filter toggles into the overflow chevron ─
 .filterOverflow {
   display: none;

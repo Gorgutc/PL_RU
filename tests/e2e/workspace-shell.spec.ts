@@ -547,9 +547,13 @@ async function expectPanelControlsAligned(page: Page, panelTestId: string) {
   }
 }
 
-async function tabUntilFocused(page: Page, locator: Locator, maxTabs = 40) {
+async function tabUntilFocused(page: Page, locator: Locator, maxTabs = 64) {
   for (let index = 0; index < maxTabs; index += 1) {
     await page.keyboard.press('Tab');
+    // Let focus settle before checking: advancing through native <select>
+    // controls can lag a frame on some OS/Chromium builds (e.g. Windows bundled
+    // Chromium), and checking activeElement too eagerly undercounts real moves.
+    await page.waitForTimeout(15);
     const focused = await locator.evaluate((element) => element.contains(document.activeElement));
 
     if (focused) return;
@@ -1241,6 +1245,27 @@ test.describe('PraiOS workspace shell', () => {
     await expect(map.locator('.maplibregl-canvas')).toBeVisible();
     await expect(map.locator('.maplibregl-ctrl-attrib')).toContainText('OpenStreetMap');
     await expect(page.getByTestId('workspace-table')).toHaveCount(0);
+  });
+
+  test('exposes hidden bottom-panel filters through the overflow menu', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/');
+    await page.getByRole('banner').locator('#praios-header-tab-kick').click();
+
+    const panel = page.getByTestId('tab-bottom-panel');
+    await expect(panel).toBeVisible();
+
+    // Below 1920 some filter toggles fold out of the inline row; the overflow
+    // chevron must open a popover exposing the full set (incl. the hidden ones)
+    // as real, reachable switches — not be a dead button.
+    const chevron = panel.getByRole('button', { name: 'Ещё фильтры' });
+    await expect(chevron).toHaveAttribute('aria-haspopup', 'menu');
+    await chevron.click();
+
+    const menu = page.getByRole('group', { name: /Дополнительная фильтрация/ });
+    await expect(menu).toBeVisible();
+    await expect(menu.getByText('Включить только отредактированные')).toBeVisible();
+    await expect(menu.locator('.bp6-switch, .bp5-switch')).toHaveCount(5);
   });
 
   test('keeps probing comment separate from the editable launch comment', async ({ page }) => {

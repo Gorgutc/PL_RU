@@ -1,13 +1,14 @@
 // cspell:disable
 'use client';
 
+import { Button, Icon, Popover, PopoverInteractionKind } from '@blueprintjs/core';
+import { useState } from 'react';
 import type { HeaderTabId } from '@/components/Header/Header';
 import {
   ChipButton,
   ControlCard,
   ControlField,
   DateTimeRange,
-  MapLayerDropdown,
   PrimaryActionButton,
   SelectField,
   SwitchToggle,
@@ -90,6 +91,50 @@ const COMPACT_VISIBLE_FILTERS = 3;
 // folds into the chevron) so the data-management card never clips at the edge.
 const WIDE_VISIBLE_FILTERS = 4;
 
+// Overflow chevron: opens a Blueprint Popover holding the full filter set as
+// real switches, so the toggles hidden inline (display:none below 1920, or the
+// 5th toggle on wide table/sat footers) stay reachable by mouse, keyboard, and
+// screen readers — the chevron is no longer a dead button.
+function FilterOverflowMenu({
+  filters,
+  ariaLabel,
+}: {
+  filters: readonly string[];
+  ariaLabel: string;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover
+      content={
+        <div aria-label={`${ariaLabel} — все`} className={styles.filterMenu} role="group">
+          {filters.map((label) => (
+            <SwitchToggle defaultChecked key={label} label={label} />
+          ))}
+        </div>
+      }
+      interactionKind={PopoverInteractionKind.CLICK}
+      isOpen={open}
+      minimal
+      onInteraction={setOpen}
+      placement="bottom-end"
+      popoverClassName={styles.filterMenuPopover}
+    >
+      <Button
+        active={open}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-label="Ещё фильтры"
+        className={styles.overflowChevron}
+        icon={<Icon icon="chevron-down" size={16} />}
+        title="Ещё фильтры"
+        type="button"
+        variant="minimal"
+      />
+    </Popover>
+  );
+}
+
 // Shared filter-toggle card: a titled row of switches that folds extras into an
 // overflow chevron. `wide` (table/sat) keeps 4 inline at 1920 and always shows
 // the chevron; the default (bar) shows all at >=1920 and folds to 3 below 1920.
@@ -121,7 +166,7 @@ function FilterToggleCard({
           </span>
         ))}
         <span className={wide ? styles.filterWideOverflow : styles.filterOverflow}>
-          <MapLayerDropdown ariaLabel="Ещё фильтры" />
+          <FilterOverflowMenu ariaLabel={ariaLabel} filters={filters} />
         </span>
       </ControlField>
     </ControlCard>
