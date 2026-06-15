@@ -90,6 +90,44 @@ const COMPACT_VISIBLE_FILTERS = 3;
 // folds into the chevron) so the data-management card never clips at the edge.
 const WIDE_VISIBLE_FILTERS = 4;
 
+// Shared filter-toggle card: a titled row of switches that folds extras into an
+// overflow chevron. `wide` (table/sat) keeps 4 inline at 1920 and always shows
+// the chevron; the default (bar) shows all at >=1920 and folds to 3 below 1920.
+function FilterToggleCard({
+  title,
+  ariaLabel,
+  filters,
+  wide = false,
+}: {
+  title: string;
+  ariaLabel: string;
+  filters: readonly string[];
+  wide?: boolean;
+}) {
+  return (
+    <ControlCard ariaLabel={ariaLabel}>
+      <ControlField title={title}>
+        {filters.map((label, index) => (
+          <span
+            key={label}
+            className={cx(
+              wide && index >= WIDE_VISIBLE_FILTERS && styles.filterWideExtra,
+              wide
+                ? index === WIDE_VISIBLE_FILTERS - 1 && styles.filterExtra
+                : index >= COMPACT_VISIBLE_FILTERS && styles.filterExtra,
+            )}
+          >
+            <SwitchToggle defaultChecked label={label} />
+          </span>
+        ))}
+        <span className={wide ? styles.filterWideOverflow : styles.filterOverflow}>
+          <MapLayerDropdown ariaLabel="Ещё фильтры" />
+        </span>
+      </ControlField>
+    </ControlCard>
+  );
+}
+
 function RoutesBottomPanel() {
   return (
     <section
@@ -97,21 +135,11 @@ function RoutesBottomPanel() {
       className={styles.panel}
       data-testid="tab-bottom-panel"
     >
-      <ControlCard ariaLabel="Фильтрация на карте">
-        <ControlField title="Фильтрация на карте">
-          {ROUTES_FILTERS.map((label, index) => (
-            <span
-              key={label}
-              className={cx(index >= COMPACT_VISIBLE_FILTERS && styles.filterExtra)}
-            >
-              <SwitchToggle defaultChecked label={label} />
-            </span>
-          ))}
-          <span className={styles.filterOverflow}>
-            <MapLayerDropdown ariaLabel="Ещё фильтры" />
-          </span>
-        </ControlField>
-      </ControlCard>
+      <FilterToggleCard
+        ariaLabel="Фильтрация на карте"
+        filters={ROUTES_FILTERS}
+        title="Фильтрация на карте"
+      />
 
       <ControlCard ariaLabel="Настройки карты">
         <ControlField title="Настройки карты">
@@ -209,24 +237,12 @@ function TableBottomPanel({
 }) {
   return (
     <section aria-label={testLabel} className={styles.panel} data-testid="tab-bottom-panel">
-      <ControlCard ariaLabel="Дополнительная фильтрация">
-        <ControlField title="Дополнительная фильтрация">
-          {filters.map((label, index) => (
-            <span
-              key={label}
-              className={cx(
-                index >= WIDE_VISIBLE_FILTERS && styles.filterWideExtra,
-                index === WIDE_VISIBLE_FILTERS - 1 && styles.filterExtra,
-              )}
-            >
-              <SwitchToggle defaultChecked label={label} />
-            </span>
-          ))}
-          <span className={styles.filterWideOverflow}>
-            <MapLayerDropdown ariaLabel="Ещё фильтры" />
-          </span>
-        </ControlField>
-      </ControlCard>
+      <FilterToggleCard
+        ariaLabel="Дополнительная фильтрация"
+        filters={filters}
+        title="Дополнительная фильтрация"
+        wide
+      />
 
       <ControlCard ariaLabel="Настройки таблицы">
         <ControlField title="Настройки таблицы">
@@ -294,24 +310,12 @@ function SatBottomPanel() {
       className={styles.panel}
       data-testid="tab-bottom-panel"
     >
-      <ControlCard ariaLabel="Дополнительная фильтрация">
-        <ControlField title="Дополнительная фильтрация">
-          {SAT_FILTERS.map((label, index) => (
-            <span
-              key={label}
-              className={cx(
-                index >= WIDE_VISIBLE_FILTERS && styles.filterWideExtra,
-                index === WIDE_VISIBLE_FILTERS - 1 && styles.filterExtra,
-              )}
-            >
-              <SwitchToggle defaultChecked label={label} />
-            </span>
-          ))}
-          <span className={styles.filterWideOverflow}>
-            <MapLayerDropdown ariaLabel="Ещё фильтры" />
-          </span>
-        </ControlField>
-      </ControlCard>
+      <FilterToggleCard
+        ariaLabel="Дополнительная фильтрация"
+        filters={SAT_FILTERS}
+        title="Дополнительная фильтрация"
+        wide
+      />
 
       <ControlCard ariaLabel="Коллекция изображений">
         <ControlField title="Коллекция изображений">

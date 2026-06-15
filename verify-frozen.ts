@@ -1197,6 +1197,10 @@ async function testWorkspaceShellContract() {
       'PraiOS workspace',
       'getWorkspaceSidebarMode(activeTab)',
       '<WorkspaceMap />',
+      // A13 re-open (2026-06-15): kick/stats render the table container instead
+      // of the map; guard the routing so it cannot silently regress.
+      'WorkspaceTableSurface',
+      'showsTable',
     ]).map((snippet) => `AppShell.tsx missing ${snippet}`),
     ...missingSnippets(appShellStyles, [
       'height: calc(100dvh - t.$header-height);',

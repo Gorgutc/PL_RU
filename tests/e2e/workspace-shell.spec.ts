@@ -1018,8 +1018,8 @@ test.describe('PraiOS workspace shell', () => {
     await header.locator('#praios-header-tab-stats').click();
     await expectPanelControlsAligned(page, 'stats-side-panel');
 
-    await header.locator('#praios-header-tab-sat').click();
-    await expectPanelControlsAligned(page, 'sat-side-panel');
+    // sat is now the OsiDus gallery (thumbnails, not aligned form controls), so
+    // the form-control right-edge alignment contract applies to kick/stats only.
   });
 
   test('keeps launch checkbox controls compact without pointer focus outlines', async ({
