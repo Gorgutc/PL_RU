@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "taskScope": "Оперативная карта tab: top-controls remapped to the reference (Слои карты = 9 providers + 2 toggles) with compact icon/toggle overflow and a 2560 content cap, plus the new MapBottomPanel (filters · cloud-base gradient legend · data actions) under the map; baselines refreshed for the map-tab bottom panel",
+  "taskScope": "Reference-compliance pass: per-tab bottom panels added on bar/tmi/sat/kick/stats (sibling TabBottomPanel reusing the frozen control-surface primitives; MapBottomPanel untouched), a dark table container (WorkspaceTableSurface) replaces the map center on kick/stats (A13 re-opened with user approval), and the sat left panel is now the OsiDus gallery. routes/telemetry rail-expanded baselines refreshed because those tabs now render the bottom panel (the map shifts up); map-tab baselines unchanged (still 0 mismatch).",
   "references": [
     "Figma per-tab block exports: Desktop/Work/Верхние блоки управления/*_общий блок.png and *_code.md (design source for sizing/colors)",
     "Numeric spec: card #171d20 surface, #727677 1px outline, 2px radius, 16px padding, 30px controls, 24px #2970ff active segment",
