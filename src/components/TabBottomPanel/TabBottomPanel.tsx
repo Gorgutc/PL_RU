@@ -206,7 +206,7 @@ function TableBottomPanel({
 }) {
   return (
     <section aria-label={testLabel} className={styles.panel} data-testid="tab-bottom-panel">
-      <ControlCard ariaLabel="Дополнительная фильтрация" flexible>
+      <ControlCard ariaLabel="Дополнительная фильтрация">
         <ControlField title="Дополнительная фильтрация">
           {filters.map((label) => (
             <SwitchToggle defaultChecked key={label} label={label} />
@@ -280,7 +280,7 @@ function SatBottomPanel() {
       className={styles.panel}
       data-testid="tab-bottom-panel"
     >
-      <ControlCard ariaLabel="Дополнительная фильтрация" flexible>
+      <ControlCard ariaLabel="Дополнительная фильтрация">
         <ControlField title="Дополнительная фильтрация">
           {SAT_FILTERS.map((label) => (
             <SwitchToggle defaultChecked key={label} label={label} />

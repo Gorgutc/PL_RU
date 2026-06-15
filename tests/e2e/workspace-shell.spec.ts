@@ -773,11 +773,13 @@ test.describe('PraiOS workspace shell', () => {
     await expectMapCanvasCoversMaskDuringMotionSamples(page, 'rail closing');
 
     await waitForMapCanvasStableStage(page, 'collapsed rail after close');
-    await page.getByRole('banner').locator('#praios-header-tab-stats').click();
-    await waitForMapCanvasStableStage(page, 'stats panel before map tab');
+    // sat is a panel tab that still renders the map (kick/stats now show a table
+    // surface, so they cannot exercise the map-mask crop path).
+    await page.getByRole('banner').locator('#praios-header-tab-sat').click();
+    await waitForMapCanvasStableStage(page, 'sat panel before map tab');
 
     await page.getByRole('banner').locator('#praios-header-tab-map').click();
-    await expectMapCanvasCoversMaskDuringMotionSamples(page, 'stats to map');
+    await expectMapCanvasCoversMaskDuringMotionSamples(page, 'sat to map');
   });
 
   test('keeps a right-anchored stable map stage while tabs crop and reveal it', async ({
@@ -789,23 +791,23 @@ test.describe('PraiOS workspace shell', () => {
     await expect(page.locator('.maplibregl-canvas')).toBeVisible();
     await waitForMapCanvasStableStage(page, 'initial collapsed map');
 
-    await header.locator('#praios-header-tab-stats').click();
-    await waitForMapCanvasStableStage(page, 'stats panel crop');
+    await header.locator('#praios-header-tab-sat').click();
+    await waitForMapCanvasStableStage(page, 'sat panel crop');
     await waitForMapCanvasResizeQuiet(page, MAP_STAGE_PRE_WATCH_QUIET_MS);
     await watchMapCanvasResizeMutations(page);
 
     await header.locator('#praios-header-tab-map').click();
-    await expectMapCanvasStableStageDuringMotionSamples(page, 'stats to map');
+    await expectMapCanvasStableStageDuringMotionSamples(page, 'sat to map');
     await waitForWorkspaceMotion(page);
     await expectMapCanvasUsesStableStageWidth(page, 'map after stats reveal');
     // Entering the map tab mounts the fixed bottom panel, which legitimately
     // changes the map HEIGHT once (handled by the ResizeObserver). The
     // right-anchored stage WIDTH must stay stable — assert no horizontal resize.
-    const statsToMapResizeEvents = await readMapCanvasResizeMutationEvents(page);
-    for (const event of statsToMapResizeEvents) {
+    const satToMapResizeEvents = await readMapCanvasResizeMutationEvents(page);
+    for (const event of satToMapResizeEvents) {
       expect(
         Math.abs(Number(event.width) - MAX_COLLAPSED_MAP_CANVAS_WIDTH),
-        'stats to map must not change the right-anchored stage width',
+        'sat to map must not change the right-anchored stage width',
       ).toBeLessThanOrEqual(MAP_MASK_COVERAGE_TOLERANCE_PX);
     }
     await stopWatchingMapCanvasResizeMutations(page);
@@ -1218,6 +1220,22 @@ test.describe('PraiOS workspace shell', () => {
     await expect(satPanel).toBeVisible();
     await expect(page.getByTestId('workspace-map')).toBeVisible();
     await expect(satPanel.getByText('Зондирование')).toBeVisible();
+  });
+
+  test('renders a table surface instead of the map on the table tabs', async ({ page }) => {
+    await openWorkspace(page);
+    const header = page.getByRole('banner');
+
+    for (const tab of ['kick', 'stats'] as const) {
+      await header.locator(`#praios-header-tab-${tab}`).click();
+      await expect(page.getByTestId('workspace-left-area')).toHaveAttribute('data-tab', tab);
+      await expect(page.getByTestId('workspace-table')).toBeVisible();
+      await expect(page.getByTestId('workspace-map')).toHaveCount(0);
+    }
+
+    await header.locator('#praios-header-tab-map').click();
+    await expect(page.getByTestId('workspace-map')).toBeVisible();
+    await expect(page.getByTestId('workspace-table')).toHaveCount(0);
   });
 
   test('keeps probing comment separate from the editable launch comment', async ({ page }) => {
