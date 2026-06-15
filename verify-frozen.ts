@@ -1266,7 +1266,7 @@ async function testWorkspaceShellContract() {
       'testId="sat-side-panel"',
       'Создание параметров для пуска',
       'Фильтры таблицы',
-      'Зондирование',
+      'OsiDus',
     ]).map((snippet) => `TabSidePanel.tsx missing ${snippet}`),
     ...missingSnippets(tabSidePanelStyles, [
       '.checkbox.checkbox',
@@ -1390,7 +1390,7 @@ async function testWorkspaceShellContract() {
       'Launch comments are editable `TextArea`',
       'visible text inputs in the reference format',
       'native `datetime-local` calendar',
-      'probing (`sat`) comment control',
+      'probing (`sat`) `OsiDus` gallery',
       'Launch checkbox rows keep a compact `16px` Blueprint indicator',
       'pointer-click focus outline or shadow',
       'keyboard focus remains visible',

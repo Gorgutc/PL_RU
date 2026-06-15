@@ -1219,7 +1219,7 @@ test.describe('PraiOS workspace shell', () => {
 
     await expect(satPanel).toBeVisible();
     await expect(page.getByTestId('workspace-map')).toBeVisible();
-    await expect(satPanel.getByText('Зондирование')).toBeVisible();
+    await expect(satPanel.getByText('OsiDus')).toBeVisible();
   });
 
   test('renders a table surface instead of the map on the table tabs', async ({ page }) => {
@@ -1243,12 +1243,10 @@ test.describe('PraiOS workspace shell', () => {
     await page.getByRole('banner').locator('#praios-header-tab-sat').click();
 
     const satPanel = page.getByTestId('sat-side-panel');
-    const comment = satPanel.locator('textarea');
 
+    // The OsiDus gallery replaced the legacy probing form: it must never leak the
+    // editable launch comment control into the probing panel.
     await expect(satPanel.locator('[data-testid="kick-comment"]')).toHaveCount(0);
-    await expect(comment).toHaveCount(1);
-    expect(await comment.evaluate((element) => (element as HTMLTextAreaElement).readOnly)).toBe(
-      true,
-    );
+    await expect(satPanel.getByRole('list', { name: 'Снимки в выделенной области' })).toBeVisible();
   });
 });
