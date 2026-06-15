@@ -1233,8 +1233,13 @@ test.describe('PraiOS workspace shell', () => {
       await expect(page.getByTestId('workspace-map')).toHaveCount(0);
     }
 
+    // Returning to a map tab must remount a real interactive MapLibre map, not
+    // just the wrapper element.
     await header.locator('#praios-header-tab-map').click();
-    await expect(page.getByTestId('workspace-map')).toBeVisible();
+    const map = page.getByTestId('workspace-map');
+    await expect(map).toBeVisible();
+    await expect(map.locator('.maplibregl-canvas')).toBeVisible();
+    await expect(map.locator('.maplibregl-ctrl-attrib')).toContainText('OpenStreetMap');
     await expect(page.getByTestId('workspace-table')).toHaveCount(0);
   });
 
