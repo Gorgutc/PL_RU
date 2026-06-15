@@ -110,7 +110,7 @@ Rules mirrored by `verify-frozen.ts` are binding (`pnpm verify`):
 - A10: Header responsive-tabs, action-button, and dropdown contracts stay frozen.
 - A11: quality-tooling dedupe/shared-config contracts stay frozen.
 - A12: mandatory PL_RU subagent orchestration, component reuse, duplicate-code, exact-spec, and pixel-level visual QA gates stay documented.
-- A13: workspace shell, left sidebar, side-panel alignment, and real MapLibre/OSM map contract stay frozen.
+- A13: workspace shell, left sidebar, side-panel alignment, and the real MapLibre/OSM map contract stay frozen; the map renders on map/bar/tmi/sat and the table tabs (kick/stats) show a table container (A13 re-opened 2026-06-15).
 - A14: app-wide layout sizing follows the `10px` / `8px` / `4px` rhythm, with `4px` as the minimum grid step and explicit frozen-radius exceptions allowed.
 - A15: per-tab top control blocks (`TabTopControls`) stay on the frozen control-surface contract (see `docs/agent/frozen-decisions.md`).
 - A16: the Claude (`.claude/` + `CLAUDE.md`) and Codex (`.codex/` + `plugins/pl-ru-codex/` + `AGENTS.md`) canons stay in parity.

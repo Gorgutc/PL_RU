@@ -181,7 +181,13 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 - The center workspace is a Blueprint `Card` map surface inside a dynamic map
   container. The map area keeps a symmetric `10px` outer gutter, the Card keeps
   an `8px` inner inset before the MapLibre canvas, the outer container radius is
-  `2px`, and the map canvas radius is `4px`. The visible map canvas is a clipped
+  `2px`, and the map canvas radius is `4px`.
+- The map-bearing tabs (`map`/`bar`/`tmi`/`sat`) show the map in that center
+  slot; the table tabs (`kick`/`stats`) render a presentational dark table
+  container (`WorkspaceTableSurface`) there instead, reusing the same
+  `10px`/`8px`/`2px`/`4px` geometry. A13 was re-opened 2026-06-15 with explicit
+  user approval because the эталон shows a table, not a map, on those tabs;
+  `AppShell.tsx` keeps the literal `<WorkspaceMap />` for the map-bearing tabs. The visible map canvas is a clipped
   mask over a stable right-anchored MapLibre stage sized to the collapsed-rail
   map width, so left-side rail and panel width changes crop or reveal the map
   instead of scaling, recentering, or resizing it. MapLibre `trackResize` stays disabled;
