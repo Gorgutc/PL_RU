@@ -481,7 +481,7 @@ export function Header({
           <Button
             className={cx(styles.actionButton, styles.actionButtonData)}
             disabled
-            icon={<Icon className={styles.actionIcon} icon="circle" size={16} />}
+            icon={<Icon className={styles.actionIcon} icon="full-circle" size={16} />}
             text="Данные"
             textClassName={styles.actionText}
             title="Действие будет подключено следующим этапом"
@@ -491,7 +491,7 @@ export function Header({
           <Button
             className={cx(styles.actionButton, styles.actionButtonDatabase)}
             disabled
-            icon={<Icon className={styles.actionIcon} icon="th" size={16} />}
+            icon={<Icon className={styles.actionIcon} icon="grid-view" size={16} />}
             text="База данных"
             textClassName={styles.actionText}
             title="Действие будет подключено следующим этапом"

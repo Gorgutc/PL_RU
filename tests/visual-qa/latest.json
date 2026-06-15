@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "taskScope": "Оперативная карта tab: top-controls remapped to the reference (Слои карты = 9 providers + 2 toggles) with compact icon/toggle overflow and a 2560 content cap, plus the new MapBottomPanel (filters · cloud-base gradient legend · data actions) under the map; baselines refreshed for the map-tab bottom panel",
+  "taskScope": "Reference-compliance pass: per-tab bottom panels added on bar/tmi/sat/kick/stats (sibling TabBottomPanel reusing the frozen control-surface primitives; MapBottomPanel untouched), a dark table container (WorkspaceTableSurface) replaces the map center on kick/stats (A13 re-opened with user approval), and the sat left panel is now the OsiDus gallery. routes/telemetry rail-expanded baselines refreshed because those tabs now render the bottom panel (the map shifts up); map-tab baselines unchanged (still 0 mismatch).",
   "references": [
     "Figma per-tab block exports: Desktop/Work/Верхние блоки управления/*_общий блок.png and *_code.md (design source for sizing/colors)",
     "Numeric spec: card #171d20 surface, #727677 1px outline, 2px radius, 16px padding, 30px controls, 24px #2970ff active segment",
@@ -35,7 +35,8 @@
       "The map function block renders 11 + 8 + 4 + 9 Blueprint icon buttons + 2 layer toggles; every glyph SVG loads and every icon button keeps an aria-label (e2e).",
       "Map height/offset now account for the toolbar and the map-tab bottom panel; the frozen map gutter (10px), inner inset (8px), and radii (2px/4px) are unchanged (workspace-shell.spec.ts).",
       "The map-tab MapBottomPanel is a fixed 96px footer reusing the frozen ControlCard surface, with three sub-blocks (Фильтрация switches · Нижняя граница облаков rainbow gradient legend · Управление данными actions). The rainbow stops live only in _tokens.scss ($gradient-cloud-legend, sampled from the reference); it only reduces the map height, leaving the right-anchored stage contract unchanged.",
-      "Actual and diff artifacts stay under reports/visual-qa/."
+      "Actual and diff artifacts stay under reports/visual-qa/.",
+      "Per-tab bottom panels (bar/tmi/sat/kick/stats) reuse the frozen ControlCard/ControlField/SwitchToggle/ChipButton primitives; kick/stats render WorkspaceTableSurface (a dark table container mirroring the frozen map gutter/inset/2px-4px radii) instead of the map (A13 re-opened 2026-06-15), and the sat left panel is the OsiDus gallery. These new surfaces were verified against the эталон via the visual_qa_guardian subagent plus DOM/CSS metrics; committed pixel baselines stay limited to the map/routes/telemetry chrome to avoid bloating the repo with the heavy full-screen эталон PNGs."
     ]
   },
   "pixelComparison": {

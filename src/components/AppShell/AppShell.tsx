@@ -8,9 +8,11 @@ import {
   type WorkspaceRailState,
 } from '@/components/AppNavigation/navigation';
 import { MapBottomPanel } from '@/components/MapBottomPanel/MapBottomPanel';
+import { TabBottomPanel } from '@/components/TabBottomPanel/TabBottomPanel';
 import { TabSidePanel } from '@/components/TabSidePanel/TabSidePanel';
 import { TabTopControls } from '@/components/TabTopControls/TabTopControls';
 import { WorkspaceMap } from '@/components/WorkspaceMap/WorkspaceMap';
+import { WorkspaceTableSurface } from '@/components/WorkspaceTableSurface/WorkspaceTableSurface';
 import { cx } from '@/lib/cx';
 import styles from './AppShell.module.scss';
 
@@ -21,6 +23,9 @@ type AppShellProps = {
 export function AppShell({ activeTab }: AppShellProps) {
   const [isRailExpanded, setIsRailExpanded] = useState(false);
   const sidebarMode = getWorkspaceSidebarMode(activeTab);
+  // The table tabs (kick/stats) show a dark table container in the center
+  // instead of the map, matching the эталон (A13 was re-opened for this).
+  const showsTable = activeTab === 'kick' || activeTab === 'stats';
   const railState: WorkspaceRailState =
     sidebarMode === 'rail' && isRailExpanded ? 'expanded' : 'collapsed';
   const expandedRailClass =
@@ -60,9 +65,9 @@ export function AppShell({ activeTab }: AppShellProps) {
         <div className={styles.workspaceColumn}>
           <TabTopControls activeTab={activeTab} />
           <div className={styles.mapArea}>
-            <WorkspaceMap />
+            {showsTable ? <WorkspaceTableSurface /> : <WorkspaceMap />}
           </div>
-          {activeTab === 'map' ? <MapBottomPanel /> : null}
+          {activeTab === 'map' ? <MapBottomPanel /> : <TabBottomPanel activeTab={activeTab} />}
         </div>
       </section>
     </main>

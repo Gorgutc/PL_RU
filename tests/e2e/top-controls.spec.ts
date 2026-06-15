@@ -52,13 +52,17 @@ test.describe('Per-tab top control blocks', () => {
       await expect(toolbar.locator('section[aria-label="Тип данных"]')).toBeVisible();
 
       const toolbarBox = await requireBox(toolbar);
-      const mapBox = await requireBox(page.getByTestId('workspace-map'));
+      // kick/stats render the table container in the center instead of the map.
+      const isTableTab = tab === 'kick' || tab === 'stats';
+      const centerBox = await requireBox(
+        page.getByTestId(isTableTab ? 'workspace-table' : 'workspace-map'),
+      );
 
       expect(Math.round(toolbarBox.y)).toBe(HEADER_HEIGHT);
-      expect(Math.round(mapBox.y)).toBeGreaterThanOrEqual(
+      expect(Math.round(centerBox.y)).toBeGreaterThanOrEqual(
         Math.round(toolbarBox.y + toolbarBox.height),
       );
-      expect(Math.round(toolbarBox.x)).toBe(Math.round(mapBox.x));
+      expect(Math.round(toolbarBox.x)).toBe(Math.round(centerBox.x));
 
       // Constant toolbar height across every tab — a regression to taller
       // controls (e.g. 32px selects) would resize the map stage on tab switch.
@@ -123,7 +127,7 @@ test.describe('Per-tab top control blocks', () => {
     const toolbar = page.getByTestId('tab-top-controls');
 
     await selectTab(page, 'bar');
-    await expect(toolbar.getByPlaceholder('Поиск по названию, координатам')).toBeVisible();
+    await expect(toolbar.getByPlaceholder('Поиск по названию')).toBeVisible();
 
     await selectTab(page, 'tmi');
     await expect(toolbar.getByText('Загрузить маршруты')).toBeVisible();

@@ -547,9 +547,13 @@ async function expectPanelControlsAligned(page: Page, panelTestId: string) {
   }
 }
 
-async function tabUntilFocused(page: Page, locator: Locator, maxTabs = 40) {
+async function tabUntilFocused(page: Page, locator: Locator, maxTabs = 64) {
   for (let index = 0; index < maxTabs; index += 1) {
     await page.keyboard.press('Tab');
+    // Let focus settle before checking: advancing through native <select>
+    // controls can lag a frame on some OS/Chromium builds (e.g. Windows bundled
+    // Chromium), and checking activeElement too eagerly undercounts real moves.
+    await page.waitForTimeout(15);
     const focused = await locator.evaluate((element) => element.contains(document.activeElement));
 
     if (focused) return;
@@ -773,11 +777,13 @@ test.describe('PraiOS workspace shell', () => {
     await expectMapCanvasCoversMaskDuringMotionSamples(page, 'rail closing');
 
     await waitForMapCanvasStableStage(page, 'collapsed rail after close');
-    await page.getByRole('banner').locator('#praios-header-tab-stats').click();
-    await waitForMapCanvasStableStage(page, 'stats panel before map tab');
+    // sat is a panel tab that still renders the map (kick/stats now show a table
+    // surface, so they cannot exercise the map-mask crop path).
+    await page.getByRole('banner').locator('#praios-header-tab-sat').click();
+    await waitForMapCanvasStableStage(page, 'sat panel before map tab');
 
     await page.getByRole('banner').locator('#praios-header-tab-map').click();
-    await expectMapCanvasCoversMaskDuringMotionSamples(page, 'stats to map');
+    await expectMapCanvasCoversMaskDuringMotionSamples(page, 'sat to map');
   });
 
   test('keeps a right-anchored stable map stage while tabs crop and reveal it', async ({
@@ -789,23 +795,23 @@ test.describe('PraiOS workspace shell', () => {
     await expect(page.locator('.maplibregl-canvas')).toBeVisible();
     await waitForMapCanvasStableStage(page, 'initial collapsed map');
 
-    await header.locator('#praios-header-tab-stats').click();
-    await waitForMapCanvasStableStage(page, 'stats panel crop');
+    await header.locator('#praios-header-tab-sat').click();
+    await waitForMapCanvasStableStage(page, 'sat panel crop');
     await waitForMapCanvasResizeQuiet(page, MAP_STAGE_PRE_WATCH_QUIET_MS);
     await watchMapCanvasResizeMutations(page);
 
     await header.locator('#praios-header-tab-map').click();
-    await expectMapCanvasStableStageDuringMotionSamples(page, 'stats to map');
+    await expectMapCanvasStableStageDuringMotionSamples(page, 'sat to map');
     await waitForWorkspaceMotion(page);
     await expectMapCanvasUsesStableStageWidth(page, 'map after stats reveal');
     // Entering the map tab mounts the fixed bottom panel, which legitimately
     // changes the map HEIGHT once (handled by the ResizeObserver). The
     // right-anchored stage WIDTH must stay stable — assert no horizontal resize.
-    const statsToMapResizeEvents = await readMapCanvasResizeMutationEvents(page);
-    for (const event of statsToMapResizeEvents) {
+    const satToMapResizeEvents = await readMapCanvasResizeMutationEvents(page);
+    for (const event of satToMapResizeEvents) {
       expect(
         Math.abs(Number(event.width) - MAX_COLLAPSED_MAP_CANVAS_WIDTH),
-        'stats to map must not change the right-anchored stage width',
+        'sat to map must not change the right-anchored stage width',
       ).toBeLessThanOrEqual(MAP_MASK_COVERAGE_TOLERANCE_PX);
     }
     await stopWatchingMapCanvasResizeMutations(page);
@@ -1016,8 +1022,8 @@ test.describe('PraiOS workspace shell', () => {
     await header.locator('#praios-header-tab-stats').click();
     await expectPanelControlsAligned(page, 'stats-side-panel');
 
-    await header.locator('#praios-header-tab-sat').click();
-    await expectPanelControlsAligned(page, 'sat-side-panel');
+    // sat is now the OsiDus gallery (thumbnails, not aligned form controls), so
+    // the form-control right-edge alignment contract applies to kick/stats only.
   });
 
   test('keeps launch checkbox controls compact without pointer focus outlines', async ({
@@ -1217,7 +1223,49 @@ test.describe('PraiOS workspace shell', () => {
 
     await expect(satPanel).toBeVisible();
     await expect(page.getByTestId('workspace-map')).toBeVisible();
-    await expect(satPanel.getByText('Зондирование')).toBeVisible();
+    await expect(satPanel.getByText('OsiDus')).toBeVisible();
+  });
+
+  test('renders a table surface instead of the map on the table tabs', async ({ page }) => {
+    await openWorkspace(page);
+    const header = page.getByRole('banner');
+
+    for (const tab of ['kick', 'stats'] as const) {
+      await header.locator(`#praios-header-tab-${tab}`).click();
+      await expect(page.getByTestId('workspace-left-area')).toHaveAttribute('data-tab', tab);
+      await expect(page.getByTestId('workspace-table')).toBeVisible();
+      await expect(page.getByTestId('workspace-map')).toHaveCount(0);
+    }
+
+    // Returning to a map tab must remount a real interactive MapLibre map, not
+    // just the wrapper element.
+    await header.locator('#praios-header-tab-map').click();
+    const map = page.getByTestId('workspace-map');
+    await expect(map).toBeVisible();
+    await expect(map.locator('.maplibregl-canvas')).toBeVisible();
+    await expect(map.locator('.maplibregl-ctrl-attrib')).toContainText('OpenStreetMap');
+    await expect(page.getByTestId('workspace-table')).toHaveCount(0);
+  });
+
+  test('exposes hidden bottom-panel filters through the overflow menu', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/');
+    await page.getByRole('banner').locator('#praios-header-tab-kick').click();
+
+    const panel = page.getByTestId('tab-bottom-panel');
+    await expect(panel).toBeVisible();
+
+    // Below 1920 some filter toggles fold out of the inline row; the overflow
+    // chevron must open a popover exposing the full set (incl. the hidden ones)
+    // as real, reachable switches — not be a dead button.
+    const chevron = panel.getByRole('button', { name: 'Ещё фильтры' });
+    await expect(chevron).toHaveAttribute('aria-haspopup', 'menu');
+    await chevron.click();
+
+    const menu = page.getByRole('group', { name: /Дополнительная фильтрация/ });
+    await expect(menu).toBeVisible();
+    await expect(menu.getByText('Включить только отредактированные')).toBeVisible();
+    await expect(menu.locator('.bp6-switch, .bp5-switch')).toHaveCount(5);
   });
 
   test('keeps probing comment separate from the editable launch comment', async ({ page }) => {
@@ -1225,12 +1273,10 @@ test.describe('PraiOS workspace shell', () => {
     await page.getByRole('banner').locator('#praios-header-tab-sat').click();
 
     const satPanel = page.getByTestId('sat-side-panel');
-    const comment = satPanel.locator('textarea');
 
+    // The OsiDus gallery replaced the legacy probing form: it must never leak the
+    // editable launch comment control into the probing panel.
     await expect(satPanel.locator('[data-testid="kick-comment"]')).toHaveCount(0);
-    await expect(comment).toHaveCount(1);
-    expect(await comment.evaluate((element) => (element as HTMLTextAreaElement).readOnly)).toBe(
-      true,
-    );
+    await expect(satPanel.getByRole('list', { name: 'Снимки в выделенной области' })).toBeVisible();
   });
 });

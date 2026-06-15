@@ -1,6 +1,6 @@
 // cspell:disable
 import { Button, Checkbox, Icon, InputGroup, TextArea } from '@blueprintjs/core';
-import { createContext, useContext, useId, type ReactNode } from 'react';
+import { createContext, useContext, useId, useState, type ReactNode } from 'react';
 import type { HeaderTabId } from '@/components/Header/Header';
 import { RAIL_BY_TAB } from '@/components/AppNavigation/navigation';
 import { SelectControl as SharedSelectControl } from '@/components/controls/SelectControl/SelectControl';
@@ -405,22 +405,95 @@ function StatsPanel() {
   );
 }
 
-function SatPanel() {
+const SAT_GALLERY_TABS = [
+  { id: 'visual', label: 'Визуализация' },
+  { id: 'saved', label: 'Сохранённые' },
+  { id: 'marks', label: 'Метки' },
+] as const;
+
+type SatGalleryTabId = (typeof SAT_GALLERY_TABS)[number]['id'];
+
+type SatSnapshot = {
+  id: string;
+  number: string;
+  timestamp: string;
+  status: string;
+};
+
+const SAT_SNAPSHOTS: readonly SatSnapshot[] = [
+  { id: 's1', number: '234234234234', timestamp: '28.06.2025 13:00:00', status: 'Визуализация' },
+  { id: 's2', number: '234234234234', timestamp: '28.06.2025 13:00:00', status: 'Визуализация' },
+  { id: 's3', number: '234234234234', timestamp: '28.06.2025 13:00:00', status: 'Визуализация' },
+  { id: 's4', number: '234234234234', timestamp: '28.06.2025 13:00:00', status: 'Визуализация' },
+  { id: 's5', number: '234234234234', timestamp: '28.06.2025 13:00:00', status: 'Визуализация' },
+  { id: 's6', number: '234234234234', timestamp: '28.06.2025 13:00:00', status: 'Поверочн' },
+  { id: 's7', number: '234234234234', timestamp: '28.06.2025 13:00:00', status: 'Поверочн' },
+  { id: 's8', number: '234234234234', timestamp: '28.06.2025 13:00:00', status: 'Поверочн' },
+];
+
+function SatGalleryTabs({
+  activeId,
+  onSelect,
+}: {
+  activeId: SatGalleryTabId;
+  onSelect: (id: SatGalleryTabId) => void;
+}) {
   return (
-    <PanelChrome footer={<SatFooter />} testId="sat-side-panel" title="Зондирование">
-      <FieldGrid
-        fields={[
-          { label: 'Источник данных', value: 'Все' },
-          { label: 'Период', value: 'Текущий' },
-        ]}
-      />
-      <SectionDivider />
-      <Field label="Слой наблюдения">
-        <SelectControl value="Заглушка" />
-      </Field>
-      <Field label="Комментарий">
-        <CommentControl />
-      </Field>
+    // These are mutually-exclusive filter toggles, not a W3C tab widget (the
+    // snapshot content is a placeholder that does not switch yet), so they use
+    // plain aria-pressed toggle buttons — the same pattern as ToggleActionButton —
+    // rather than role="tab"/"tablist" (which would require roving tabindex and a
+    // wired tabpanel).
+    <div className={styles.galleryTabs} role="group" aria-label="Раздел галереи">
+      {SAT_GALLERY_TABS.map((tab) => {
+        const active = tab.id === activeId;
+
+        return (
+          <Button
+            key={tab.id}
+            aria-pressed={active}
+            className={cx(styles.galleryTab, active && styles.galleryTabActive)}
+            onClick={() => onSelect(tab.id)}
+            text={tab.label}
+            type="button"
+            variant="minimal"
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function SatSnapshotCard({ snapshot }: { snapshot: SatSnapshot }) {
+  return (
+    <li className={styles.snapshotCard}>
+      <div className={styles.snapshotThumb} aria-hidden="true">
+        <Icon className={styles.snapshotThumbIcon} icon="media" size={20} />
+      </div>
+      <div className={styles.snapshotMeta}>
+        <span className={styles.snapshotNumber}>{snapshot.number}</span>
+        <span className={styles.snapshotTimestamp}>{snapshot.timestamp}</span>
+        <span className={styles.snapshotStatus}>{snapshot.status}</span>
+      </div>
+    </li>
+  );
+}
+
+function SatPanel() {
+  const [activeTab, setActiveTab] = useState<SatGalleryTabId>('visual');
+
+  return (
+    <PanelChrome footer={<SatFooter />} testId="sat-side-panel" title="OsiDus">
+      <SatGalleryTabs activeId={activeTab} onSelect={setActiveTab} />
+      <div className={styles.galleryCount}>
+        <span className={styles.label}>Снимки в выделенной области</span>
+        <span className={styles.galleryCountValue}>Найдено {SAT_SNAPSHOTS.length}</span>
+      </div>
+      <ul className={styles.snapshotList} aria-label="Снимки в выделенной области">
+        {SAT_SNAPSHOTS.map((snapshot) => (
+          <SatSnapshotCard key={snapshot.id} snapshot={snapshot} />
+        ))}
+      </ul>
     </PanelChrome>
   );
 }

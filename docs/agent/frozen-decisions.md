@@ -146,8 +146,12 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   toggle. In collapsed state it is the expand affordance; in expanded state it
   collapses the menu.
 - Wide side panels are fixed at `300px` wide. `kick` renders the launch-parameter
-  form, `stats` renders table filters, and `sat` renders a temporary probing
-  placeholder panel until the probing task gets its own full spec.
+  form, `stats` renders table filters, and `sat` renders the `OsiDus` probing
+  gallery: a `OsiDus` panel title, a `Визуализация` / `Сохранённые` / `Метки` tab
+  row (presentational local state, `Визуализация` active by default), a
+  `Снимки в выделенной области` row with a `Найдено N` counter, and a vertical
+  list of snapshot cards (dark square thumbnail placeholder plus number, date-time,
+  and status text). The probing map stays in the center slot alongside the gallery.
 - Left-rail buttons preserve the shared visual state contract: transparent rest,
   `#528bff` hover, `#2970ff` active, white icon color, and one uniform button
   size. Active rail buttons must not keep a persistent outline, border, or
@@ -170,9 +174,10 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   visible text inputs in the reference format (`02.05.2026 | 16:31` for launch,
   `24-04-2025 | 00:00` for statistics) plus a native `datetime-local` calendar
   input kept inside the shared control for the calendar affordance.
-- The probing (`sat`) comment control must not inherit the launch-specific
-  editable `kick-comment` selector or behavior unless a future task explicitly
-  changes that contract.
+- The probing (`sat`) `OsiDus` gallery must not inherit the launch-specific
+  editable `kick-comment` selector or behavior; the gallery has no comment field.
+  The legacy probing form (source/period/observation-layer/comment) was replaced
+  by the gallery with explicit user approval on 2026-06-15.
 - Launch checkbox rows keep a compact `16px` Blueprint indicator aligned to
   the same internal right inset as other controls and must not keep a
   pointer-click focus outline or shadow; keyboard focus remains visible on the
@@ -181,7 +186,13 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 - The center workspace is a Blueprint `Card` map surface inside a dynamic map
   container. The map area keeps a symmetric `10px` outer gutter, the Card keeps
   an `8px` inner inset before the MapLibre canvas, the outer container radius is
-  `2px`, and the map canvas radius is `4px`. The visible map canvas is a clipped
+  `2px`, and the map canvas radius is `4px`.
+- The map-bearing tabs (`map`/`bar`/`tmi`/`sat`) show the map in that center
+  slot; the table tabs (`kick`/`stats`) render a presentational dark table
+  container (`WorkspaceTableSurface`) there instead, reusing the same
+  `10px`/`8px`/`2px`/`4px` geometry. A13 was re-opened 2026-06-15 with explicit
+  user approval because the эталон shows a table, not a map, on those tabs;
+  `AppShell.tsx` keeps the literal `<WorkspaceMap />` for the map-bearing tabs. The visible map canvas is a clipped
   mask over a stable right-anchored MapLibre stage sized to the collapsed-rail
   map width, so left-side rail and panel width changes crop or reveal the map
   instead of scaling, recentering, or resizing it. MapLibre `trackResize` stays disabled;

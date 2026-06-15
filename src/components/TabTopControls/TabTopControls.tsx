@@ -142,7 +142,7 @@ function RoutesTopControls() {
     <Toolbar label="Управление: маршруты" trailing={<DataTypeCard items={BAR_DATA_TYPES} />}>
       <ControlCard ariaLabel="Работа с данными по карте" flexible>
         <ControlField title="Работа с данными по карте">
-          <SearchField placeholder="Поиск по названию, координатам" />
+          <SearchField placeholder="Поиск по названию" />
         </ControlField>
         <DateTimeCard />
       </ControlCard>

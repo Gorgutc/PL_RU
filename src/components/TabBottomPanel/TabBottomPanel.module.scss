@@ -1,0 +1,209 @@
+@use '../../styles/tokens' as t;
+
+// Per-tab footer strip. Mirrors the MapBottomPanel rhythm: a fixed height so it
+// only changes the map's available height, never the right-anchored stage. Card
+// surfaces come from the reused ControlCard primitive (frozen dark surface).
+.panel {
+  display: flex;
+  box-sizing: border-box;
+  align-items: stretch;
+  gap: t.$workspace-bottom-panel-gap;
+  width: 100%;
+  max-width: t.$workspace-content-max; // caps at 2560, left-aligns beyond it (matches top controls)
+  height: t.$workspace-bottom-panel-height;
+  min-width: 0;
+  padding: 0 t.$workspace-bottom-panel-padding t.$workspace-bottom-panel-padding;
+  background: t.$color-workspace-bg;
+}
+
+.panel *,
+.panel *::before,
+.panel *::after {
+  box-sizing: border-box;
+}
+
+// ── Rainbow legend (flexible middle block) — shared look with the cloud legend ──
+.legend {
+  display: flex;
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.legendHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: t.$space-2;
+}
+
+.legendTitle {
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-weight: 500;
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+.legendUnit {
+  color: t.$color-workspace-placeholder;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  line-height: 1rem;
+}
+
+.legendBar {
+  width: 100%;
+  height: t.$cloud-legend-bar-height;
+  border-radius: t.$radius-dropdown;
+  background: t.$gradient-cloud-legend;
+}
+
+.legendTicks {
+  display: flex;
+  justify-content: space-between;
+  color: t.$color-workspace-placeholder;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-variant-numeric: tabular-nums;
+  line-height: 1rem;
+}
+
+// ── tmi: "Данные маршрута" key/value block ────────────────────────────────────
+.routeData {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  gap: t.$space-1;
+  overflow: hidden;
+}
+
+.routeDataTitle {
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-weight: 500;
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+// Reference lays the 8 fields out as 4 column-pairs × 2 rows (column-major), so
+// the card stays short enough to fit the fixed panel height (a 2-column layout
+// produced 4 rows and clipped the last two fields).
+.routeGrid {
+  display: grid;
+  margin: 0;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, auto);
+  grid-auto-columns: minmax(0, auto);
+  gap: t.$space-1 t.$space-5;
+  align-content: start;
+}
+
+.routeRow {
+  display: flex;
+  gap: t.$space-2;
+  min-width: 0;
+  align-items: baseline;
+}
+
+.routeTerm {
+  color: t.$color-workspace-placeholder;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-filter;
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+.routeValue {
+  margin: 0;
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-filter;
+  font-variant-numeric: tabular-nums;
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+// ── Data-management actions: blue glyph on the reused outlined ChipButton ─────
+.actionIcon.actionIcon {
+  color: t.$color-workspace-button-active;
+}
+
+// Keep filter-toggle labels on a single line (the reference never wraps them);
+// the flexible filter card grows to fit rather than wrapping the Switch labels.
+/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+.panel :global(.bp6-switch) {
+  white-space: nowrap;
+}
+/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
+
+// Table/sat footers have no flexible (rubber) card to absorb width, so they are
+// ~110px wider than the rail-tab footers and would clip the data-management card
+// at 1920. Their 5th filter therefore always lives in the chevron (even at 1920);
+// the chevron is always shown for them.
+.filterWideExtra {
+  display: none;
+}
+
+.filterWideOverflow {
+  display: inline-flex;
+}
+
+// ── Overflow chevron + its filter Popover (the hidden toggles live here) ───────
+.overflowChevron.overflowChevron {
+  display: inline-flex;
+  width: 2rem;
+  min-width: 2rem;
+  height: t.$top-controls-control-height;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: t.$radius-xs;
+  outline: 0.0625rem solid t.$color-workspace-border;
+  outline-offset: -0.0625rem;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: t.$color-header-text-on-color !important;
+}
+
+.overflowChevron.overflowChevron:not(:disabled):hover {
+  outline-color: t.$color-workspace-button-hover;
+}
+
+.overflowChevron.overflowChevron:focus-visible {
+  outline: 0.125rem solid t.$color-header-text-on-color;
+  outline-offset: 0.125rem;
+}
+
+.filterMenu {
+  display: grid;
+  gap: t.$space-2;
+  padding: t.$space-3;
+  border: 0.0625rem solid t.$color-header-dropdown-border;
+  border-radius: t.$radius-dropdown;
+  background: t.$color-header-dropdown-bg;
+}
+
+.filterMenuPopover {
+  box-shadow: none !important;
+}
+
+// ── Compact band (< 1920): fold extra filter toggles into the overflow chevron ─
+.filterOverflow {
+  display: none;
+}
+
+@media (max-width: t.$workspace-bp-compact-max) {
+  .filterExtra {
+    display: none;
+  }
+
+  .filterOverflow {
+    display: inline-flex;
+  }
+}
