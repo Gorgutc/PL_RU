@@ -142,6 +142,18 @@
 }
 /* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
 
+// Table/sat footers have no flexible (rubber) card to absorb width, so they are
+// ~110px wider than the rail-tab footers and would clip the data-management card
+// at 1920. Their 5th filter therefore always lives in the chevron (even at 1920);
+// the chevron is always shown for them.
+.filterWideExtra {
+  display: none;
+}
+
+.filterWideOverflow {
+  display: inline-flex;
+}
+
 // ── Compact band (< 1920): fold extra filter toggles into the overflow chevron ─
 .filterOverflow {
   display: none;

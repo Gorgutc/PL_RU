@@ -86,6 +86,9 @@ const ROUTES_FILTERS = [
 ] as const;
 // Below 1920 only the first few toggles stay inline; the rest fold into the chevron.
 const COMPACT_VISIBLE_FILTERS = 3;
+// Table/sat footers keep at most 4 toggles inline even at 1920 (the 5th always
+// folds into the chevron) so the data-management card never clips at the edge.
+const WIDE_VISIBLE_FILTERS = 4;
 
 function RoutesBottomPanel() {
   return (
@@ -201,7 +204,7 @@ function TableBottomPanel({
   testLabel,
 }: {
   filters: readonly string[];
-  tableActions: readonly { label: string; icon: 'th' | 'timeline-line-chart' }[];
+  tableActions: readonly { label: string; icon: 'grid-view' | 'timeline-line-chart' }[];
   testLabel: string;
 }) {
   return (
@@ -211,12 +214,15 @@ function TableBottomPanel({
           {filters.map((label, index) => (
             <span
               key={label}
-              className={cx(index >= COMPACT_VISIBLE_FILTERS && styles.filterExtra)}
+              className={cx(
+                index >= WIDE_VISIBLE_FILTERS && styles.filterWideExtra,
+                index === WIDE_VISIBLE_FILTERS - 1 && styles.filterExtra,
+              )}
             >
               <SwitchToggle defaultChecked label={label} />
             </span>
           ))}
-          <span className={styles.filterOverflow}>
+          <span className={styles.filterWideOverflow}>
             <MapLayerDropdown ariaLabel="Ещё фильтры" />
           </span>
         </ControlField>
@@ -254,9 +260,9 @@ const KICK_FILTERS = [
   'Включить только отредактированные',
 ] as const;
 const KICK_TABLE_ACTIONS = [
-  { label: 'Настройка колонок', icon: 'th' },
-  { label: 'Тип данных', icon: 'th' },
-  { label: 'Формат ячеек', icon: 'th' },
+  { label: 'Настройка колонок', icon: 'grid-view' },
+  { label: 'Тип данных', icon: 'grid-view' },
+  { label: 'Формат ячеек', icon: 'grid-view' },
 ] as const;
 
 const STATS_FILTERS = [
@@ -267,8 +273,8 @@ const STATS_FILTERS = [
   'Только отредактированные',
 ] as const;
 const STATS_TABLE_ACTIONS = [
-  { label: 'Настройка колонок', icon: 'th' },
-  { label: 'Тип данных', icon: 'th' },
+  { label: 'Настройка колонок', icon: 'grid-view' },
+  { label: 'Тип данных', icon: 'grid-view' },
   { label: 'Включить график', icon: 'timeline-line-chart' },
 ] as const;
 
@@ -293,12 +299,15 @@ function SatBottomPanel() {
           {SAT_FILTERS.map((label, index) => (
             <span
               key={label}
-              className={cx(index >= COMPACT_VISIBLE_FILTERS && styles.filterExtra)}
+              className={cx(
+                index >= WIDE_VISIBLE_FILTERS && styles.filterWideExtra,
+                index === WIDE_VISIBLE_FILTERS - 1 && styles.filterExtra,
+              )}
             >
               <SwitchToggle defaultChecked label={label} />
             </span>
           ))}
-          <span className={styles.filterOverflow}>
+          <span className={styles.filterWideOverflow}>
             <MapLayerDropdown ariaLabel="Ещё фильтры" />
           </span>
         </ControlField>
