@@ -32,6 +32,22 @@
   align-items: stretch;
 }
 
+.mapToolbar .scroller {
+  flex: 0 0 auto;
+}
+
+.mapToolbar .trailing {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.mapToolbar .trailing .card,
+.mapToolbar .trailing .field,
+.mapToolbar .trailing .fieldRow,
+.mapToolbar .trailing .segmented {
+  width: 100%;
+}
+
 // ── Card section (dark control surface) holding one or more titled fields ────
 .card {
   display: flex;
@@ -55,6 +71,15 @@
 // Tighter 16px gap between the four map icon-button groups (vs the 24px card gap).
 .cardTightGroups {
   gap: t.$top-controls-group-gap;
+}
+
+.mapDateCard {
+  width: t.$top-controls-map-date-card-width;
+  flex: 0 0 t.$top-controls-map-date-card-width;
+}
+
+.mapFunctionsCard {
+  min-width: 0;
 }
 
 .field {
@@ -122,6 +147,12 @@
 .segmented.segmented :global(.bp5-button[aria-checked='true']) {
   background: t.$color-workspace-button-active;
   color: t.$color-header-text-on-color;
+}
+
+.mapToolbar .trailing .segmented.segmented :global(.bp6-button),
+.mapToolbar .trailing .segmented.segmented :global(.bp5-button) {
+  flex: 1 1 0;
+  justify-content: center;
 }
 /* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
 
@@ -267,12 +298,18 @@
 }
 
 // ── Map icon-button groups ───────────────────────────────────────────────────
-// An icon group. At >=1920 it is intrinsic (all icons shown). Below 1920 it
-// flexes proportionally to its full icon count (`--group-grow`) and the row
-// trims icons into an overflow chevron (see IconButtonGroup).
+// An icon group. Above 1920 it is intrinsic (all icons shown). At 1920 and
+// below it flexes proportionally to its effective icon slots (`--group-grow`)
+// and the row trims icons into an overflow chevron (see IconButtonGroup).
 .iconGroup {
+  position: relative;
+  width: max-content;
   flex: 0 0 auto;
   min-width: min-content; // never shrink below the (nowrap) title; the row trims icons instead
+}
+
+.iconGroupWithTrailing {
+  padding-block-start: 0;
 }
 
 .iconRow {
@@ -340,9 +377,22 @@
 
 // ── Map-layer toggles (Подложка / Сетка) trailing the layer glyphs ───────────
 .layerToggles {
-  display: inline-flex;
-  align-items: center;
-  gap: t.$space-1;
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: -0.25rem;
+  display: grid;
+  width: calc((2rem * 3) + (#{t.$space-1} * 2));
+  grid-template-columns: repeat(3, 2rem);
+  column-gap: t.$space-1;
+  place-items: center;
+}
+
+.layerToggle:nth-child(1) {
+  grid-column: 1;
+}
+
+.layerToggle:nth-child(2) {
+  grid-column: 3;
 }
 
 .layerToggle.layerToggle {
@@ -365,16 +415,27 @@
   outline-offset: -0.125rem;
 }
 
-// ── Compact band (< 1920): fixed-chrome responsive reflow ────────────────────
-// The frozen 1920 layout (date card flexes, fixed cards keep intrinsic width)
-// is unchanged at >= 1920. Below it the date/time card becomes intrinsic, the
-// map-functions card becomes the flexible (shrinking) card, and its icon groups
-// share the width proportionally to their full icon count so the overflow
-// chevrons appear — no horizontal scroll, no shrunken buttons.
+// Map-function responsive trimming. At the exact 1920 design target the map
+// function groups stay packed; only the layer group caps extra icons into the
+// rightmost dropdown. Width-driven flex trimming starts below 1920.
+@media (max-width: t.$workspace-bp-compact) {
+  // At the exact 1920 reference width the extra layer controls fold into the
+  // rightmost layer dropdown, matching the Figma crop.
+  .mapFunctionsCard .layerToggles {
+    display: none;
+  }
+}
+
+// Narrower than the exact 1920 target also tightens the toolbar/card gaps and
+// keeps the generic flexible cards intrinsic.
 @media (max-width: t.$workspace-bp-compact-max) {
   .toolbar,
   .scroller {
     gap: t.$top-controls-gap-compact;
+  }
+
+  .mapToolbar .scroller {
+    flex: 1 1 auto;
   }
 
   // Scoped to the toolbar so the shared ControlCard `cardFlexible` class used by
@@ -394,6 +455,7 @@
   }
 
   .iconGroup {
+    width: auto;
     flex: var(--group-grow, 1) 1 0;
 
     // Exactly 2 icon slots (32 + 4 + 32); the floor must not depend on text
@@ -427,7 +489,7 @@
   }
 
   // The map toggles fold away with the layer icons in the compact band (they
-  // reappear in the layers dropdown), matching the 1280 reference.
+  // reappear in the layers dropdown), matching the compact references.
   .layerToggles {
     display: none;
   }

@@ -39,6 +39,7 @@ const config = [
       'node_modules/**',
       'playwright-report/**',
       'test-results/**',
+      '.claude/worktrees/**',
       'Blueprints_lib/**',
       'Osiris_ref/**',
       'plugins/pl-ru-codex/skills/blueprint-design/**',

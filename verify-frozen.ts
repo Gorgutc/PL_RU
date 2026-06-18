@@ -1435,6 +1435,7 @@ async function testTopControlBlocksContract() {
       '$top-controls-control-height',
       '$top-controls-segment-height',
       '$top-controls-gap',
+      '$top-controls-map-date-card-width',
     ]) {
       if (!tokens.includes(token)) failures.push(`_tokens.scss missing ${token}`);
     }
@@ -1473,6 +1474,10 @@ async function testTopControlBlocksContract() {
       );
     if (!controls.includes('toggleActionActive'))
       failures.push('controls.tsx ToggleActionButton must wire the active accent-fill class');
+    if (!controls.includes('styles.iconGroupWithTrailing'))
+      failures.push('controls.tsx must position map layer toggles via iconGroupWithTrailing');
+    if (!controls.includes('compactVisibleCount'))
+      failures.push('controls.tsx must support the 1920 compact visible icon cap');
   } catch {
     failures.push('controls.tsx unreadable');
   }
@@ -1487,6 +1492,14 @@ async function testTopControlBlocksContract() {
     // is actually caught.
     if (!topControls.includes('<ToggleActionButton'))
       failures.push('TabTopControls.tsx must render the animation control as <ToggleActionButton>');
+    if (!topControls.includes('styles.mapDateCard'))
+      failures.push('TabTopControls.tsx must wire the map date card to styles.mapDateCard');
+    if (!topControls.includes('styles.mapFunctionsCard'))
+      failures.push(
+        'TabTopControls.tsx must wire the map functions card to styles.mapFunctionsCard',
+      );
+    if (!topControls.includes('styles.mapToolbar'))
+      failures.push('TabTopControls.tsx must wire the map toolbar to styles.mapToolbar');
   } catch {
     failures.push('TabTopControls.tsx unreadable');
   }
@@ -1501,6 +1514,10 @@ async function testTopControlBlocksContract() {
     for (const cls of [
       '.cardFlexible',
       '.cardTightGroups',
+      '.iconGroupWithTrailing',
+      '.mapToolbar',
+      '.mapDateCard',
+      '.mapFunctionsCard',
       '.toggleAction',
       '.toggleActionActive',
     ]) {
@@ -1522,6 +1539,19 @@ async function testTopControlBlocksContract() {
         'presentational with local UI state',
         'cardFlexible',
         'cardTightGroups',
+        'mapToolbar',
+        'mapDateCard',
+        'mapFunctionsCard',
+        'data-type card absorbs the remaining',
+        'segments flex',
+        '`320px` (`20rem`)',
+        'two `142px`',
+        'rightmost',
+        'hydromap',
+        'yandex-plus',
+        'fold into that dropdown',
+        'at `1920px` and below',
+        'last button edge',
         'internal horizontal scroll',
         '`dense` 30px',
         'rest→active',
@@ -1630,6 +1660,7 @@ async function testResponsiveAndBottomPanelContract() {
         'export function MapLayerDropdown',
         'ResizeObserver',
         'export function LayerToggle',
+        'COMPACT_ICON_CAP_WIDTH_PX',
       ]).map((snippet) => `controls.tsx missing ${snippet}`),
     );
   } catch {

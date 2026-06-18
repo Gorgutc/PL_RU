@@ -141,7 +141,8 @@ export const MAP_FUNCTION_GROUPS: readonly MapIconGroup[] = [
 
 // Слои карты — map layer providers (9 glyphs, order mapped to the reference) plus
 // the two map toggles (MAP_LAYER_TOGGLES). Dividers after the 1st and 3rd glyph
-// per the Figma spec. At narrow widths the icons overflow into a chevron.
+// per the Figma spec. At 1920 and narrower widths extra layer controls overflow
+// into the rightmost chevron.
 export const MAP_LAYER_GROUP: MapIconGroup = {
   title: 'Слои карты',
   items: [

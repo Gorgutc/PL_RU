@@ -22,3 +22,4 @@ plugins/pl-ru-codex/skills/osiris-design/
 
 .codex-refs-baseline/
 .claude/.refs-baseline/
+.claude/worktrees/

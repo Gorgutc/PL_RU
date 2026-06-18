@@ -229,25 +229,38 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   `src/styles/_tokens.scss` (`$top-controls-*` plus reused tokens); no inline hex
   and no `px` font-size.
 - The `Тип данных` group stays pinned to the right. At the target `1920px` with
-  the rail collapsed, the cards flex to fill the full toolbar width with no
-  internal horizontal scroll: the fixed cards (map functions, weather, data-type,
-  animation) keep their intrinsic width, while the per-tab date/time card flexes
-  (`cardFlexible`) and the date/time field shrinks to a min-width so everything
-  fits. Cards stay `10px` apart and the data-type group is never clipped.
-  Responsive reflow for narrower widths follows the Workspace Responsive
-  Adaptation And Map Bottom Panel contract below.
+  the rail collapsed, the map tab `Дата и время` card keeps the Figma hug width:
+  `320px` (`20rem`) outer card, `86px` height, `16px` padding, and two `142px`
+  date fields. That map date card uses `mapDateCard`, not the generic
+  `cardFlexible` shrink path. The map toolbar uses `mapToolbar`: at `1920px`
+  the adjacent map-functions card (`mapFunctionsCard`) stays packed to its
+  visible icon content, while the pinned data-type card absorbs the remaining
+  right-side width. There is no internal horizontal scroll. The `Тип данных`
+  segmented control stretches to the full card width and its two segments flex
+  equally. Other per-tab flexible date/time cards continue to use
+  `cardFlexible`. Cards stay `10px` apart. Responsive reflow for narrower widths
+  follows the Workspace Responsive Adaptation And Map Bottom Panel contract
+  below.
 - The `map` tab icon-button groups (Инфраструктура / Наложения на карту / Борты /
   Слои карты) use a dedicated SVG glyph manifest in `public/top-control-icons/`
   driven by `src/components/TabTopControls/mapIcons.ts`. This is the map-tab
   equivalent of the left-rail SVG exception: production map control icons use
   these SVGs via `<img>`, not Blueprint `<Icon>`. The glyph↔button order across
   the four groups is mapped to the reference (`Верхние блоки управления` block
-  slices). The `Слои карты` group shows the map layer providers plus two map
-  toggles (`Подложка` / `Сетка`); at narrow widths its icons overflow into a
-  chevron "more" dropdown and the toggles fold away. The exact assignment stays
-  adjustable in the manifest.
-- Map icon glyphs render as block `<img>` centered in their `32x30` button, and
-  the four `map` function groups sit `16px` apart (`cardTightGroups`).
+  slices). The `Слои карты` group owns the map layer providers plus two map
+  toggles (`Подложка` / `Сетка`). At the exact `1920px` map target the visible
+  layer row is capped to `hydromap`, `google`, `yandex-plus`, and the rightmost
+  chevron "more" dropdown; the remaining layer provider icons and both toggles
+  fold into that dropdown. The row keeps dividers after the first and third
+  visible provider icons, so the visible order is `hydromap` / divider /
+  `google` / `yandex-plus` / divider / dropdown. At widths below `1920px`, the
+  same overflow model continues to trim icons into the chevron. The exact glyph
+  assignment stays adjustable in the manifest.
+- Map icon glyphs render as block `<img>` centered in their `32x30` button. At
+  `1920px`, the four `map` function groups are packed, and the real visual gap
+  from the previous group's last button edge to the next group's first button
+  edge is `16px` (`cardTightGroups`), with no internal flex spacer inside the
+  groups.
 - Toolbar action buttons follow a rest→active model. The `tmi` "Загрузить
   маршруты" primary action is a filled accent button (`PrimaryActionButton`,
   `#2970ff` surface). The `sat` "Создать анимацию…" control is a resting-outlined
@@ -272,21 +285,24 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   controls, map bottom panel) keeps fixed pixel control sizes on the `10px` /
   `8px` / `4px` rhythm; the map (and the bottom-panel cloud legend) absorb the
   free space. There is one workspace breakpoint, `$workspace-bp-compact` (`120rem`
-  / `1920px`), mirroring the Header expanded threshold. At `>= 1920` the frozen
-  `1920` layout is unchanged (date/time card flexes, the map-functions card keeps
-  intrinsic width, all icons visible). It is not proportional zoom.
-- Compact band (`< 1920`, the `1280` / `1440` references): the date/time card
-  becomes intrinsic and the map-functions card becomes the flexible (shrinking)
+  / `1920px`), mirroring the Header expanded threshold. At `1920px` the map date
+  card preserves the Figma `320px` hug width, the map-functions card stays
+  intrinsic/packed except for the layer-row chevron cap, and the pinned data-type
+  card stretches to absorb remaining width. At wider chrome widths, including
+  the `2560px` cap, every map function group shows all icons. It is not
+  proportional zoom.
+- Compact band (`< 1920`, including the `1280` and `1440` references): the map
+  date card is fixed and the map-functions card becomes the flexible (shrinking)
   card. Each `map` function group shows as many icons as fit and collapses the
   rest into a chevron "more" dropdown (`MapLayerDropdown`), driven by a
-  `ResizeObserver` on the icon row. A group never shrinks below its (nowrap)
-  title; the icon row uses `contain: inline-size` so the icon count never forces
-  the group wider than its title. The toolbar height stays constant (single row),
+  `ResizeObserver` on the icon row. A group never shrinks below its floor; the
+  icon row uses `contain: inline-size` so the icon count never forces the group
+  wider than the available card. The toolbar height stays constant (single row),
   so the map stage never resizes on reflow; there is no horizontal scroll and the
   `32x30` buttons are never shrunk. The `Слои карты` map toggles (`Подложка` /
-  `Сетка`) fold away in the compact band. At `>= 1920` every group shows all its
-  icons (no overflow chevron). Exact per-group icon counts in the compact band
-  approximate the reference (they are width-driven, not byte-exact).
+  `Сетка`) fold away at `1920px` and below with the extra layer icons. Exact
+  per-group icon counts in the adaptive band approximate the reference (they are
+  width-driven, not byte-exact), except the `1920px` layer-row cap above.
 - Content max-width: the chrome caps at `$workspace-content-max` (`160rem` /
   `2560px`) and left-aligns beyond it, while the map and Header stay full-bleed.
   At `<= 2560` the chrome fills the width; at `3840` (the canonical maximum width)
