@@ -52,6 +52,15 @@ $map-stage-left-offset: t.$workspace-rail-width + $map-stage-map-gutters + $map-
   outline: none;
 }
 
+// Dark theme: a high-contrast black basemap with near-white contours/labels,
+// produced by inverting the light OSM raster (white → near-black, dark lines →
+// near-white) and rotating hues back so water reads blue rather than orange.
+// Scoped to the tile canvas only, so the zoom/attribution controls keep their
+// own styling.
+.mapStage[data-map-theme='dark'] :global(.maplibregl-canvas) {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 .mapCanvas :global(.maplibregl-ctrl-group) {
   overflow: hidden;
   border: 0.0625rem solid t.$color-workspace-border;

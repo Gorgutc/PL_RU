@@ -24,6 +24,9 @@ const SIDEBAR_PANEL_TABS = new Set<HeaderTabId>(['sat', 'kick', 'stats']);
 const SHARED_BOTTOM_RAIL_ITEMS = [
   { id: 'information', label: 'Информация', iconId: 'file-outline' },
   { id: 'support', label: 'Поддержка', iconId: 'transition-to-queries' },
+  // The map basemap light/dark toggle. LeftRail renders this item's visible and
+  // accessible label dynamically (getThemeRailLabel: "Тёмная тема" while light,
+  // "Светлая тема" while dark), so this static label is only a config fallback.
   { id: 'theme', label: 'Светлая тема', iconId: 'moon-outline', dividerBefore: true },
   {
     id: 'collapse',

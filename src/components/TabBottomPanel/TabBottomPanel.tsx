@@ -199,7 +199,7 @@ function RoutesBottomPanel() {
       <BarometricLegendCard />
 
       <ControlCard ariaLabel="Управление данными">
-        <ControlField title="Управление данными">
+        <ControlField dense title="Управление данными">
           <ChipButton leadingIcon="grid-view" leadingIconClassName={styles.actionIcon}>
             Загрузить свои цели
           </ChipButton>
@@ -254,7 +254,7 @@ function TelemetryBottomPanel() {
       <BarometricLegendCard />
 
       <ControlCard ariaLabel="Управление данными">
-        <ControlField title="Управление данными">
+        <ControlField dense title="Управление данными">
           <ChipButton leadingIcon="grid-view" leadingIconClassName={styles.actionIcon}>
             Загрузить данные
           </ChipButton>
@@ -290,7 +290,7 @@ function TableBottomPanel({
       />
 
       <ControlCard ariaLabel="Настройки таблицы">
-        <ControlField title="Настройки таблицы">
+        <ControlField dense title="Настройки таблицы">
           {tableActions.map((action) => (
             <ChipButton icon={action.icon} key={action.label}>
               {action.label}
@@ -300,7 +300,7 @@ function TableBottomPanel({
       </ControlCard>
 
       <ControlCard ariaLabel="Управление данными">
-        <ControlField title="Управление данными">
+        <ControlField dense title="Управление данными">
           <ChipButton leadingIcon="grid-view" leadingIconClassName={styles.actionIcon}>
             Загрузить свои данные
           </ChipButton>
@@ -389,7 +389,7 @@ function SatBottomPanel() {
       </ControlCard>
 
       <ControlCard ariaLabel="Загрузить свои снимки">
-        <ControlField title="Загрузить свои снимки">
+        <ControlField dense title="Загрузить свои снимки">
           <ChipButton leadingIcon="grid-view" leadingIconClassName={styles.actionIcon}>
             Загрузить файлы
           </ChipButton>

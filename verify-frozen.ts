@@ -1196,7 +1196,10 @@ async function testWorkspaceShellContract() {
       'data-testid="workspace-left-area"',
       'PraiOS workspace',
       'getWorkspaceSidebarMode(activeTab)',
-      '<WorkspaceMap />',
+      // A13 re-open (2026-06-18): the map basemap can switch light/dark from the
+      // left-rail theme item; AppShell owns the in-memory theme and wires it into
+      // the map. Guard that the map still renders AND the theme stays wired.
+      '<WorkspaceMap theme={mapTheme} />',
       // A13 re-open (2026-06-15): kick/stats render the table container instead
       // of the map; guard the routing so it cannot silently regress.
       'WorkspaceTableSurface',
@@ -1223,9 +1226,13 @@ async function testWorkspaceShellContract() {
       'data-testid={testId}',
       'data-icon-id={item.iconId}',
       'data-testid="left-rail-label"',
-      'aria-expanded={isToggle ? expanded : undefined}',
-      'aria-pressed={isToggle ? undefined : pressed}',
-      'onClick={isToggle ? () => onExpandedChange(!expanded) : onPress}',
+      // A13 re-open (2026-06-18): the rail collapse item is one toggle; the theme
+      // item is a second toggle that flips the map basemap (aria-pressed reflects
+      // the dark state) while keeping its frozen moon icon. Guard both toggles.
+      'aria-expanded={isCollapse ? expanded : undefined}',
+      "aria-pressed={isCollapse ? undefined : isThemeToggle ? mapTheme === 'dark' : pressed}",
+      'onExpandedChange(!expanded)',
+      'onToggleMapTheme',
     ]).map((snippet) => `LeftRail.tsx missing ${snippet}`),
     ...missingSnippets(leftRailStyles, [
       'transition: width t.$workspace-motion-duration t.$workspace-motion-easing;',

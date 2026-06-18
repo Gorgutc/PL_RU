@@ -81,7 +81,7 @@ export function MapBottomPanel() {
       </ControlCard>
 
       <ControlCard ariaLabel="Управление данными">
-        <ControlField title="Управление данными">
+        <ControlField dense title="Управление данными">
           <ChipButton leadingIcon="grid-view" leadingIconClassName={styles.actionIcon}>
             <span className={styles.fullLabel}>Загрузить свои данные</span>
             <span className={styles.shortLabel}>Загрузить данные</span>

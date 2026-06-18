@@ -6,6 +6,12 @@
   min-width: 0;
 }
 
+// `fill` spans the shell to its container so the select stretches full-width
+// (side-panel fields + the telemetry "Сигналы" equal-width cluster).
+.selectShellFill {
+  width: 100%;
+}
+
 .selectShellIcon.selectShellIcon {
   position: absolute;
   inset-block-start: 50%;
