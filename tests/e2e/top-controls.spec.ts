@@ -11,6 +11,10 @@ const WORKSPACE_MOTION_DURATION_MS = 220;
 // The per-tab toolbar must keep a constant height so switching tabs never resizes
 // the map stage (frozen A13): 10px top padding + an 86px control card.
 const TOP_CONTROLS_HEIGHT = 96;
+const TOP_CONTROL_CARD_HEIGHT = 86;
+const MAP_DATE_CARD_WIDTH = 320;
+const MAP_DATE_FIELD_WIDTH = 142;
+const MAP_DATE_FIELD_HEIGHT = 30;
 
 const ALL_TABS = ['map', 'bar', 'tmi', 'sat', 'kick', 'stats'] as const;
 const PANEL_TABS = ['kick', 'stats', 'sat'] as const;
@@ -22,6 +26,8 @@ async function openWorkspace(page: Page) {
   await page.setViewportSize(VIEWPORT);
   await page.goto('/');
   await expect(page.getByTestId('workspace-shell')).toBeVisible();
+  await expect(page.getByRole('banner').locator('#praios-header-tab-map')).toBeVisible();
+  await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
 }
 
 async function selectTab(page: Page, tab: (typeof ALL_TABS)[number]) {
@@ -86,8 +92,10 @@ test.describe('Per-tab top control blocks', () => {
   });
 
   test('renders the map function icon groups with layer toggles', async ({ page }) => {
-    await openWorkspace(page);
-    await selectTab(page, 'map');
+    // At the wider chrome cap all map function icons and layer toggles are visible.
+    await page.setViewportSize({ width: 2560, height: 1440 });
+    await page.goto('/');
+    await expect(page.getByTestId('workspace-shell')).toBeVisible();
 
     const functions = page
       .getByTestId('tab-top-controls')
@@ -120,6 +128,156 @@ test.describe('Per-tab top control blocks', () => {
       .evaluateAll((els) => els.map((el) => (el.getAttribute('aria-label') ?? '').trim()));
     expect(toggleLabels.length).toBe(2);
     expect(toggleLabels.every((label) => label.length > 0)).toBe(true);
+  });
+
+  test('keeps the map date card on the 1920 Figma sizing contract', async ({ page }) => {
+    await openWorkspace(page);
+    await selectTab(page, 'map');
+
+    const toolbar = page.getByTestId('tab-top-controls');
+    const scroller = toolbar.locator(':scope > div').first();
+    const sections = scroller.locator(':scope > section');
+    const dateCard = sections.first();
+    const functionsCard = sections.nth(1);
+    const fields = dateCard.locator('input');
+
+    await expect(fields).toHaveCount(2);
+    await expect(fields.nth(0)).toHaveValue('24-04-2025');
+    await expect(fields.nth(1)).toHaveValue('24-04-2025');
+
+    const cardBox = await requireBox(dateCard);
+    expect(Math.round(cardBox.width)).toBe(MAP_DATE_CARD_WIDTH);
+    expect(Math.round(cardBox.height)).toBe(TOP_CONTROL_CARD_HEIGHT);
+
+    for (let index = 0; index < 2; index += 1) {
+      const fieldBox = await requireBox(fields.nth(index));
+      expect(Math.round(fieldBox.width)).toBe(MAP_DATE_FIELD_WIDTH);
+      expect(Math.round(fieldBox.height)).toBe(MAP_DATE_FIELD_HEIGHT);
+    }
+
+    const dateCardMetrics = await dateCard.evaluate((el) => {
+      const title = el.querySelector('[class*="fieldTitle"]') as HTMLElement | null;
+      const range = el.querySelector('[class*="dateTimeRange"]') as HTMLElement | null;
+      const input = el.querySelector('input') as HTMLInputElement | null;
+      const cs = getComputedStyle(el);
+      const titleCs = title ? getComputedStyle(title) : null;
+      const inputCs = input ? getComputedStyle(input) : null;
+      const rangeCs = range ? getComputedStyle(range) : null;
+
+      return {
+        cardPadding: cs.padding,
+        cardRadius: cs.borderRadius,
+        cardBackground: cs.backgroundColor,
+        cardOutlineColor: cs.outlineColor,
+        cardOutlineStyle: cs.outlineStyle,
+        cardOutlineWidth: cs.outlineWidth,
+        rangeGap: rangeCs?.columnGap ?? '',
+        titleFontSize: titleCs?.fontSize ?? '',
+        titleFontWeight: titleCs?.fontWeight ?? '',
+        titleLineHeight: titleCs?.lineHeight ?? '',
+        inputRadius: inputCs?.borderRadius ?? '',
+        inputFontSize: inputCs?.fontSize ?? '',
+        inputLineHeight: inputCs?.lineHeight ?? '',
+      };
+    });
+    expect(dateCardMetrics).toMatchObject({
+      cardPadding: '16px',
+      cardRadius: '2px',
+      cardBackground: 'rgb(23, 29, 32)',
+      cardOutlineColor: 'rgb(114, 118, 119)',
+      cardOutlineStyle: 'solid',
+      cardOutlineWidth: '1px',
+      rangeGap: '4px',
+      titleFontSize: '12px',
+      titleFontWeight: '500',
+      titleLineHeight: '16px',
+      inputRadius: '3px',
+      inputFontSize: '12px',
+      inputLineHeight: '16px',
+    });
+
+    const finalDateBox = await requireBox(dateCard);
+    const functionsBox = await requireBox(functionsCard);
+    expect(Math.round(finalDateBox.x + finalDateBox.width)).toBeLessThanOrEqual(
+      Math.round(functionsBox.x),
+    );
+
+    const scrollerOverflow = await scroller.evaluate((el) => el.scrollWidth - el.clientWidth);
+    expect(scrollerOverflow).toBeLessThanOrEqual(1);
+  });
+
+  test('moves extra map layer icons into the rightmost dropdown at 1920', async ({ page }) => {
+    await openWorkspace(page);
+    await selectTab(page, 'map');
+
+    const toolbar = page.getByTestId('tab-top-controls');
+    const scroller = toolbar.locator(':scope > div').first();
+    const functionsCard = scroller.locator(':scope > section').nth(1);
+    const dataTypeCard = toolbar.locator('section[aria-label="Тип данных"]');
+    const iconGroups = functionsCard.locator('[class*="iconGroup"]');
+    const layerGroup = functionsCard.locator('[class*="iconGroup"]').last();
+    const iconRows = iconGroups.locator('[class*="iconRow"]');
+    const switches = layerGroup.locator('[class*="layerToggles"] label');
+
+    await expect(iconGroups).toHaveCount(4);
+    await expect(switches).toHaveCount(2);
+    await expect(switches.nth(0)).toBeHidden();
+    await expect(switches.nth(1)).toBeHidden();
+
+    await expect(iconRows.nth(0).locator('button')).toHaveCount(11);
+    await expect(iconRows.nth(1).locator('button')).toHaveCount(8);
+    await expect(iconRows.nth(2).locator('button')).toHaveCount(4);
+    await expect(iconRows.nth(3).locator('button')).toHaveCount(4);
+    await expect(layerGroup.locator('[class*="iconDivider"]')).toHaveCount(2);
+
+    const layerImageIds = await layerGroup
+      .locator('[class*="iconRow"] img')
+      .evaluateAll((imgs) => imgs.map((img) => img.getAttribute('data-icon-id')));
+    expect(layerImageIds).toEqual(['hydromap', 'google', 'yandex-plus']);
+    await expect(layerGroup.locator('[class*="iconRow"] button').last().locator('img')).toHaveCount(
+      0,
+    );
+
+    const groupBoxes = await iconGroups.evaluateAll((groups) =>
+      groups.map((group) => {
+        const rect = group.getBoundingClientRect();
+        return { left: rect.left, right: rect.right };
+      }),
+    );
+    for (let index = 0; index < groupBoxes.length - 1; index += 1) {
+      expect(Math.round(groupBoxes[index + 1].left - groupBoxes[index].right)).toBe(16);
+    }
+
+    const buttonEdgeGaps = await iconRows.evaluateAll((rows) =>
+      rows.slice(0, -1).map((row, index) => {
+        const currentLastButton = row.querySelector('button:last-of-type');
+        const nextFirstButton = rows[index + 1]?.querySelector('button:first-of-type');
+        if (!currentLastButton || !nextFirstButton) return Number.NaN;
+        return (
+          nextFirstButton.getBoundingClientRect().left -
+          currentLastButton.getBoundingClientRect().right
+        );
+      }),
+    );
+    expect(buttonEdgeGaps.map(Math.round)).toEqual([16, 16, 16]);
+
+    const dataTypeBox = await requireBox(dataTypeCard);
+    expect(Math.round(dataTypeBox.width)).toBeGreaterThanOrEqual(440);
+    const dataTypeSegments = dataTypeCard.locator('.bp6-button, .bp5-button');
+    await expect(dataTypeSegments).toHaveCount(2);
+    const dataTypeSegmentWidths = await dataTypeSegments.evaluateAll((buttons) =>
+      buttons.map((button) => button.getBoundingClientRect().width),
+    );
+    expect(Math.abs(dataTypeSegmentWidths[0] - dataTypeSegmentWidths[1])).toBeLessThanOrEqual(1);
+
+    const firstRowGap = await iconRows.first().evaluate((row) => getComputedStyle(row).columnGap);
+    expect(firstRowGap).toBe('4px');
+
+    const firstLayerButton = await requireBox(
+      layerGroup.locator('[class*="iconRow"] button').first(),
+    );
+    expect(Math.round(firstLayerButton.width)).toBe(32);
+    expect(Math.round(firstLayerButton.height)).toBe(30);
   });
 
   test('shows the expected lead controls per tab', async ({ page }) => {
@@ -264,29 +422,35 @@ test.describe('Per-tab top control blocks', () => {
   });
 
   test('keeps the map toolbar fitting and capped across viewport widths', async ({ page }) => {
-    // The map tab is the densest toolbar: a flexible date card + a 32-icon
-    // function card + the pinned "Тип данных" card. Rail-COLLAPSED is the frozen
-    // design target (and the visual-QA reference state), so it must fit exactly.
-    // When the rail is EXPANDED the toolbar loses 190px and the date card collapses
-    // to its card padding; at the narrowest bands the four icon groups each hold
-    // their 1-icon+chevron floor, so the row can sit a few sub-pixel-rounded px past
-    // the leading scroller on the Linux CI Chromium — while still never scrolling
-    // the page or overlapping the pinned data-type card (both asserted below).
+    // The map tab is the densest toolbar: a fixed 320px Figma date card + an
+    // adaptive map-functions card + the pinned "Тип данных" card. Rail-collapsed
+    // is the 1920 visual target; expanded and narrower widths must still avoid
+    // page scroll and data-type overlap while icon groups trim into chevrons.
     const SCROLLER_FIT_BUDGET = { collapsed: 1, expanded: 6 } as const;
     for (const width of RESPONSIVE_WIDTHS) {
       const height = Math.round((width * 9) / 16);
       await page.setViewportSize({ width, height });
       await page.goto('/');
+      await expect(page.getByTestId('workspace-shell')).toBeVisible();
 
       const toolbar = page.getByTestId('tab-top-controls');
       await expect(toolbar).toBeVisible();
       const dataType = toolbar.locator('section[aria-label="Тип данных"]');
       const collapseToggle = page.getByTestId('left-rail-button-collapse');
+      await expect(collapseToggle).toBeVisible();
+      // The shell appears before React has always wired the rail toggle after a
+      // fresh goto at every viewport. Let the first interactive click settle.
+      await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
 
       for (const state of ['collapsed', 'expanded'] as const) {
         if (state === 'expanded') {
           await collapseToggle.click();
-          await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
+          await expect
+            .poll(async () => Math.round((await requireBox(toolbar)).x), {
+              message: `rail did not expand at ${width}px`,
+              timeout: WORKSPACE_MOTION_DURATION_MS + 2_000,
+            })
+            .toBe(RAIL_EXPANDED_WIDTH);
         }
 
         const railWidth = state === 'expanded' ? RAIL_EXPANDED_WIDTH : RAIL_COLLAPSED_WIDTH;
@@ -318,7 +482,12 @@ test.describe('Per-tab top control blocks', () => {
 
         if (state === 'expanded') {
           await collapseToggle.click();
-          await page.waitForTimeout(WORKSPACE_MOTION_DURATION_MS + 100);
+          await expect
+            .poll(async () => Math.round((await requireBox(toolbar)).x), {
+              message: `rail did not collapse at ${width}px`,
+              timeout: WORKSPACE_MOTION_DURATION_MS + 2_000,
+            })
+            .toBe(RAIL_COLLAPSED_WIDTH);
         }
       }
     }

@@ -1,6 +1,7 @@
 // cspell:disable
 import { useState, type ReactNode } from 'react';
 import type { HeaderTabId } from '@/components/Header/Header';
+import { cx } from '@/lib/cx';
 import {
   ChipButton,
   ControlCard,
@@ -28,16 +29,18 @@ const DATETIME_TO = '24-04-2025 | 00:00';
 function Toolbar({
   label,
   children,
+  className,
   trailing,
 }: {
   label: string;
   children: ReactNode;
+  className?: string;
   trailing: ReactNode;
 }) {
   return (
     <div
       aria-label={label}
-      className={styles.toolbar}
+      className={cx(styles.toolbar, className)}
       data-testid="tab-top-controls"
       role="toolbar"
     >
@@ -80,21 +83,24 @@ const MAP_DATA_TYPES: readonly SegmentItem[] = [
 ];
 // The map date/time card shows date-only values in the reference (no time).
 const MAP_DATETIME = '24-04-2025';
+const MAP_LAYER_COMPACT_VISIBLE_COUNT = 3;
 
 function MapTopControls() {
   return (
     <Toolbar
+      className={styles.mapToolbar}
       label="Управление: оперативная карта"
       trailing={<DataTypeCard items={MAP_DATA_TYPES} />}
     >
-      <ControlCard ariaLabel="Дата и время" flexible>
+      <ControlCard ariaLabel="Дата и время" className={styles.mapDateCard}>
         <DateTimeCard from={MAP_DATETIME} to={MAP_DATETIME} />
       </ControlCard>
-      <ControlCard ariaLabel="Функции карты" tightGroups>
+      <ControlCard ariaLabel="Функции карты" className={styles.mapFunctionsCard} tightGroups>
         {MAP_FUNCTION_GROUPS.map((group) => (
           <IconButtonGroup group={group} key={group.title} />
         ))}
         <IconButtonGroup
+          compactVisibleCount={MAP_LAYER_COMPACT_VISIBLE_COUNT}
           group={MAP_LAYER_GROUP}
           trailing={
             <span className={styles.layerToggles}>

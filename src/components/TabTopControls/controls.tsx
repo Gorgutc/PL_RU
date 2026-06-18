@@ -26,11 +26,13 @@ import styles from './TabTopControls.module.scss';
 export function ControlCard({
   children,
   ariaLabel,
+  className,
   flexible,
   tightGroups,
 }: {
   children: ReactNode;
   ariaLabel?: string;
+  className?: string;
   flexible?: boolean;
   tightGroups?: boolean;
 }) {
@@ -41,6 +43,7 @@ export function ControlCard({
         styles.card,
         flexible && styles.cardFlexible,
         tightGroups && styles.cardTightGroups,
+        className,
       )}
     >
       {children}
@@ -285,21 +288,25 @@ function IconButton({ id }: { id: MapIconId }) {
 
 // A titled group of icon buttons. Adapts to the available width (fixed-chrome
 // responsive rule): it shows as many icons as fit and collapses the rest into a
-// chevron "more" dropdown at narrow widths, matching the reference compact
-// layout. Optional `trailing` content (the map-layer toggles) renders after the
-// icons. The toolbar height stays constant (single row), so the map stage never
-// resizes on reflow.
+// chevron "more" dropdown at narrow widths. Groups may also opt into a compact
+// visible-icon cap at the exact 1920 reference width. Optional `trailing`
+// content (the map-layer toggles) sits in the title row above the right-edge
+// icon buttons when the wide layout shows it. The toolbar height stays constant
+// (single row), so the map stage never resizes on reflow.
 export function IconButtonGroup({
   group,
+  compactVisibleCount,
   trailing,
 }: {
   group: MapIconGroup;
+  compactVisibleCount?: number;
   trailing?: ReactNode;
 }) {
   const rowRef = useRef<HTMLDivElement>(null);
   const total = group.items.length;
   const [visibleCount, setVisibleCount] = useState(total);
   const [overflowing, setOverflowing] = useState(false);
+  const [groupGrow, setGroupGrow] = useState(total);
 
   useEffect(() => {
     const row = rowRef.current;
@@ -307,44 +314,65 @@ export function IconButtonGroup({
 
     const compute = () => {
       const maxFit = Math.max(1, Math.floor((row.clientWidth + 4) / ICON_GROUP_PITCH_PX));
-      if (maxFit >= total) {
+      const compactLimit = compactVisibleCount ?? total;
+      const compactCapActive =
+        compactVisibleCount !== undefined &&
+        compactLimit < total &&
+        window.innerWidth <= COMPACT_ICON_CAP_WIDTH_PX;
+      const visibleLimit = compactCapActive ? compactLimit : total;
+      const shouldOverflow = visibleLimit < total || maxFit < total;
+      setGroupGrow(compactCapActive ? visibleLimit + 1 : total);
+
+      if (!shouldOverflow) {
         setVisibleCount(total);
         setOverflowing(false);
       } else {
         // Reserve one slot for the overflow chevron.
-        setVisibleCount(Math.max(1, maxFit - 1));
+        setVisibleCount(Math.max(1, Math.min(visibleLimit, maxFit - 1)));
         setOverflowing(true);
       }
     };
 
     const observer = new ResizeObserver(compute);
     observer.observe(row);
+    window.addEventListener('resize', compute);
     compute();
 
-    return () => observer.disconnect();
-  }, [total]);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', compute);
+    };
+  }, [compactVisibleCount, total]);
 
   const dividerAfter = new Set(group.dividerAfter ?? []);
   const shown = group.items.slice(0, visibleCount);
 
   return (
     <div
-      className={cx(styles.field, styles.iconGroup)}
-      style={{ '--group-grow': total } as CSSProperties}
+      className={cx(
+        styles.field,
+        styles.iconGroup,
+        trailing ? styles.iconGroupWithTrailing : false,
+      )}
+      style={{ '--group-grow': groupGrow } as CSSProperties}
     >
       <span className={styles.fieldTitle}>{group.title}</span>
       <div className={styles.iconRow} ref={rowRef}>
-        {shown.map((id, index) => (
-          <Fragment key={id}>
-            <IconButton id={id} />
-            {dividerAfter.has(index) && index < shown.length - 1 ? (
-              <span aria-hidden="true" className={styles.iconDivider} />
-            ) : null}
-          </Fragment>
-        ))}
+        {shown.map((id, index) => {
+          const hasNextIcon = index < shown.length - 1;
+          const hasDropdownAfter = overflowing && index === shown.length - 1;
+          const showDivider = dividerAfter.has(index) && (hasNextIcon || hasDropdownAfter);
+
+          return (
+            <Fragment key={id}>
+              <IconButton id={id} />
+              {showDivider ? <span aria-hidden="true" className={styles.iconDivider} /> : null}
+            </Fragment>
+          );
+        })}
         {overflowing ? <MapLayerDropdown ariaLabel={`Ещё: ${group.title}`} /> : null}
-        {trailing}
       </div>
+      {trailing}
     </div>
   );
 }
@@ -372,3 +400,4 @@ export function MapLayerDropdown({ ariaLabel = 'Ещё слои карты' }: {
 
 // Approx button pitch used to estimate how many icons fit: 32px button + 4px gap.
 const ICON_GROUP_PITCH_PX = 36;
+const COMPACT_ICON_CAP_WIDTH_PX = 1920;
