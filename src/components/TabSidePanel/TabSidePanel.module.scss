@@ -165,7 +165,10 @@
 }
 
 .compactDateTimeElement.compactDateTimeElement {
-  padding-inline: 0.25rem;
+  // Stays at the tight 4px inset (not the shared 12px): this narrow launch field
+  // must fit the full "DD.MM.YYYY | HH:MM" value plus the date-picker reserve,
+  // which the frozen e2e (expectInputTextFits) enforces — 12px would overflow it.
+  padding-inline: t.$space-1;
   font-size: t.$fs-header-filter;
 }
 

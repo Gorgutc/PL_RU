@@ -35,7 +35,7 @@ export function SelectControl({
   ariaLabelledBy?: string;
 }) {
   return (
-    <div className={styles.selectShell}>
+    <div className={cx(styles.selectShell, fill && styles.selectShellFill)}>
       <HTMLSelect
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}

@@ -169,13 +169,16 @@ $top-controls-card-padding: $space-4; // 16px inside each #171d20 card section
 $top-controls-stack-gap: $space-2; // 8px label ↔ controls row
 $top-controls-group-gap: $space-4; // 16px between control groups within a section
 $top-controls-control-height: $header-action-height; // 30px inputs/segmented (Header rhythm)
-$top-controls-segment-height: 1.5rem; // 24px active/inactive segment pill
+$top-controls-segment-height: 1.5rem; // 24px segment pill (Figma); 16px line centered in 24px = 4px effective gap
 $top-controls-segment-gap: $space-1; // 4px between segments
 $top-controls-search-width: 16rem; // 256px search field
 $top-controls-map-date-card-width: 20rem; // 320px Figma hug width for the map date card
+$top-controls-tmi-date-card-width: 37.1875rem; // 595px (563px content) telemetry date block, rail collapsed
+$top-controls-tmi-date-card-width-expanded: 28.4375rem; // 455px (423px content) telemetry date block, rail expanded
 $top-controls-datetime-min-width: 7rem; // 112px min before the flexible date-time field stops shrinking
 $top-controls-card-gap: 1.5rem; // 24px between titled fields inside one card section
 $top-controls-inline-pad: 0.625rem; // 10px inline padding for segments / action buttons
+$top-controls-segment-icon-gap: $space-1; // 4px segment-option icon ↔ label gap (Figma), overriding Blueprint's 8px default
 
 // Compact band (<1920) deltas — tighten only below the frozen 1920 contract.
 $top-controls-gap-compact: $space-2; // 8px between card sections <1920

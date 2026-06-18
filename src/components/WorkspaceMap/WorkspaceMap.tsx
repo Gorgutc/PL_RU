@@ -10,6 +10,7 @@ import {
   WORKSPACE_MAP_MIN_ZOOM,
   WORKSPACE_MAP_STYLE,
   WORKSPACE_MAP_ZOOM,
+  type WorkspaceMapTheme,
 } from './mapConfig';
 import styles from './WorkspaceMap.module.scss';
 
@@ -25,7 +26,11 @@ function isExpectedOsmTileError(error: unknown) {
   );
 }
 
-export function WorkspaceMap() {
+type WorkspaceMapProps = {
+  theme: WorkspaceMapTheme;
+};
+
+export function WorkspaceMap({ theme }: WorkspaceMapProps) {
   const mapStageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -119,7 +124,12 @@ export function WorkspaceMap() {
     <section className={styles.map} aria-label="Рабочая карта" data-testid="workspace-map">
       <Card className={styles.mapCard} data-testid="workspace-map-card" elevation={Elevation.ZERO}>
         <div className={styles.mapCanvas} data-testid="workspace-map-canvas">
-          <div ref={mapStageRef} className={styles.mapStage} data-testid="workspace-map-stage" />
+          <div
+            ref={mapStageRef}
+            className={styles.mapStage}
+            data-map-theme={theme}
+            data-testid="workspace-map-stage"
+          />
         </div>
       </Card>
     </section>

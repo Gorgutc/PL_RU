@@ -82,7 +82,7 @@ const MAP_DATA_TYPES: readonly SegmentItem[] = [
   { id: 'analysis', label: 'Анализ данных', icon: 'list' },
 ];
 // The map date/time card shows date-only values in the reference (no time).
-const MAP_DATETIME = '24-04-2025';
+const DATE_ONLY = '24-04-2025';
 const MAP_LAYER_COMPACT_VISIBLE_COUNT = 3;
 
 function MapTopControls() {
@@ -93,7 +93,7 @@ function MapTopControls() {
       trailing={<DataTypeCard items={MAP_DATA_TYPES} />}
     >
       <ControlCard ariaLabel="Дата и время" className={styles.mapDateCard}>
-        <DateTimeCard from={MAP_DATETIME} to={MAP_DATETIME} />
+        <DateTimeCard from={DATE_ONLY} to={DATE_ONLY} />
       </ControlCard>
       <ControlCard ariaLabel="Функции карты" className={styles.mapFunctionsCard} tightGroups>
         {MAP_FUNCTION_GROUPS.map((group) => (
@@ -166,31 +166,32 @@ const TMI_DATA_TYPES: readonly SegmentItem[] = [
 function TelemetryTopControls() {
   return (
     <Toolbar label="Управление: телеметрия" trailing={<DataTypeCard items={TMI_DATA_TYPES} />}>
-      <ControlCard ariaLabel="Дата и загрузка маршрутов" flexible>
-        <DateTimeCard />
+      <ControlCard ariaLabel="Дата и загрузка маршрутов" className={styles.tmiDateCard} tightGroups>
+        <DateTimeCard from={DATE_ONLY} to={DATE_ONLY} />
         <ControlField title=" ">
           <PrimaryActionButton icon="flows">Загрузить маршруты</PrimaryActionButton>
         </ControlField>
       </ControlCard>
-      <ControlCard ariaLabel="Сигналы">
+      <ControlCard denseFields flexible ariaLabel="Сигналы">
         <ControlField title="Серия">
-          <SelectField ariaLabel="Серия" options={['—']} value="—" />
+          <SelectField ariaLabel="Серия" fill options={['—']} value="—" />
         </ControlField>
         <ControlField title="Номер">
-          <SelectField ariaLabel="Номер" options={['—']} value="—" />
+          <SelectField ariaLabel="Номер" fill options={['—']} value="—" />
         </ControlField>
         <ControlField title="Сигнал">
-          <SelectField ariaLabel="Сигнал" options={['SADRA']} value="SADRA" />
+          <SelectField ariaLabel="Сигнал" fill options={['SADRA']} value="SADRA" />
         </ControlField>
         <ControlField title="Сравнить сигнал">
-          <SelectField ariaLabel="Сравнить сигнал" options={['SADRA']} value="SADRA" />
+          <SelectField ariaLabel="Сравнить сигнал" fill options={['SADRA']} value="SADRA" />
         </ControlField>
         <ControlField title="Графики">
-          <SelectField ariaLabel="Графики" options={['Высота']} value="Высота" />
+          <SelectField ariaLabel="Графики" fill options={['Высота']} value="Высота" />
         </ControlField>
         <ControlField title="Параметры">
           <SelectField
             ariaLabel="Параметры"
+            fill
             options={['Высота по баллистике']}
             value="Высота по баллистике"
           />

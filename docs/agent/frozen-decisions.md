@@ -145,6 +145,17 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 - The collapse item is present on every rail tab and owns the open / close
   toggle. In collapsed state it is the expand affordance; in expanded state it
   collapses the menu.
+- The shared bottom-rail `theme` item (frozen `moon-outline` icon) is the map
+  basemap light/dark toggle. `AppShell` owns the theme as in-memory UI state
+  (no web storage) and wires it into `WorkspaceMap`; the item label names the
+  target theme (`Тёмная тема` while light, `Светлая тема` while dark) and its
+  `aria-pressed` reflects the active dark state. Scope is the map basemap only —
+  the app chrome theme is unchanged. The map always uses the single light OSM
+  raster style in `mapConfig.ts`; the dark theme is a high-contrast CSS invert
+  (`invert(1) hue-rotate(180deg)`) applied to the tile canvas only (see
+  `WorkspaceMap.module.scss`, keyed off `data-map-theme` from the `theme` prop),
+  giving a black basemap with near-white contours while leaving the zoom and
+  attribution controls unfiltered. Default is light (no filter).
 - Wide side panels are fixed at `300px` wide. `kick` renders the launch-parameter
   form, `stats` renders table filters, and `sat` renders the `OsiDus` probing
   gallery: a `OsiDus` panel title, a `Визуализация` / `Сохранённые` / `Метки` tab
@@ -241,6 +252,17 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   `cardFlexible`. Cards stay `10px` apart. Responsive reflow for narrower widths
   follows the Workspace Responsive Adaptation And Map Bottom Panel contract
   below.
+- The `tmi` (Телеметрия) toolbar is the one exception to "other date cards
+  flex": its `Дата и загрузка маршрутов` card (`tmiDateCard`) is a fixed Figma
+  block width that shrinks with the rail — `563px` content (rail collapsed) /
+  `423px` content (rail expanded), i.e. `595px`/`455px` with the `16px` card
+  padding (`$top-controls-tmi-date-card-width{,-expanded}`, driven by
+  `data-rail-state` on the tab panel). The two date inputs stretch to fill it and
+  the `Загрузить маршруты` button sits `16px` after them (`tightGroups`); the
+  freed toolbar width goes to the adjacent `Сигналы` card, which is `cardFlexible`
+  with `denseFields` so its select fields stretch to equal widths (`flex: 1 1 0`)
+  while the `4px` gap between them stays fixed. Below `1920px` the `tmiDateCard`
+  falls back to flexing so it never overflows.
 - The `map` tab icon-button groups (Инфраструктура / Наложения на карту / Борты /
   Слои карты) use a dedicated SVG glyph manifest in `public/top-control-icons/`
   driven by `src/components/TabTopControls/mapIcons.ts`. This is the map-tab

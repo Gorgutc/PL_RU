@@ -22,19 +22,22 @@ import styles from './TabTopControls.module.scss';
 
 // Card section: the dark control-surface card that holds one or more titled fields.
 // `flexible` lets the card grow/shrink to fill the toolbar width (the per-tab
-// date/time card); `tightGroups` uses the 16px group gap (map function groups).
+// date/time card); `tightGroups` uses the 16px group gap (map function groups);
+// `denseFields` uses the 4px field gap (the telemetry "Сигналы" select cluster).
 export function ControlCard({
   children,
   ariaLabel,
   className,
   flexible,
   tightGroups,
+  denseFields,
 }: {
   children: ReactNode;
   ariaLabel?: string;
   className?: string;
   flexible?: boolean;
   tightGroups?: boolean;
+  denseFields?: boolean;
 }) {
   return (
     <section
@@ -43,6 +46,7 @@ export function ControlCard({
         styles.card,
         flexible && styles.cardFlexible,
         tightGroups && styles.cardTightGroups,
+        denseFields && styles.cardDenseFields,
         className,
       )}
     >
@@ -53,19 +57,23 @@ export function ControlCard({
 
 // A titled field column: a 12px/500 label above its control row. `grow` lets the
 // column fill its flexible card so the date/time control stretches dynamically.
+// `dense` tightens the control row to the 4px action-button gap (the Figma
+// data-management contract) instead of the default 16px group gap.
 export function ControlField({
   title,
   children,
   grow,
+  dense,
 }: {
   title: string;
   children: ReactNode;
   grow?: boolean;
+  dense?: boolean;
 }) {
   return (
     <div className={cx(styles.field, grow && styles.fieldGrow)}>
       <span className={styles.fieldTitle}>{title}</span>
-      <div className={styles.fieldRow}>{children}</div>
+      <div className={cx(styles.fieldRow, dense && styles.fieldRowDense)}>{children}</div>
     </div>
   );
 }
@@ -153,17 +161,20 @@ export function SearchField({
 }
 
 // Toolbar dropdown — reuses the shared SelectControl so it matches the side
-// panels (Зондирование/Статистика). Content-sized (no `fill`) for the toolbar.
+// panels (Зондирование/Статистика). Content-sized by default; pass `fill` to
+// span its field column (the telemetry "Сигналы" equal-width select cluster).
 export function SelectField({
   value,
   options,
   ariaLabel,
+  fill,
 }: {
   value: string;
   options: readonly string[];
   ariaLabel: string;
+  fill?: boolean;
 }) {
-  return <SelectControl ariaLabel={ariaLabel} dense options={options} value={value} />;
+  return <SelectControl ariaLabel={ariaLabel} dense fill={fill} options={options} value={value} />;
 }
 
 // Blueprint Switch + label (e.g. satellite data sources).

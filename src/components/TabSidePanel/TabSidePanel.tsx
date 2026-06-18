@@ -5,12 +5,15 @@ import type { HeaderTabId } from '@/components/Header/Header';
 import { RAIL_BY_TAB } from '@/components/AppNavigation/navigation';
 import { SelectControl as SharedSelectControl } from '@/components/controls/SelectControl/SelectControl';
 import { LeftRail } from '@/components/LeftRail/LeftRail';
+import type { WorkspaceMapTheme } from '@/components/WorkspaceMap/mapConfig';
 import { cx } from '@/lib/cx';
 import styles from './TabSidePanel.module.scss';
 
 type TabSidePanelProps = {
   activeTab: HeaderTabId;
   labelledBy: string;
+  mapTheme: WorkspaceMapTheme;
+  onToggleMapTheme: () => void;
   railExpanded: boolean;
   onRailExpandedChange: (expanded: boolean) => void;
 };
@@ -501,6 +504,8 @@ function SatPanel() {
 export function TabSidePanel({
   activeTab,
   labelledBy,
+  mapTheme,
+  onToggleMapTheme,
   railExpanded,
   onRailExpandedChange,
 }: TabSidePanelProps) {
@@ -513,7 +518,9 @@ export function TabSidePanel({
       config={RAIL_BY_TAB[activeTab]}
       expanded={railExpanded}
       labelledBy={labelledBy}
+      mapTheme={mapTheme}
       onExpandedChange={onRailExpandedChange}
+      onToggleMapTheme={onToggleMapTheme}
     />
   );
 }

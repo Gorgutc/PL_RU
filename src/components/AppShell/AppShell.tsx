@@ -12,6 +12,7 @@ import { TabBottomPanel } from '@/components/TabBottomPanel/TabBottomPanel';
 import { TabSidePanel } from '@/components/TabSidePanel/TabSidePanel';
 import { TabTopControls } from '@/components/TabTopControls/TabTopControls';
 import { WorkspaceMap } from '@/components/WorkspaceMap/WorkspaceMap';
+import type { WorkspaceMapTheme } from '@/components/WorkspaceMap/mapConfig';
 import { WorkspaceTableSurface } from '@/components/WorkspaceTableSurface/WorkspaceTableSurface';
 import { cx } from '@/lib/cx';
 import styles from './AppShell.module.scss';
@@ -22,6 +23,10 @@ type AppShellProps = {
 
 export function AppShell({ activeTab }: AppShellProps) {
   const [isRailExpanded, setIsRailExpanded] = useState(false);
+  // Map basemap theme is local UI state (A6: no web storage). Lives here so the
+  // left-rail toggle and the map share one source of truth across map/bar/tmi.
+  const [mapTheme, setMapTheme] = useState<WorkspaceMapTheme>('light');
+  const toggleMapTheme = () => setMapTheme((theme) => (theme === 'light' ? 'dark' : 'light'));
   const sidebarMode = getWorkspaceSidebarMode(activeTab);
   // The table tabs (kick/stats) show a dark table container in the center
   // instead of the map, matching the эталон (A13 was re-opened for this).
@@ -45,6 +50,7 @@ export function AppShell({ activeTab }: AppShellProps) {
           sidebarMode === 'panel' && styles.tabPanelWide,
           expandedRailClass,
         )}
+        data-rail-state={railState}
         id="praios-tab-panel"
         role="tabpanel"
       >
@@ -58,6 +64,8 @@ export function AppShell({ activeTab }: AppShellProps) {
           <TabSidePanel
             activeTab={activeTab}
             labelledBy={`praios-header-tab-${activeTab}`}
+            mapTheme={mapTheme}
+            onToggleMapTheme={toggleMapTheme}
             railExpanded={isRailExpanded}
             onRailExpandedChange={setIsRailExpanded}
           />
@@ -65,7 +73,7 @@ export function AppShell({ activeTab }: AppShellProps) {
         <div className={styles.workspaceColumn}>
           <TabTopControls activeTab={activeTab} />
           <div className={styles.mapArea}>
-            {showsTable ? <WorkspaceTableSurface /> : <WorkspaceMap />}
+            {showsTable ? <WorkspaceTableSurface /> : <WorkspaceMap theme={mapTheme} />}
           </div>
           {activeTab === 'map' ? <MapBottomPanel /> : <TabBottomPanel activeTab={activeTab} />}
         </div>

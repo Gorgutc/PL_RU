@@ -73,9 +73,33 @@
   gap: t.$top-controls-group-gap;
 }
 
+// 4px gap between titled fields (telemetry "Сигналы" select cluster, Figma).
+.cardDenseFields {
+  gap: t.$space-1;
+}
+
+// The dense field cluster stretches its selects to equal widths (Figma flex 1 1 0)
+// while the 4px gap between them stays fixed; the card itself is `flexible`.
+.cardDenseFields .field {
+  flex: 1 1 0;
+}
+
 .mapDateCard {
   width: t.$top-controls-map-date-card-width;
   flex: 0 0 t.$top-controls-map-date-card-width;
+}
+
+// Telemetry date card: a fixed Figma block width that shrinks with the rail —
+// 563px content with the rail collapsed, 423px expanded (i.e. 595/455 including
+// the 16px card padding). The date inputs stretch to fill it; the freed toolbar
+// width goes to the flexible "Сигналы" card beside it.
+.tmiDateCard {
+  width: t.$top-controls-tmi-date-card-width;
+  flex: 0 0 auto;
+}
+
+[data-rail-state='expanded'] .tmiDateCard {
+  width: t.$top-controls-tmi-date-card-width-expanded;
 }
 
 .mapFunctionsCard {
@@ -111,10 +135,17 @@
   min-width: 0;
 }
 
+// Tight action-button row (Figma data-management contract): 4px between the
+// chip buttons instead of the 16px control-group gap.
+.fieldRowDense.fieldRowDense {
+  gap: t.$space-1;
+}
+
 // ── Segmented control: Blueprint SegmentedControl restyled to the Figma look ──
 /* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
 .segmented.segmented {
   height: t.$top-controls-control-height;
+  gap: t.$top-controls-segment-gap;
   padding: t.$space-1;
   border-radius: t.$radius-xs;
   outline: 0.0625rem solid t.$color-workspace-border;
@@ -135,6 +166,23 @@
   font-size: t.$fs-header-nav;
   font-weight: 400;
   line-height: 1rem;
+  white-space: nowrap;
+}
+
+// Figma segment options use a 4px icon ↔ label gap; Blueprint medium buttons
+// space the leading icon with an 8px margin, so tighten it to the reference gap.
+.segmented.segmented :global(.bp6-button .bp6-icon),
+.segmented.segmented :global(.bp5-button .bp5-icon) {
+  margin-right: t.$top-controls-segment-icon-gap;
+}
+
+// The option label stays on a single line (Figma). When the toolbar is narrow
+// (rail expanded, or OS scaling below the 1920 target) the label truncates with
+// an ellipsis instead of wrapping to two lines or overflowing the toolbar.
+.segmented.segmented :global(.bp6-button .bp6-button-text),
+.segmented.segmented :global(.bp5-button .bp5-button-text) {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .segmented.segmented :global(.bp6-button:hover),
@@ -152,6 +200,7 @@
 .mapToolbar .trailing .segmented.segmented :global(.bp6-button),
 .mapToolbar .trailing .segmented.segmented :global(.bp5-button) {
   flex: 1 1 0;
+  min-width: 0; // allow the label to ellipsis-truncate instead of overflowing when narrow
   justify-content: center;
 }
 /* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
@@ -181,7 +230,9 @@
 }
 
 .dateTimeInput.dateTimeInput {
-  padding-inline: t.$space-1;
+  // Match the shared control-inner left/right inset (12px) used by the selects
+  // and side-panel inputs, so the value never sits flush against the border.
+  padding-inline: t.$space-3;
   font-variant-numeric: tabular-nums;
 }
 
@@ -228,6 +279,7 @@
   font-size: t.$fs-header-nav;
   font-weight: 400;
   line-height: 1rem;
+  white-space: nowrap; // keep "Загрузить маршруты" on a single line
 }
 
 .primaryButton.primaryButton:not(:disabled):hover {
@@ -432,6 +484,14 @@
   .toolbar,
   .scroller {
     gap: t.$top-controls-gap-compact;
+  }
+
+  // Below the 1920 target the fixed telemetry date width would overflow, so it
+  // falls back to flexing alongside the "Сигналы" card.
+  .tmiDateCard,
+  [data-rail-state='expanded'] .tmiDateCard {
+    width: auto;
+    flex: 1 1 auto;
   }
 
   .mapToolbar .scroller {
