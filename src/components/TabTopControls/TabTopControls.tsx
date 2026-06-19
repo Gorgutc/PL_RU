@@ -146,11 +146,11 @@ function WeatherCard() {
 function RoutesTopControls() {
   return (
     <Toolbar label="Управление: маршруты" trailing={<DataTypeCard items={BAR_DATA_TYPES} />}>
-      <ControlCard ariaLabel="Работа с данными по карте" flexible>
+      <ControlCard ariaLabel="Работа с данными по карте" className={styles.dataWorkCard} flexible>
         <ControlField title="Работа с данными по карте">
           <SearchField placeholder="Поиск по названию" />
         </ControlField>
-        <DateTimeCard />
+        <DateTimeCard from={DATE_ONLY} to={DATE_ONLY} />
       </ControlCard>
       <WeatherCard />
     </Toolbar>

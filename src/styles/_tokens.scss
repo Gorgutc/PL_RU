@@ -176,6 +176,9 @@ $top-controls-map-date-card-width: 20rem; // 320px Figma hug width for the map d
 $top-controls-tmi-date-card-width: 37.1875rem; // 595px (563px content) telemetry date block, rail collapsed
 $top-controls-tmi-date-card-width-expanded: 28.4375rem; // 455px (423px content) telemetry date block, rail expanded
 $top-controls-datetime-min-width: 7rem; // 112px min before the flexible date-time field stops shrinking
+$top-controls-search-width-expanded: 11.3125rem; // 181px "Работа с данными" search field, rail expanded (Figma)
+$top-controls-data-work-date-width: 11.25rem; // 180px each "Работа с данными" date field, rail collapsed (Figma)
+$top-controls-data-work-date-width-expanded: 7.5rem; // 120px each "Работа с данными" date field, rail expanded (Figma)
 $top-controls-card-gap: 1.5rem; // 24px between titled fields inside one card section
 $top-controls-inline-pad: 0.625rem; // 10px inline padding for segments / action buttons
 $top-controls-segment-icon-gap: $space-1; // 4px segment-option icon ↔ label gap (Figma), overriding Blueprint's 8px default

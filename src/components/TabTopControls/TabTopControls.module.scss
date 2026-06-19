@@ -248,6 +248,33 @@
   min-width: 0;
 }
 
+// ── "Работа с данными по карте" (bar): inputs sized to the Figma эталон ───────
+// This is the flexible (rubber) toolbar block, but its inputs hug the left at
+// fixed widths instead of stretching to fill it: search 256 / dates 180 each
+// with the rail collapsed, narrowing to 181 / 120 expanded; the search and date
+// group sit 16px apart (not the 24px inter-field card gap).
+.dataWorkCard.dataWorkCard {
+  gap: t.$top-controls-group-gap;
+}
+
+.dataWorkCard .fieldGrow,
+.dataWorkCard .dateTimeRange {
+  flex: 0 1 auto;
+}
+
+.dataWorkCard .dateField {
+  flex: 0 1 t.$top-controls-data-work-date-width;
+  min-width: 0;
+}
+
+[data-rail-state='expanded'] .dataWorkCard .search {
+  width: t.$top-controls-search-width-expanded;
+}
+
+[data-rail-state='expanded'] .dataWorkCard .dateField {
+  flex-basis: t.$top-controls-data-work-date-width-expanded;
+}
+
 // ── Switch (filter toggles / data sources) ───────────────────────────────────
 // Compact Figma filter-toggle item: 20px tall, 10px label, 28x16 indicator, and a
 // 4px trailing pad so the 4px (dense) row gap reads as the reference's 8px between
