@@ -51,12 +51,18 @@ function Toolbar({
 }
 
 // "Тип данных" segmented card with local selection state.
-function DataTypeCard({ items }: { items: readonly SegmentItem[] }) {
+function DataTypeCard({ items, wideTabs }: { items: readonly SegmentItem[]; wideTabs?: boolean }) {
   const [value, setValue] = useState(items[0]?.id ?? '');
   return (
     <ControlCard ariaLabel="Тип данных">
       <ControlField title="Тип данных">
-        <SegmentedControl ariaLabel="Тип данных" items={items} onChange={setValue} value={value} />
+        <SegmentedControl
+          ariaLabel="Тип данных"
+          items={items}
+          onChange={setValue}
+          value={value}
+          wideTabs={wideTabs}
+        />
       </ControlField>
     </ControlCard>
   );
@@ -130,13 +136,14 @@ const BAR_DATA_TYPES: readonly SegmentItem[] = [
 function WeatherCard() {
   const [value, setValue] = useState(BAR_WEATHER[0].id);
   return (
-    <ControlCard ariaLabel="Погодные параметры" flexible>
+    <ControlCard ariaLabel="Погодные параметры">
       <ControlField title="Погодные параметры">
         <SegmentedControl
           ariaLabel="Погодные параметры"
           items={BAR_WEATHER}
           onChange={setValue}
           value={value}
+          wideTabs
         />
       </ControlField>
     </ControlCard>
@@ -145,7 +152,10 @@ function WeatherCard() {
 
 function RoutesTopControls() {
   return (
-    <Toolbar label="Управление: маршруты" trailing={<DataTypeCard items={BAR_DATA_TYPES} />}>
+    <Toolbar
+      label="Управление: маршруты"
+      trailing={<DataTypeCard items={BAR_DATA_TYPES} wideTabs />}
+    >
       <ControlCard ariaLabel="Работа с данными по карте" className={styles.dataWorkCard}>
         <ControlField title="Работа с данными по карте">
           <SearchField placeholder="Поиск по названию" />

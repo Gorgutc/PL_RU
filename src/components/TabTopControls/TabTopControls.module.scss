@@ -203,6 +203,15 @@
   min-width: 0; // allow the label to ellipsis-truncate instead of overflowing when narrow
   justify-content: center;
 }
+
+// Wide-tab variant (bar «Погодные параметры» + «Тип данных»): a per-option
+// min-width so short tabs widen to the Figma эталон (Тип данных ≈ 485 total)
+// while long tabs (Погодные) keep their natural width (≈ 615). The cards then
+// hug these wider tabs and fill the toolbar instead of leaving a gap.
+.segmentWideTabs.segmentWideTabs :global(.bp6-button),
+.segmentWideTabs.segmentWideTabs :global(.bp5-button) {
+  min-width: t.$top-controls-segment-wide-min;
+}
 /* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
 
 // ── Text inputs (date-time, search) ──────────────────────────────────────────

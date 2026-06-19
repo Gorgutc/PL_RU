@@ -171,6 +171,7 @@ $top-controls-group-gap: $space-4; // 16px between control groups within a secti
 $top-controls-control-height: $header-action-height; // 30px inputs/segmented (Header rhythm)
 $top-controls-segment-height: 1.5rem; // 24px segment pill (Figma); 16px line centered in 24px = 4px effective gap
 $top-controls-segment-gap: $space-1; // 4px between segments
+$top-controls-segment-wide-min: 9.75rem; // 156px min per wide-tab option (Figma bar: «Тип данных» tabs ≈485 total)
 $top-controls-search-width: 16rem; // 256px search field
 $top-controls-map-date-card-width: 20rem; // 320px Figma hug width for the map date card
 $top-controls-tmi-date-card-width: 37.1875rem; // 595px (563px content) telemetry date block, rail collapsed

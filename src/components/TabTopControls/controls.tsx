@@ -86,18 +86,21 @@ export function SegmentedControl({
   value,
   onChange,
   ariaLabel,
+  wideTabs,
 }: {
   items: readonly SegmentItem[];
   value: string;
   onChange: (id: string) => void;
   ariaLabel: string;
+  /** Widen short options to the Figma bar эталон (min-width per tab). */
+  wideTabs?: boolean;
 }) {
   // Reuse Blueprint's SegmentedControl: it provides the radiogroup/radio roles
   // and Arrow/Home/End keyboard handling; we only restyle it to the Figma look.
   return (
     <BlueprintSegmentedControl
       aria-label={ariaLabel}
-      className={styles.segmented}
+      className={cx(styles.segmented, wideTabs && styles.segmentWideTabs)}
       intent="primary"
       onValueChange={onChange}
       options={items.map((item) => ({ label: item.label, value: item.id, icon: item.icon }))}
