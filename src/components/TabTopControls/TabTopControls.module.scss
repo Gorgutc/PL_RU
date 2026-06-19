@@ -248,19 +248,28 @@
   min-width: 0;
 }
 
-// ── Switch (data sources) ────────────────────────────────────────────────────
+// ── Switch (filter toggles / data sources) ───────────────────────────────────
+// Compact Figma filter-toggle item: 20px tall, 10px label, 28x16 indicator, and a
+// 4px trailing pad so the 4px (dense) row gap reads as the reference's 8px between
+// toggles. The toggle↔label gap is 6px (Blueprint defaults the indicator to 8px).
 .switch.switch {
   display: inline-flex;
   align-items: center;
-  min-height: t.$top-controls-control-height;
+  min-height: 1.25rem;
   margin: 0;
+  padding-inline-end: t.$space-1;
   color: t.$color-header-text-on-color;
   font-family: t.$font-sans;
-  font-size: t.$fs-header-nav;
+  font-size: t.$fs-header-filter;
   line-height: 1rem;
 }
 
 /* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+.switch.switch :global(.bp6-control-indicator),
+.switch.switch :global(.bp5-control-indicator) {
+  margin-right: 0.375rem;
+}
+
 .switch.switch :global(input:checked ~ .bp6-control-indicator),
 .switch.switch :global(input:checked ~ .bp5-control-indicator) {
   background: t.$color-workspace-button-active !important;

@@ -152,7 +152,7 @@ function FilterToggleCard({
 }) {
   return (
     <ControlCard ariaLabel={ariaLabel}>
-      <ControlField title={title}>
+      <ControlField dense title={title}>
         {filters.map((label, index) => (
           <span
             key={label}
