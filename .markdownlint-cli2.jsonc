@@ -15,5 +15,13 @@
     "!Osiris_ref/**",
     "!plugins/pl-ru-codex/skills/blueprint-design/**",
     "!plugins/pl-ru-codex/skills/osiris-design/**",
+    // Generated/ephemeral artifact dirs (gitignored): Playwright writes
+    // error-context.md into test-results/ on a flaky retry, which would otherwise
+    // fail MD047 on the next gate run. Never lint generated output.
+    "!test-results/**",
+    "!reports/**",
+    "!playwright-report/**",
+    "!.lighthouseci/**",
+    "!coverage/**",
   ],
 }
