@@ -13,6 +13,7 @@ import {
   SelectField,
   SwitchToggle,
 } from '@/components/TabTopControls/controls';
+import { mapIconSrc } from '@/components/TabTopControls/mapIcons';
 import { cx } from '@/lib/cx';
 import styles from './TabBottomPanel.module.scss';
 
@@ -187,11 +188,17 @@ function RoutesBottomPanel() {
       />
 
       <ControlCard ariaLabel="Настройки карты">
-        <ControlField title="Настройки карты">
+        <ControlField dense title="Настройки карты">
           <SelectField
             ariaLabel="Режим карты"
             options={['Контурность карты']}
             value="Контурность карты"
+          />
+          <SelectField
+            ariaLabel="Тип карты"
+            iconSrc={mapIconSrc('yandex')}
+            options={['Яндекс карты']}
+            value="Яндекс карты"
           />
         </ControlField>
       </ControlCard>

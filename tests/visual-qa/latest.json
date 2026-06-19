@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "taskScope": "Reference-compliance pass: per-tab bottom panels added on bar/tmi/sat/kick/stats (sibling TabBottomPanel reusing the frozen control-surface primitives; MapBottomPanel untouched), a dark table container (WorkspaceTableSurface) replaces the map center on kick/stats (A13 re-opened with user approval), and the sat left panel is now the OsiDus gallery. routes/telemetry rail-expanded baselines refreshed because those tabs now render the bottom panel (the map shifts up); map-tab baselines unchanged (still 0 mismatch).",
+  "taskScope": "Iteration 1 (Маршруты/bar bottom panel): added the second map-provider control «Яндекс карты» (reused SelectControl with an optional iconSrc rendering the yandex.svg brand glyph instead of the chevron) beside «Контурность карты» in the «Настройки карты» card, matching the Figma эталон; the flexible «Высота по барометру» legend auto-compresses to absorb the wider card. Verified at 1920 with the rail collapsed (50px) and expanded (240px): no horizontal overflow; control widths 158/125px, gap 4px, card height 86px, glyph 16×16. The routes-rail-expanded baseline was refreshed and a routes-rail-collapsed baseline added, both at the two-control state; map/telemetry baselines unchanged.",
   "references": [
     "Figma per-tab block exports: Desktop/Work/Верхние блоки управления/*_общий блок.png and *_code.md (design source for sizing/colors)",
     "Numeric spec: card #171d20 surface, #727677 1px outline, 2px radius, 16px padding, 30px controls, 24px #2970ff active segment",
@@ -8,6 +8,7 @@
     "tests/visual-qa/workspace-shell/map-rail-1920x1080.reference.png",
     "tests/visual-qa/workspace-shell/map-rail-expanded-1920x1080.reference.png",
     "tests/visual-qa/workspace-shell/routes-rail-expanded-1920x1080.reference.png",
+    "tests/visual-qa/workspace-shell/routes-rail-1920x1080.reference.png",
     "tests/visual-qa/workspace-shell/telemetry-rail-expanded-1920x1080.reference.png",
     "tests/visual-qa/workspace-shell/map-rail-1920x768.reference.png",
     "tests/visual-qa/workspace-shell/map-rail-expanded-1920x768.reference.png"
@@ -18,6 +19,7 @@
     "map rail collapsed",
     "map rail expanded",
     "routes rail expanded",
+    "routes rail collapsed",
     "telemetry rail expanded"
   ],
   "tolerance": {
@@ -117,6 +119,23 @@
               "selector": "[data-testid=\"left-rail-button-collapse\"]",
               "waitAfterMs": 700
             }
+          ]
+        }
+      },
+      {
+        "name": "workspace-shell-routes-collapsed-1920x1080",
+        "viewport": "1920x1080",
+        "state": "routes rail collapsed",
+        "referencePath": "tests/visual-qa/workspace-shell/routes-rail-1920x1080.reference.png",
+        "actualPath": "reports/visual-qa/workspace-shell/routes-rail-1920x1080.actual.png",
+        "diffPath": "reports/visual-qa/workspace-shell/routes-rail-1920x1080.diff.png",
+        "capture": {
+          "url": "/",
+          "selector": "[data-testid=\"workspace-shell\"]",
+          "viewport": { "width": 1920, "height": 1080 },
+          "actions": [
+            { "type": "click", "selector": "[data-testid=\"workspace-map\"]", "waitAfterMs": 1500 },
+            { "type": "click", "selector": "#praios-header-tab-bar", "waitAfterMs": 500 }
           ]
         }
       },

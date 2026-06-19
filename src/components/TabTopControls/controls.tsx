@@ -168,13 +168,25 @@ export function SelectField({
   options,
   ariaLabel,
   fill,
+  iconSrc,
 }: {
   value: string;
   options: readonly string[];
   ariaLabel: string;
   fill?: boolean;
+  /** Brand/manifest SVG glyph shown instead of the chevron (e.g. map provider). */
+  iconSrc?: string;
 }) {
-  return <SelectControl ariaLabel={ariaLabel} dense fill={fill} options={options} value={value} />;
+  return (
+    <SelectControl
+      ariaLabel={ariaLabel}
+      dense
+      fill={fill}
+      iconSrc={iconSrc}
+      options={options}
+      value={value}
+    />
+  );
 }
 
 // Blueprint Switch + label (e.g. satellite data sources).
