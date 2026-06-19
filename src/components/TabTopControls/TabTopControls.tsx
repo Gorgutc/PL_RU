@@ -130,7 +130,7 @@ const BAR_DATA_TYPES: readonly SegmentItem[] = [
 function WeatherCard() {
   const [value, setValue] = useState(BAR_WEATHER[0].id);
   return (
-    <ControlCard ariaLabel="Погодные параметры">
+    <ControlCard ariaLabel="Погодные параметры" flexible>
       <ControlField title="Погодные параметры">
         <SegmentedControl
           ariaLabel="Погодные параметры"
@@ -146,7 +146,7 @@ function WeatherCard() {
 function RoutesTopControls() {
   return (
     <Toolbar label="Управление: маршруты" trailing={<DataTypeCard items={BAR_DATA_TYPES} />}>
-      <ControlCard ariaLabel="Работа с данными по карте" className={styles.dataWorkCard} flexible>
+      <ControlCard ariaLabel="Работа с данными по карте" className={styles.dataWorkCard}>
         <ControlField title="Работа с данными по карте">
           <SearchField placeholder="Поиск по названию" />
         </ControlField>

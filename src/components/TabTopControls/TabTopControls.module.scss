@@ -249,10 +249,11 @@
 }
 
 // ── "Работа с данными по карте" (bar): inputs sized to the Figma эталон ───────
-// This is the flexible (rubber) toolbar block, but its inputs hug the left at
-// fixed widths instead of stretching to fill it: search 256 / dates 180 each
-// with the rail collapsed, narrowing to 181 / 120 expanded; the search and date
-// group sit 16px apart (not the 24px inter-field card gap).
+// The card hugs its content (the rubber/flexible toolbar block is «Погодные
+// параметры», not this one), so its right edge sits 16px from the last input.
+// The inputs keep fixed эталон widths: search 256 / dates 180 each with the rail
+// collapsed, narrowing to 181 / 120 expanded; the search and date group sit 16px
+// apart (not the 24px inter-field card gap).
 .dataWorkCard.dataWorkCard {
   gap: t.$top-controls-group-gap;
 }
