@@ -50,7 +50,7 @@ export function MapBottomPanel() {
       data-testid="map-bottom-panel"
     >
       <ControlCard ariaLabel="Фильтрация на карте">
-        <ControlField title="Фильтрация на карте">
+        <ControlField dense title="Фильтрация на карте">
           {MAP_FILTER_TOGGLES.map((label, index) => (
             <span
               key={label}

@@ -13,6 +13,11 @@ import styles from './SelectControl.module.scss';
  * Width is contextual: pass `fill` to span the container (side panels); omit it
  * to size to content (top-control toolbar). Supply either `ariaLabel` (toolbar)
  * or `ariaLabelledBy` (side-panel field label) for the accessible name.
+ *
+ * `iconSrc` swaps the default chevron-down overlay for a brand/manifest SVG glyph
+ * (e.g. the map-provider "Яндекс карты" control shows the Yandex glyph), rendered
+ * via <img> like the map-icon manifest; the native select still drives the
+ * dropdown behaviour and a11y underneath.
  */
 export function SelectControl({
   value,
@@ -23,6 +28,7 @@ export function SelectControl({
   testId,
   ariaLabel,
   ariaLabelledBy,
+  iconSrc,
 }: {
   value: string;
   options?: readonly string[];
@@ -33,6 +39,8 @@ export function SelectControl({
   testId?: string;
   ariaLabel?: string;
   ariaLabelledBy?: string;
+  /** Manifest/brand SVG glyph shown instead of the default chevron-down. */
+  iconSrc?: string;
 }) {
   return (
     <div className={cx(styles.selectShell, fill && styles.selectShellFill)}>
@@ -49,7 +57,19 @@ export function SelectControl({
         fill={fill}
         options={options && options.length ? [...options] : [value]}
       />
-      <Icon className={styles.selectShellIcon} icon="chevron-down" size={16} />
+      {iconSrc ? (
+        <img
+          alt=""
+          aria-hidden="true"
+          className={styles.selectShellIcon}
+          draggable={false}
+          height={16}
+          src={iconSrc}
+          width={16}
+        />
+      ) : (
+        <Icon className={styles.selectShellIcon} icon="chevron-down" size={16} />
+      )}
     </div>
   );
 }

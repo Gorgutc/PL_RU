@@ -203,6 +203,15 @@
   min-width: 0; // allow the label to ellipsis-truncate instead of overflowing when narrow
   justify-content: center;
 }
+
+// Wide-tab variant (bar «Погодные параметры» + «Тип данных»): a per-option
+// min-width so short tabs widen to the Figma эталон (Тип данных ≈ 485 total)
+// while long tabs (Погодные) keep their natural width (≈ 615). The cards then
+// hug these wider tabs and fill the toolbar instead of leaving a gap.
+.segmentWideTabs.segmentWideTabs :global(.bp6-button),
+.segmentWideTabs.segmentWideTabs :global(.bp5-button) {
+  min-width: t.$top-controls-segment-wide-min;
+}
 /* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
 
 // ── Text inputs (date-time, search) ──────────────────────────────────────────
@@ -248,19 +257,56 @@
   min-width: 0;
 }
 
-// ── Switch (data sources) ────────────────────────────────────────────────────
+// ── "Работа с данными по карте" (bar): inputs sized to the Figma эталон ───────
+// The card hugs its content (the rubber/flexible toolbar block is «Погодные
+// параметры», not this one), so its right edge sits 16px from the last input.
+// The inputs keep fixed эталон widths: search 256 / dates 180 each with the rail
+// collapsed, narrowing to 181 / 120 expanded; the search and date group sit 16px
+// apart (not the 24px inter-field card gap).
+.dataWorkCard.dataWorkCard {
+  gap: t.$top-controls-group-gap;
+}
+
+.dataWorkCard .fieldGrow,
+.dataWorkCard .dateTimeRange {
+  flex: 0 1 auto;
+}
+
+.dataWorkCard .dateField {
+  flex: 0 1 t.$top-controls-data-work-date-width;
+  min-width: 0;
+}
+
+[data-rail-state='expanded'] .dataWorkCard .search {
+  width: t.$top-controls-search-width-expanded;
+}
+
+[data-rail-state='expanded'] .dataWorkCard .dateField {
+  flex-basis: t.$top-controls-data-work-date-width-expanded;
+}
+
+// ── Switch (filter toggles / data sources) ───────────────────────────────────
+// Compact Figma filter-toggle item: 20px tall, 10px label, 28x16 indicator, and a
+// 4px trailing pad so the 4px (dense) row gap reads as the reference's 8px between
+// toggles. The toggle↔label gap is 6px (Blueprint defaults the indicator to 8px).
 .switch.switch {
   display: inline-flex;
   align-items: center;
-  min-height: t.$top-controls-control-height;
+  min-height: 1.25rem;
   margin: 0;
+  padding-inline-end: t.$space-1;
   color: t.$color-header-text-on-color;
   font-family: t.$font-sans;
-  font-size: t.$fs-header-nav;
+  font-size: t.$fs-header-filter;
   line-height: 1rem;
 }
 
 /* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+.switch.switch :global(.bp6-control-indicator),
+.switch.switch :global(.bp5-control-indicator) {
+  margin-right: 0.375rem;
+}
+
 .switch.switch :global(input:checked ~ .bp6-control-indicator),
 .switch.switch :global(input:checked ~ .bp5-control-indicator) {
   background: t.$color-workspace-button-active !important;

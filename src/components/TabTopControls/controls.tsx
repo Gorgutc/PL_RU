@@ -86,18 +86,21 @@ export function SegmentedControl({
   value,
   onChange,
   ariaLabel,
+  wideTabs,
 }: {
   items: readonly SegmentItem[];
   value: string;
   onChange: (id: string) => void;
   ariaLabel: string;
+  /** Widen short options to the Figma bar эталон (min-width per tab). */
+  wideTabs?: boolean;
 }) {
   // Reuse Blueprint's SegmentedControl: it provides the radiogroup/radio roles
   // and Arrow/Home/End keyboard handling; we only restyle it to the Figma look.
   return (
     <BlueprintSegmentedControl
       aria-label={ariaLabel}
-      className={styles.segmented}
+      className={cx(styles.segmented, wideTabs && styles.segmentWideTabs)}
       intent="primary"
       onValueChange={onChange}
       options={items.map((item) => ({ label: item.label, value: item.id, icon: item.icon }))}
@@ -168,13 +171,25 @@ export function SelectField({
   options,
   ariaLabel,
   fill,
+  iconSrc,
 }: {
   value: string;
   options: readonly string[];
   ariaLabel: string;
   fill?: boolean;
+  /** Brand/manifest SVG glyph shown instead of the chevron (e.g. map provider). */
+  iconSrc?: string;
 }) {
-  return <SelectControl ariaLabel={ariaLabel} dense fill={fill} options={options} value={value} />;
+  return (
+    <SelectControl
+      ariaLabel={ariaLabel}
+      dense
+      fill={fill}
+      iconSrc={iconSrc}
+      options={options}
+      value={value}
+    />
+  );
 }
 
 // Blueprint Switch + label (e.g. satellite data sources).
