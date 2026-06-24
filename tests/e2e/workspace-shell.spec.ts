@@ -897,6 +897,15 @@ test.describe('PraiOS workspace shell', () => {
     const visibleSwitches = panel.locator('.bp6-switch:visible');
     expect(await visibleSwitches.count()).toBeLessThanOrEqual(3);
 
+    const overflowButton = panel.getByTestId('map-filter-overflow-trigger');
+    await expect(overflowButton).toHaveAttribute('aria-haspopup', 'menu');
+    await overflowButton.click();
+
+    const overflowMenu = page.getByTestId('map-filter-overflow-menu');
+    await expect(overflowMenu).toBeVisible();
+    await expect(overflowMenu.locator('.bp6-switch, .bp5-switch')).toHaveCount(4);
+    await expect(overflowMenu.getByText('Пожары')).toBeVisible();
+
     // Nothing in the panel is clipped past its right edge (the data actions fit).
     const panelBox = await requireBox(panel);
     const buttons = panel.locator('button');

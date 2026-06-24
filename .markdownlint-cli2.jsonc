@@ -13,6 +13,7 @@
     "!node_modules/**",
     "!Blueprints_lib/**",
     "!Osiris_ref/**",
+    "!.claude/worktrees/**",
     "!plugins/pl-ru-codex/skills/blueprint-design/**",
     "!plugins/pl-ru-codex/skills/osiris-design/**",
     // Generated/ephemeral artifact dirs (gitignored): Playwright writes

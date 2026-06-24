@@ -38,6 +38,7 @@ const MAP_FILTER_TOGGLES = [
   'Часовые пояса',
   'Сетка WGS84',
 ] as const;
+const MAP_FILTER_OVERFLOW_TOGGLES = MAP_FILTER_TOGGLES.slice(COMPACT_VISIBLE_FILTERS);
 
 // "Нижняя граница облаков" tick labels (metres) under the rainbow legend.
 const CLOUD_LEGEND_TICKS = ['0', '500', '1000', '1500', '2000', '3000', '4000', '5000'] as const;
@@ -60,7 +61,15 @@ export function MapBottomPanel() {
             </span>
           ))}
           <span className={styles.filterOverflow}>
-            <MapLayerDropdown ariaLabel="Ещё фильтры" />
+            <MapLayerDropdown
+              ariaLabel="Ещё фильтры"
+              menuTestId="map-filter-overflow-menu"
+              switchItems={MAP_FILTER_OVERFLOW_TOGGLES.map((label) => ({
+                defaultChecked: true,
+                label,
+              }))}
+              triggerTestId="map-filter-overflow-trigger"
+            />
           </span>
         </ControlField>
       </ControlCard>

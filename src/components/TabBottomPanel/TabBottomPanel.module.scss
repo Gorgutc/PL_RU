@@ -1,75 +1,37 @@
+@use '../../styles/bottom-panel' as bp;
 @use '../../styles/tokens' as t;
 
 // Per-tab footer strip. Mirrors the MapBottomPanel rhythm: a fixed height so it
 // only changes the map's available height, never the right-anchored stage. Card
 // surfaces come from the reused ControlCard primitive (frozen dark surface).
 .panel {
-  display: flex;
-  box-sizing: border-box;
-  align-items: stretch;
-  gap: t.$workspace-bottom-panel-gap;
-  width: 100%;
-  max-width: t.$workspace-content-max; // caps at 2560, left-aligns beyond it (matches top controls)
-  height: t.$workspace-bottom-panel-height;
-  min-width: 0;
-  padding: 0 t.$workspace-bottom-panel-padding t.$workspace-bottom-panel-padding;
-  background: t.$color-workspace-bg;
-}
-
-.panel *,
-.panel *::before,
-.panel *::after {
-  box-sizing: border-box;
+  @include bp.panel;
+  @include bp.panel-border-box;
 }
 
 // ── Rainbow legend (flexible middle block) — shared look with the cloud legend ──
 .legend {
-  display: flex;
-  flex: 1 1 auto;
-  align-self: stretch;
-  min-width: 0;
-  flex-direction: column;
-  justify-content: space-between;
+  @include bp.legend;
 }
 
 .legendHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: t.$space-2;
+  @include bp.legend-header;
 }
 
 .legendTitle {
-  color: t.$color-header-text-on-color;
-  font-family: t.$font-sans;
-  font-size: t.$fs-header-nav;
-  font-weight: 500;
-  line-height: 1rem;
-  white-space: nowrap;
+  @include bp.legend-title;
 }
 
 .legendUnit {
-  color: t.$color-workspace-placeholder;
-  font-family: t.$font-sans;
-  font-size: t.$fs-header-nav;
-  line-height: 1rem;
+  @include bp.legend-unit;
 }
 
 .legendBar {
-  width: 100%;
-  height: t.$cloud-legend-bar-height;
-  border-radius: t.$radius-dropdown;
-  background: t.$gradient-cloud-legend;
+  @include bp.legend-bar;
 }
 
 .legendTicks {
-  display: flex;
-  justify-content: space-between;
-  color: t.$color-workspace-placeholder;
-  font-family: t.$font-sans;
-  font-size: t.$fs-header-nav;
-  font-variant-numeric: tabular-nums;
-  line-height: 1rem;
+  @include bp.legend-ticks;
 }
 
 // ── tmi: "Данные маршрута" key/value block ────────────────────────────────────

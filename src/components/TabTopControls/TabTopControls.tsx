@@ -108,6 +108,7 @@ function MapTopControls() {
         <IconButtonGroup
           compactVisibleCount={MAP_LAYER_COMPACT_VISIBLE_COUNT}
           group={MAP_LAYER_GROUP}
+          overflowSwitchItems={MAP_LAYER_TOGGLES}
           trailing={
             <span className={styles.layerToggles}>
               {MAP_LAYER_TOGGLES.map((label) => (

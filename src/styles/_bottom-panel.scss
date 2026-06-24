@@ -1,0 +1,71 @@
+@use './tokens' as t;
+
+@mixin panel {
+  display: flex;
+  box-sizing: border-box;
+  align-items: stretch;
+  gap: t.$workspace-bottom-panel-gap;
+  width: 100%;
+  max-width: t.$workspace-content-max;
+  height: t.$workspace-bottom-panel-height;
+  min-width: 0;
+  padding: 0 t.$workspace-bottom-panel-padding t.$workspace-bottom-panel-padding;
+  background: t.$color-workspace-bg;
+}
+
+@mixin panel-border-box {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}
+
+@mixin legend {
+  display: flex;
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+@mixin legend-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: t.$space-2;
+}
+
+@mixin legend-title {
+  color: t.$color-header-text-on-color;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-weight: 500;
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+@mixin legend-unit {
+  color: t.$color-workspace-placeholder;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  line-height: 1rem;
+}
+
+@mixin legend-bar {
+  width: 100%;
+  height: t.$cloud-legend-bar-height;
+  border-radius: t.$radius-dropdown;
+  background: t.$gradient-cloud-legend;
+}
+
+@mixin legend-ticks {
+  display: flex;
+  justify-content: space-between;
+  color: t.$color-workspace-placeholder;
+  font-family: t.$font-sans;
+  font-size: t.$fs-header-nav;
+  font-variant-numeric: tabular-nums;
+  line-height: 1rem;
+}
