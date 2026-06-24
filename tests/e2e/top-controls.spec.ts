@@ -238,6 +238,19 @@ test.describe('Per-tab top control blocks', () => {
       0,
     );
 
+    const overflowButton = layerGroup.getByTestId('map-layer-overflow-trigger');
+    await expect(overflowButton).toHaveAttribute('aria-haspopup', 'menu');
+    await overflowButton.click();
+
+    const overflowMenu = page.getByTestId('map-layer-overflow-menu');
+    await expect(overflowMenu).toBeVisible();
+    await expect(overflowMenu.locator('[data-icon-id="yandex"]')).toBeVisible();
+    const hiddenYandexItem = overflowMenu.locator('[data-menu-icon-id="yandex"]');
+    await expect(hiddenYandexItem).toHaveAttribute('aria-pressed', 'false');
+    await hiddenYandexItem.click();
+    await expect(hiddenYandexItem).toHaveAttribute('aria-pressed', 'true');
+    await expect(overflowMenu.locator('.bp6-switch, .bp5-switch')).toHaveCount(2);
+
     const groupBoxes = await iconGroups.evaluateAll((groups) =>
       groups.map((group) => {
         const rect = group.getBoundingClientRect();

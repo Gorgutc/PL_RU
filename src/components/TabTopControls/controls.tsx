@@ -3,6 +3,10 @@ import {
   Button,
   Icon,
   InputGroup,
+  Menu,
+  MenuItem,
+  Popover,
+  PopoverInteractionKind,
   SegmentedControl as BlueprintSegmentedControl,
   Switch,
 } from '@blueprintjs/core';
@@ -322,10 +326,12 @@ function IconButton({ id }: { id: MapIconId }) {
 export function IconButtonGroup({
   group,
   compactVisibleCount,
+  overflowSwitchItems,
   trailing,
 }: {
   group: MapIconGroup;
   compactVisibleCount?: number;
+  overflowSwitchItems?: readonly string[];
   trailing?: ReactNode;
 }) {
   const rowRef = useRef<HTMLDivElement>(null);
@@ -372,6 +378,7 @@ export function IconButtonGroup({
 
   const dividerAfter = new Set(group.dividerAfter ?? []);
   const shown = group.items.slice(0, visibleCount);
+  const hidden = group.items.slice(visibleCount);
 
   return (
     <div
@@ -396,7 +403,15 @@ export function IconButtonGroup({
             </Fragment>
           );
         })}
-        {overflowing ? <MapLayerDropdown ariaLabel={`Ещё: ${group.title}`} /> : null}
+        {overflowing ? (
+          <MapLayerDropdown
+            ariaLabel={`Ещё: ${group.title}`}
+            iconItems={hidden}
+            menuTestId="map-layer-overflow-menu"
+            switchItems={overflowSwitchItems?.map((label) => ({ defaultChecked: true, label }))}
+            triggerTestId="map-layer-overflow-trigger"
+          />
+        ) : null}
       </div>
       {trailing}
     </div>
@@ -408,19 +423,85 @@ export function LayerToggle({ label }: { label: string }) {
   return <Switch aria-label={label} className={styles.layerToggle} defaultChecked />;
 }
 
-// Chevron overflow dropdown trigger: appears at the end of a group when its
-// icons overflow the available width (the trimmed icons would open from here).
-// Presentational icon-sized button (Blueprint chevron, not an SVG-manifest glyph).
-export function MapLayerDropdown({ ariaLabel = 'Ещё слои карты' }: { ariaLabel?: string }) {
+type OverflowSwitchItem = {
+  defaultChecked?: boolean;
+  label: string;
+};
+
+function OverflowIconMenuItem({ id }: { id: MapIconId }) {
+  const [pressed, setPressed] = useState(false);
+
   return (
-    <Button
-      aria-label={ariaLabel}
-      className={styles.iconButton}
-      icon={<Icon icon="chevron-down" size={16} />}
-      title={ariaLabel}
-      type="button"
-      variant="minimal"
+    <MenuItem
+      active={pressed}
+      aria-pressed={pressed}
+      data-menu-icon-id={id}
+      icon={
+        <span className={styles.overflowMenuIcon}>
+          <img alt="" aria-hidden="true" data-icon-id={id} draggable={false} src={mapIconSrc(id)} />
+        </span>
+      }
+      onClick={(event) => {
+        event.preventDefault();
+        setPressed((value) => !value);
+      }}
+      shouldDismissPopover={false}
+      text={mapIconLabel(id)}
     />
+  );
+}
+
+// Chevron overflow trigger: exposes controls hidden by compact toolbar/panel
+// layouts through a real Blueprint Popover/Menu instead of a dead button.
+export function MapLayerDropdown({
+  ariaLabel = 'Ещё слои карты',
+  iconItems = [],
+  menuTestId = 'map-layer-overflow-menu',
+  switchItems = [],
+  triggerTestId = 'map-layer-overflow-trigger',
+}: {
+  ariaLabel?: string;
+  iconItems?: readonly MapIconId[];
+  menuTestId?: string;
+  switchItems?: readonly OverflowSwitchItem[];
+  triggerTestId?: string;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover
+      content={
+        <Menu aria-label={ariaLabel} className={styles.overflowMenu} data-testid={menuTestId}>
+          {iconItems.map((id) => (
+            <OverflowIconMenuItem id={id} key={id} />
+          ))}
+          {switchItems.map(({ defaultChecked = true, label }) => (
+            <li className={styles.overflowSwitchItem} key={label} role="none">
+              <SwitchToggle defaultChecked={defaultChecked} label={label} />
+            </li>
+          ))}
+        </Menu>
+      }
+      interactionKind={PopoverInteractionKind.CLICK}
+      isOpen={open}
+      minimal
+      onInteraction={setOpen}
+      placement="bottom-end"
+      popoverClassName={styles.overflowMenuPopover}
+    >
+      <Button
+        active={open}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-label={ariaLabel}
+        className={styles.iconButton}
+        data-testid={triggerTestId}
+        icon={<Icon icon="chevron-down" size={16} />}
+        title={ariaLabel}
+        type="button"
+        variant="minimal"
+      />
+    </Popover>
   );
 }
 

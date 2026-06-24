@@ -31,7 +31,7 @@
     "check:dead": "knip --exclude unlisted --no-config-hints",
     "check:duplicates": "jscpd --config .jscpd.json --noTips .",
     "check:visual": "node scripts/check-visual-evidence.mjs",
-    "check:audit": "pnpm audit --prod --audit-level high",
+    "check:audit": "pnpm audit --prod --audit-level low",
     "check:a11y": "playwright test --config=playwright.quality.config.ts && node scripts/run-pa11y.mjs",
     "check:lighthouse": "pnpm build && node scripts/run-lhci.mjs",
     "test:browser": "pnpm test:e2e",
@@ -53,7 +53,7 @@
     "@blueprintjs/icons": "^6.0.0",
     "framer-motion": "^12.0.0",
     "maplibre-gl": "^5.24.0",
-    "next": "^16.2.6",
+    "next": "^16.2.9",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
@@ -70,7 +70,7 @@
     "cspell": "^10.0.0",
     "dependency-cruiser": "^17.4.2",
     "eslint": "^9.0.0",
-    "eslint-config-next": "^16.2.6",
+    "eslint-config-next": "^16.2.9",
     "eslint-config-prettier": "^9.1.0",
     "happy-dom": "^15.0.0",
     "htmlhint": "^1.9.2",
@@ -90,6 +90,10 @@
     "vitest": "^2.1.0"
   },
   "pnpm": {
+    "overrides": {
+      "@babel/core": "7.29.7",
+      "postcss": "8.5.15"
+    },
     "peerDependencyRules": {
       "allowedVersions": {
         "react": "19",

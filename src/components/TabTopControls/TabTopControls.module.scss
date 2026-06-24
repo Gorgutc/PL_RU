@@ -459,6 +459,42 @@
   outline-offset: 0.125rem;
 }
 
+.overflowMenu {
+  min-width: 12rem;
+}
+
+.overflowMenuPopover {
+  box-shadow: none !important;
+}
+
+.overflowMenuIcon {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.overflowMenuIcon img {
+  width: 1rem;
+  height: 1rem;
+  object-fit: contain;
+}
+
+.overflowSwitchItem {
+  display: flex;
+  min-height: t.$top-controls-control-height;
+  align-items: center;
+  padding: t.$space-1 t.$space-2;
+}
+
+/* stylelint-disable selector-pseudo-class-no-unknown, selector-class-pattern */
+.overflowSwitchItem :global(.bp6-control),
+.overflowSwitchItem :global(.bp5-control) {
+  margin-bottom: 0;
+}
+/* stylelint-enable selector-pseudo-class-no-unknown, selector-class-pattern */
+
 .iconGlyph {
   display: block;
   width: 1rem;

@@ -14,7 +14,14 @@ type VisualQaModule = {
     isTrackedFile: (file: string) => boolean;
     requireTrackedTestsManifest: boolean;
   }) => string | null;
-  validateEvidence: (evidence: unknown, options?: { evidencePath?: string }) => string[];
+  validateEvidence: (
+    evidence: unknown,
+    options?: {
+      artifactExists?: (file: string) => boolean;
+      evidencePath?: string;
+      verifyArtifactFiles?: boolean;
+    },
+  ) => string[];
 };
 
 async function visualQaModule(): Promise<VisualQaModule> {
@@ -134,6 +141,19 @@ describe('check-visual-evidence helpers', () => {
     });
 
     expect(failures).toEqual([]);
+  });
+
+  it('rejects selected manifests when referenced visual artifacts are missing', async () => {
+    const { validateEvidence } = await visualQaModule();
+
+    const failures = validateEvidence(visualEvidence(), {
+      artifactExists: (file) => file.endsWith('.reference.png'),
+      evidencePath: 'tests/visual-qa/latest.json',
+      verifyArtifactFiles: true,
+    });
+
+    expect(failures.join('\n')).toMatch(/actualPath artifact does not exist/);
+    expect(failures.join('\n')).toMatch(/diffPath artifact does not exist/);
   });
 
   it('requires MapLibre readiness checks for workspace screenshot captures', async () => {

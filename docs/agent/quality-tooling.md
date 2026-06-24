@@ -31,6 +31,20 @@ before CI and before a draft PR is opened.
 - Lighthouse CI: production-page quality budget.
 - Lefthook: optional local pre-commit/pre-push hooks.
 
+## Audit Policy
+
+`check:audit` runs `pnpm audit --prod --audit-level low` so low, moderate,
+high, and critical production advisories all fail the local gate instead of
+passing silently.
+
+Temporary dependency overrides are allowed only when an upstream package update
+does not yet resolve the advisory path. As of 2026-06-24, `next@16.2.9` still
+resolves `next -> postcss@8.4.31` and `next -> styled-jsx -> @babel/core@7.29.0`,
+so `package.json` pins `postcss@8.5.15` and `@babel/core@7.29.7` through
+`pnpm.overrides`. Revisit these overrides when the next Next.js patch is adopted
+or by 2026-07-24, whichever happens first; remove them once `pnpm audit --prod
+--audit-level low` stays clean without overrides.
+
 ## Command Groups
 
 - `quality:fast`: cheap local checks.

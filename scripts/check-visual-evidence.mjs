@@ -286,6 +286,18 @@ function validateCapture(testCase, label, failures) {
   }
 }
 
+function validateReferencedArtifact({ artifactExists, artifactPath, failures, label, resolver }) {
+  try {
+    const resolved = resolver(artifactPath, label);
+
+    if (!artifactExists(resolved)) {
+      failures.push(`${label} artifact does not exist (${artifactPath})`);
+    }
+  } catch (error) {
+    failures.push(error instanceof Error ? error.message : String(error));
+  }
+}
+
 export function getCaptureReadinessSelectors(testCase) {
   const selector = testCase.capture?.selector;
 
@@ -300,7 +312,10 @@ export function getCaptureReadinessSelectors(testCase) {
   ];
 }
 
-export function validateEvidence(evidence, { evidencePath } = {}) {
+export function validateEvidence(
+  evidence,
+  { artifactExists = existsSync, evidencePath, verifyArtifactFiles = false } = {},
+) {
   const failures = [];
   const cases = evidence.pixelComparison?.cases;
   const fallbackAccepted = metricOnlyFallbackAccepted(evidence);
@@ -344,6 +359,29 @@ export function validateEvidence(evidence, { evidencePath } = {}) {
         if (typeof testCase[key] !== 'string' || testCase[key].length === 0) {
           failures.push(`${label}.${key} is required`);
         }
+      }
+      if (verifyArtifactFiles) {
+        validateReferencedArtifact({
+          artifactExists,
+          artifactPath: testCase.referencePath,
+          failures,
+          label: `${label}.referencePath`,
+          resolver: resolveWorkspacePath,
+        });
+        validateReferencedArtifact({
+          artifactExists,
+          artifactPath: testCase.actualPath,
+          failures,
+          label: `${label}.actualPath`,
+          resolver: resolveVisualArtifactPath,
+        });
+        validateReferencedArtifact({
+          artifactExists,
+          artifactPath: testCase.diffPath,
+          failures,
+          label: `${label}.diffPath`,
+          resolver: resolveDiffArtifactPath,
+        });
       }
       if (
         isTrackedDefaultEvidencePath(evidencePath ?? '') &&
@@ -925,15 +963,41 @@ export async function main() {
   const uiFiles = changedFiles.filter(isUiSurface);
   const baseUiFiles = changedFileSources['base-diff'].filter(isUiSurface);
   const visualQaRequired = forceRequired || uiFiles.length > 0;
-
-  if (!visualQaRequired) {
-    console.log('visual-qa: PASS - no UI surface changed in base/worktree/staged/untracked diff');
-    process.exit(0);
-  }
-
   const evidencePath = findEvidencePath({
     requireTrackedTestsManifest: baseUiFiles.length > 0,
   });
+
+  if (!visualQaRequired) {
+    if (!evidencePath) {
+      console.log(
+        [
+          'visual-qa: PASS - no UI surface changed in base/worktree/staged/untracked diff',
+          'visual-qa: INFO - no visual QA evidence manifest found; artifact existence was not checked',
+        ].join('\n'),
+      );
+      process.exit(0);
+    }
+
+    const evidence = readEvidence(evidencePath);
+    const failures = validateEvidence(evidence, {
+      evidencePath,
+      verifyArtifactFiles: true,
+    });
+
+    if (failures.length > 0) {
+      console.error(`visual-qa: FAIL - ${evidencePath}`);
+      for (const failure of failures) console.error(`- ${failure}`);
+      process.exit(1);
+    }
+
+    console.log(
+      [
+        'visual-qa: PASS - no UI surface changed in base/worktree/staged/untracked diff',
+        `visual-qa: PASS - ${evidencePath} artifact paths exist`,
+      ].join('\n'),
+    );
+    process.exit(0);
+  }
 
   if (!evidencePath) {
     console.error(
