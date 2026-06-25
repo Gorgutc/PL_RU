@@ -48,9 +48,10 @@ or by 2026-07-24, whichever happens first; remove them once `pnpm audit --prod
 ## Command Groups
 
 - `quality:fast`: cheap local checks.
-- `quality:deep`: audit checks, visual QA evidence, browser smoke, and a11y
-  smoke.
-- `quality:all`: full local ship gate, including audit and Lighthouse.
+- `quality:deep`: production dependency audit, visual QA evidence, browser
+  smoke, a11y smoke, and full frozen runtime.
+- `quality:all`: full local ship gate, adding reference sync/verify and
+  Lighthouse on top of `quality:deep`.
 - `codex:ship`: required before commit and push.
 
 Do not run broad auto-formatting as part of this PR. `format` and `lint:fix`

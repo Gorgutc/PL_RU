@@ -12,9 +12,10 @@ dependency-cruiser, and package scripts.
 ## Command Layers
 
 - `pnpm quality:fast`: cheap local checks.
-- `pnpm quality:deep`: audit checks, `pnpm check:visual`, browser/a11y smoke,
-  and full frozen runtime.
-- `pnpm quality:all`: full local gate, including refs and Lighthouse.
+- `pnpm quality:deep`: production dependency audit, `pnpm check:visual`,
+  browser/a11y smoke, and full frozen runtime.
+- `pnpm quality:all`: full local gate, adding refs and Lighthouse on top of
+  `quality:deep`.
 - `pnpm codex:ship`: required before commit and push.
 
 ## Rules

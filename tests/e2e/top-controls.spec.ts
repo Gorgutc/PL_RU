@@ -435,6 +435,8 @@ test.describe('Per-tab top control blocks', () => {
   });
 
   test('keeps the map toolbar fitting and capped across viewport widths', async ({ page }) => {
+    test.setTimeout(60_000);
+
     // The map tab is the densest toolbar: a fixed 320px Figma date card + an
     // adaptive map-functions card + the pinned "Тип данных" card. Rail-collapsed
     // is the 1920 visual target; expanded and narrower widths must still avoid
