@@ -3,6 +3,9 @@
 Date: 2026-06-25
 Branch: `codex/pl-ru-monitor-followup-fixes`
 Base: `main` at `3f87957` (`Merge pull request #29 from Gorgutc/codex/pl-ru-monitor-findings`)
+Initial implementation commit: `916138f` (`Fix monitor follow-up gates`)
+Draft PR: https://github.com/Gorgutc/PL_RU/pull/30
+PR labels: `codex`, `codex-automation`
 Scope: follow-up implementation for the weekday monitor findings reported after
 PR #29 merged.
 
