@@ -44,8 +44,8 @@
     "hooks:install": "lefthook install",
     "codex:verify-plugin": "node scripts/verify-codex-plugin.mjs",
     "quality:fast": "pnpm check:format && pnpm check:js && pnpm check:css && pnpm typecheck && pnpm test && pnpm verify:static && pnpm codex:verify-plugin",
-    "quality:deep": "pnpm quality:fast && pnpm check:html && pnpm check:markdown && pnpm check:spelling && pnpm check:deps && pnpm check:dead && pnpm check:duplicates && pnpm check:visual && pnpm test:browser && pnpm check:a11y && pnpm verify",
-    "quality:all": "pnpm refs:sync && pnpm quality:deep && pnpm check:audit && pnpm check:lighthouse && pnpm refs:verify",
+    "quality:deep": "pnpm quality:fast && pnpm check:html && pnpm check:markdown && pnpm check:spelling && pnpm check:deps && pnpm check:dead && pnpm check:duplicates && pnpm check:audit && pnpm check:visual && pnpm test:browser && pnpm check:a11y && pnpm verify",
+    "quality:all": "pnpm refs:sync && pnpm quality:deep && pnpm check:lighthouse && pnpm refs:verify",
     "codex:ship": "pnpm quality:all"
   },
   "dependencies": {

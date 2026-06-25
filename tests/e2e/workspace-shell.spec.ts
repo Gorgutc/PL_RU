@@ -488,63 +488,72 @@ async function expectPanelControlsAligned(page: Page, panelTestId: string) {
   const panel = page.getByTestId(panelTestId);
   await expect(panel).toBeVisible();
 
-  const footerButtons = panel.locator('footer button');
-  const panelLevelControls = panel.locator(
-    [
-      '.bp6-html-select',
-      '.bp5-html-select',
-      '.bp6-input-group',
-      '.bp5-input-group',
-      'textarea',
-    ].join(', '),
-  );
-  const containedCards = panel.locator('section[aria-label]');
+  await expect
+    .poll(
+      async () =>
+        panel.evaluate((element) => {
+          const readBox = (target: Element) => {
+            const rect = target.getBoundingClientRect();
+            return { left: rect.x, right: rect.x + rect.width, y: rect.y };
+          };
+          const footerRightEdges = [...element.querySelectorAll('footer button')].map((button) => {
+            const box = readBox(button);
+            return Math.round(box.right);
+          });
 
-  const footerButtonCount = await footerButtons.count();
-  expect(footerButtonCount).toBeGreaterThan(0);
+          if (footerRightEdges.length === 0) return Number.POSITIVE_INFINITY;
 
-  const footerRightEdges: number[] = [];
-  for (let index = 0; index < footerButtonCount; index += 1) {
-    const footerBox = await requireBox(footerButtons.nth(index));
-    footerRightEdges.push(Math.round(footerBox.x + footerBox.width));
-  }
+          const panelRect = element.getBoundingClientRect();
+          const panelMidpoint = panelRect.x + panelRect.width / 2;
+          const controlBoxes = [
+            ...element.querySelectorAll(
+              [
+                '.bp6-html-select',
+                '.bp5-html-select',
+                '.bp6-input-group',
+                '.bp5-input-group',
+                'textarea',
+              ].join(', '),
+            ),
+          ]
+            .filter((control) => !control.closest('section[aria-label]'))
+            .map(readBox);
+          const cardBoxes = [...element.querySelectorAll('section[aria-label]')].map(readBox);
+          const alignmentBoxes = [...controlBoxes, ...cardBoxes];
+          const boxesByRow = new Map<number, typeof alignmentBoxes>();
 
-  const footerRight = Math.max(...footerRightEdges);
-  const panelBox = await requireBox(panel);
-  const panelMidpoint = panelBox.x + panelBox.width / 2;
-  const controlBoxes = await panelLevelControls.evaluateAll((elements) =>
-    elements
-      .filter((element) => !element.closest('section[aria-label]'))
-      .map((element) => {
-        const rect = element.getBoundingClientRect();
-        return { left: rect.x, right: rect.x + rect.width, y: rect.y };
-      }),
-  );
-  const cardBoxes = await containedCards.evaluateAll((elements) =>
-    elements.map((element) => {
-      const rect = element.getBoundingClientRect();
-      return { left: rect.x, right: rect.x + rect.width, y: rect.y };
-    }),
-  );
-  const alignmentBoxes = [...controlBoxes, ...cardBoxes];
-  const boxesByRow = new Map<number, typeof alignmentBoxes>();
+          if (alignmentBoxes.length === 0) return Number.POSITIVE_INFINITY;
 
-  expect(alignmentBoxes.length).toBeGreaterThan(0);
+          for (const box of alignmentBoxes) {
+            const rowKey = Math.round(box.y / 4) * 4;
+            boxesByRow.set(rowKey, [...(boxesByRow.get(rowKey) ?? []), box]);
+          }
 
-  for (const box of alignmentBoxes) {
-    const rowKey = Math.round(box.y / 4) * 4;
-    boxesByRow.set(rowKey, [...(boxesByRow.get(rowKey) ?? []), box]);
-  }
+          const footerRight = Math.max(...footerRightEdges);
+          const deltas = [...boxesByRow.values()]
+            .filter((boxes) => {
+              const leftOnlySingleColumn =
+                boxes.length === 1 &&
+                boxes[0].left < panelMidpoint &&
+                boxes[0].right < panelMidpoint + 1;
 
-  for (const boxes of boxesByRow.values()) {
-    const controlRight = Math.round(Math.max(...boxes.map((box) => box.right)));
-    const leftOnlySingleColumn =
-      boxes.length === 1 && boxes[0].left < panelMidpoint && boxes[0].right < panelMidpoint + 1;
+              return !leftOnlySingleColumn;
+            })
+            .map((boxes) => {
+              const controlRight = Math.round(Math.max(...boxes.map((box) => box.right)));
+              return Math.abs(controlRight - footerRight);
+            });
 
-    if (leftOnlySingleColumn) continue;
+          if (deltas.length === 0) return Number.POSITIVE_INFINITY;
 
-    expect(Math.abs(controlRight - footerRight)).toBeLessThanOrEqual(1);
-  }
+          return Math.max(...deltas);
+        }),
+      {
+        message: `${panelTestId} controls align to footer actions after tab transition`,
+        timeout: WORKSPACE_MOTION_DURATION_MS + 1_000,
+      },
+    )
+    .toBeLessThanOrEqual(1);
 }
 
 async function tabUntilFocused(page: Page, locator: Locator, maxTabs = 64) {
@@ -563,35 +572,40 @@ async function tabUntilFocused(page: Page, locator: Locator, maxTabs = 64) {
 }
 
 async function expectInputTextFits(locator: Locator, displayValue: string) {
-  const metrics = await locator.evaluate((element, value) => {
-    const input = element as HTMLInputElement;
-    const style = window.getComputedStyle(input);
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
+  await expect
+    .poll(
+      async () =>
+        locator.evaluate((element, value) => {
+          const input = element as HTMLInputElement;
+          const style = window.getComputedStyle(input);
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
 
-    if (!context) throw new Error('Expected a canvas context for text measurement');
+          if (!context) throw new Error('Expected a canvas context for text measurement');
 
-    context.font = [
-      style.fontStyle,
-      style.fontVariant,
-      style.fontWeight,
-      style.fontSize,
-      style.fontFamily,
-    ].join(' ');
+          context.font = [
+            style.fontStyle,
+            style.fontVariant,
+            style.fontWeight,
+            style.fontSize,
+            style.fontFamily,
+          ].join(' ');
 
-    return {
-      clientWidth: input.clientWidth,
-      paddingLeft: Number.parseFloat(style.paddingLeft) || 0,
-      paddingRight: Number.parseFloat(style.paddingRight) || 0,
-      textWidth: context.measureText(value).width,
-    };
-  }, displayValue);
+          const reservedPickerWidth = 14;
+          const requiredWidth =
+            context.measureText(value).width +
+            (Number.parseFloat(style.paddingLeft) || 0) +
+            (Number.parseFloat(style.paddingRight) || 0) +
+            reservedPickerWidth;
 
-  const reservedPickerWidth = 14;
-  const requiredWidth =
-    metrics.textWidth + metrics.paddingLeft + metrics.paddingRight + reservedPickerWidth;
-
-  expect(requiredWidth).toBeLessThanOrEqual(metrics.clientWidth);
+          return requiredWidth - input.clientWidth;
+        }, displayValue),
+      {
+        message: 'date-time text fits after panel transition',
+        timeout: WORKSPACE_MOTION_DURATION_MS + 1_000,
+      },
+    )
+    .toBeLessThanOrEqual(0);
 }
 
 async function expectCalendarInputUsable(locator: Locator) {

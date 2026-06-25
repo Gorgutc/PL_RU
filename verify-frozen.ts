@@ -450,6 +450,10 @@ async function testFrozenQualityToolingContract() {
   const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
   const architecture = await readFile(path.join(ROOT, 'docs', 'agent', 'architecture.md'), 'utf8');
   const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+  const qualityToolingDoc = await readFile(
+    path.join(ROOT, 'docs', 'agent', 'quality-tooling.md'),
+    'utf8',
+  );
   const frontendSkill = await readFile(
     path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-frontend-rules', 'SKILL.md'),
     'utf8',
@@ -479,8 +483,31 @@ async function testFrozenQualityToolingContract() {
   if (pkg.scripts?.['check:visual'] !== 'node scripts/check-visual-evidence.mjs') {
     failures.push('package.json check:visual drifted');
   }
+  if (pkg.scripts?.['check:audit'] !== 'pnpm audit --prod --audit-level low') {
+    failures.push('package.json check:audit must fail on low production advisories');
+  }
   if (!pkg.scripts?.['quality:deep']?.includes('pnpm check:visual')) {
     failures.push('package.json quality:deep must include pnpm check:visual');
+  }
+  if (!pkg.scripts?.['quality:deep']?.includes('pnpm check:audit')) {
+    failures.push('package.json quality:deep must include pnpm check:audit');
+  }
+  if (
+    pkg.scripts?.['quality:all']?.includes('pnpm check:audit') &&
+    pkg.scripts?.['quality:deep']?.includes('pnpm check:audit')
+  ) {
+    failures.push('package.json quality:all must not duplicate the quality:deep audit gate');
+  }
+  if (!hasPhrase(qualityToolingDoc, '`check:audit` runs `pnpm audit --prod --audit-level low`')) {
+    failures.push('docs/agent/quality-tooling.md must document the low-level audit gate');
+  }
+  if (
+    pkg.pnpm?.overrides &&
+    !['pnpm.overrides', '2026-07-24', 'postcss@8.5.15', '@babel/core@7.29.7'].every((snippet) =>
+      qualityToolingDoc.includes(snippet),
+    )
+  ) {
+    failures.push('docs/agent/quality-tooling.md must document temporary pnpm.overrides review');
   }
   if (pkg.engines?.node !== '>=24.0.0 <25')
     failures.push('package.json node engine must stay Node 24');
