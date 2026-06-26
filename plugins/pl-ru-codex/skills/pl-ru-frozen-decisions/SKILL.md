@@ -51,7 +51,9 @@ and `verify-frozen.ts`. Do not edit files when using this as a review skill.
   evidence for UI-surface changes. It must fail closed when the base ref is
   unavailable, include staged/unstaged/untracked UI files, perform real PNG
   comparison from `pixelComparison.cases`, and keep diff output under ignored
-  visual-artifact folders.
+  visual-artifact folders. Clean no-UI CI runs validate manifest shape and
+  tracked `referencePath` artifacts without requiring ignored generated
+  `actualPath`/`diffPath` files to pre-exist.
 - `verify-frozen.ts` keeps static guards for these decisions.
 
 ## Output

@@ -32,6 +32,9 @@ dependency-cruiser, and package scripts.
 - For base-diff UI changes, the implicit CI manifest must be tracked at
   `tests/visual-qa/latest.json`; ignored `reports/visual-qa/latest.json` is only
   valid through an explicit `VISUAL_QA_EVIDENCE` override.
+- For clean CI runs with no UI-surface changes, validate the manifest shape and
+  tracked `referencePath` artifacts, but do not require ignored generated
+  `actualPath`/`diffPath` files to pre-exist.
 - Screenshot-backed cases may include `capture` metadata so the guard can start
   or reuse the app, capture a fresh `actualPath`, and compare it with the
   committed `referencePath`.

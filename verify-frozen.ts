@@ -450,6 +450,10 @@ async function testFrozenQualityToolingContract() {
   const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
   const architecture = await readFile(path.join(ROOT, 'docs', 'agent', 'architecture.md'), 'utf8');
   const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
+  const verificationDoc = await readFile(
+    path.join(ROOT, 'docs', 'agent', 'verification.md'),
+    'utf8',
+  );
   const qualityToolingDoc = await readFile(
     path.join(ROOT, 'docs', 'agent', 'quality-tooling.md'),
     'utf8',
@@ -491,6 +495,17 @@ async function testFrozenQualityToolingContract() {
   }
   if (!pkg.scripts?.['quality:deep']?.includes('pnpm check:audit')) {
     failures.push('package.json quality:deep must include pnpm check:audit');
+  }
+  if (!visualScript.includes("verifyArtifactFiles: 'references-only'")) {
+    failures.push(
+      'check:visual clean-diff path must validate references without generated artifacts',
+    );
+  }
+  if (
+    !frozen.includes('tracked `referencePath` artifacts without requiring ignored') ||
+    !verificationDoc.includes('tracked `referencePath` artifacts only')
+  ) {
+    failures.push('visual QA clean CI reference-only contract must stay documented');
   }
   if (
     pkg.scripts?.['quality:all']?.includes('pnpm check:audit') &&
@@ -912,6 +927,8 @@ async function testAgentVisualQaContract() {
     'trackedDefaultEvidencePath',
     'selectEvidencePath',
     'requireTrackedTestsManifest',
+    'shouldVerifyArtifactFile',
+    "verifyArtifactFiles: 'references-only'",
     'export const visualQaContract = Object.freeze({',
     "baseDiffFailureMode: 'fail-closed-unless-VISUAL_QA_ALLOW_MISSING_BASE'",
     "changeSources: ['base-diff', 'unstaged-worktree', 'staged-index', 'untracked-files']",

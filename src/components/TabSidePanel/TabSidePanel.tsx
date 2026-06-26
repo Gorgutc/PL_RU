@@ -58,7 +58,9 @@ function PanelChrome({
             <Button
               aria-label="Свернуть панель"
               className={styles.iconButton}
+              disabled
               icon={<Icon icon="panel" size={16} />}
+              title="Сворачивание панели будет подключено отдельной задачей"
               type="button"
               variant="minimal"
             />

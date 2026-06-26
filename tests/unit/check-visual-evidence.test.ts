@@ -19,7 +19,7 @@ type VisualQaModule = {
     options?: {
       artifactExists?: (file: string) => boolean;
       evidencePath?: string;
-      verifyArtifactFiles?: boolean;
+      verifyArtifactFiles?: boolean | 'all' | 'references-only';
     },
   ) => string[];
 };
@@ -154,6 +154,18 @@ describe('check-visual-evidence helpers', () => {
 
     expect(failures.join('\n')).toMatch(/actualPath artifact does not exist/);
     expect(failures.join('\n')).toMatch(/diffPath artifact does not exist/);
+  });
+
+  it('allows clean CI checks to validate tracked references without ignored generated artifacts', async () => {
+    const { validateEvidence } = await visualQaModule();
+
+    const failures = validateEvidence(visualEvidence(), {
+      artifactExists: (file) => file.endsWith('.reference.png'),
+      evidencePath: 'tests/visual-qa/latest.json',
+      verifyArtifactFiles: 'references-only',
+    });
+
+    expect(failures).toEqual([]);
   });
 
   it('requires MapLibre readiness checks for workspace screenshot captures', async () => {

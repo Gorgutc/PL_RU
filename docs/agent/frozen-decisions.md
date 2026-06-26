@@ -385,6 +385,9 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   `tests/visual-qa/latest.json` manifest. Ignored `reports/visual-qa/latest.json`
   evidence is only valid when explicitly selected through `VISUAL_QA_EVIDENCE`
   for a local run.
+- For clean runs with no UI-surface changes, CI validates the selected manifest
+  shape and tracked `referencePath` artifacts without requiring ignored
+  generated `actualPath`/`diffPath` files to pre-exist in the checkout.
 - Visual evidence cases may include `capture` metadata. When they do, the guard
   must start or reuse the app, capture a fresh Playwright screenshot to
   `actualPath`, then compare that fresh PNG against the committed

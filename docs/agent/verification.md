@@ -72,6 +72,9 @@ For UI changes present in the base diff, the default CI evidence manifest must
 be committed at `tests/visual-qa/latest.json`. The ignored
 `reports/visual-qa/latest.json` path is only a local override when passed through
 `VISUAL_QA_EVIDENCE`; it must not be the implicit evidence source for a PR.
+When no UI surface changed, a clean CI run validates the selected manifest shape
+and tracked `referencePath` artifacts only; ignored generated `actualPath` and
+`diffPath` files are not required to pre-exist in a fresh checkout.
 
 That evidence must record PASS pixel comparison, reference PNG sources,
 viewports, states, tolerance, mismatched areas, and DOM/CSS metrics. A manifest

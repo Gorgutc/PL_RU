@@ -298,6 +298,13 @@ function validateReferencedArtifact({ artifactExists, artifactPath, failures, la
   }
 }
 
+function shouldVerifyArtifactFile(verifyArtifactFiles, artifactKind) {
+  if (verifyArtifactFiles === true || verifyArtifactFiles === 'all') return true;
+  if (verifyArtifactFiles === 'references-only') return artifactKind === 'reference';
+
+  return false;
+}
+
 export function getCaptureReadinessSelectors(testCase) {
   const selector = testCase.capture?.selector;
 
@@ -360,7 +367,7 @@ export function validateEvidence(
           failures.push(`${label}.${key} is required`);
         }
       }
-      if (verifyArtifactFiles) {
+      if (shouldVerifyArtifactFile(verifyArtifactFiles, 'reference')) {
         validateReferencedArtifact({
           artifactExists,
           artifactPath: testCase.referencePath,
@@ -368,6 +375,8 @@ export function validateEvidence(
           label: `${label}.referencePath`,
           resolver: resolveWorkspacePath,
         });
+      }
+      if (shouldVerifyArtifactFile(verifyArtifactFiles, 'generated')) {
         validateReferencedArtifact({
           artifactExists,
           artifactPath: testCase.actualPath,
@@ -981,7 +990,7 @@ export async function main() {
     const evidence = readEvidence(evidencePath);
     const failures = validateEvidence(evidence, {
       evidencePath,
-      verifyArtifactFiles: true,
+      verifyArtifactFiles: 'references-only',
     });
 
     if (failures.length > 0) {
@@ -993,7 +1002,7 @@ export async function main() {
     console.log(
       [
         'visual-qa: PASS - no UI surface changed in base/worktree/staged/untracked diff',
-        `visual-qa: PASS - ${evidencePath} artifact paths exist`,
+        `visual-qa: PASS - ${evidencePath} reference artifact paths exist`,
       ].join('\n'),
     );
     process.exit(0);
