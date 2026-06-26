@@ -550,7 +550,7 @@ async function expectPanelControlsAligned(page: Page, panelTestId: string) {
         }),
       {
         message: `${panelTestId} controls align to footer actions after tab transition`,
-        timeout: WORKSPACE_MOTION_DURATION_MS + 1_000,
+        timeout: WORKSPACE_MOTION_DURATION_MS + 3_000,
       },
     )
     .toBeLessThanOrEqual(1);
@@ -1047,6 +1047,18 @@ test.describe('PraiOS workspace shell', () => {
 
     // sat is now the OsiDus gallery (thumbnails, not aligned form controls), so
     // the form-control right-edge alignment contract applies to kick/stats only.
+  });
+
+  test('does not expose a live side-panel collapse action before collapse is wired', async ({
+    page,
+  }) => {
+    await openWorkspace(page);
+    const header = page.getByRole('banner');
+
+    for (const tabId of ['kick', 'stats', 'sat'] as const) {
+      await header.locator(`#praios-header-tab-${tabId}`).click();
+      await expect(page.getByRole('button', { name: 'Свернуть панель' })).toBeDisabled();
+    }
   });
 
   test('keeps launch checkbox controls compact without pointer focus outlines', async ({

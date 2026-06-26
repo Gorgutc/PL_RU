@@ -13,6 +13,7 @@ import {
   PopupKind,
   type IconName,
 } from '@blueprintjs/core';
+import { cx } from '@/lib/cx';
 import styles from './Header.module.scss';
 
 export type HeaderTabId = 'map' | 'bar' | 'tmi' | 'sat' | 'kick' | 'stats';
@@ -196,10 +197,6 @@ const HEADER_NOTIFICATIONS: readonly HeaderNotification[] = [
     unread: false,
   },
 ];
-
-function cx(...classes: Array<string | false | undefined>) {
-  return classes.filter(Boolean).join(' ');
-}
 
 function getTabId(tabId: HeaderTabId) {
   return `praios-header-tab-${tabId}`;

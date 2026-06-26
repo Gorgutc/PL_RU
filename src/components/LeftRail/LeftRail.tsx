@@ -6,6 +6,7 @@ import { Button } from '@blueprintjs/core';
 import type { RailConfig, RailItem } from '@/components/AppNavigation/navigation';
 import { RAIL_ICON_ASSETS } from '@/components/AppNavigation/railIcons';
 import type { WorkspaceMapTheme } from '@/components/WorkspaceMap/mapConfig';
+import { cx } from '@/lib/cx';
 import styles from './LeftRail.module.scss';
 
 // The map basemap toggle reuses the existing bottom-rail "theme" item: the label
@@ -24,10 +25,6 @@ type LeftRailProps = {
   onExpandedChange: (expanded: boolean) => void;
   onToggleMapTheme: () => void;
 };
-
-function cx(...classes: Array<string | false | undefined>) {
-  return classes.filter(Boolean).join(' ');
-}
 
 function RailDivider() {
   return <span className={styles.divider} aria-hidden="true" />;
