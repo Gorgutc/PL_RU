@@ -19,6 +19,7 @@ import {
 } from './lib/reference-manifest.mjs';
 
 const results = [];
+const baseRef = process.env.REFERENCE_BASE_REF ?? 'origin/main';
 
 function record(name, pass, detail) {
   results.push({ name, pass, detail });
@@ -50,6 +51,36 @@ function checkGitClean(ref) {
   }
 }
 
+function checkUntracked(ref) {
+  const displayRef = toPosix(ref);
+  try {
+    const out = execFileSync(
+      'git',
+      ['ls-files', '--others', '--exclude-standard', '--', displayRef],
+      {
+        cwd: ROOT,
+        encoding: 'utf8',
+      },
+    );
+    const untracked = out.split('\n').filter((line) => line.trim() !== '');
+    if (untracked.length === 0) {
+      record(`git-untracked:${displayRef}`, true);
+      return true;
+    }
+    record(
+      `git-untracked:${displayRef}`,
+      false,
+      `untracked reference files detected:\n${untracked.join(
+        '\n',
+      )}\n  remediate: remove untracked files from the read-only reference folder`,
+    );
+    return false;
+  } catch (error) {
+    record(`git-untracked:${displayRef}`, false, `git ls-files failed: ${error.message}`);
+    return false;
+  }
+}
+
 function checkBaseline(ref) {
   const displayRef = toPosix(ref);
   const baselinePath = path.join(STATE_DIR, `${referenceStateName(ref)}.sha256`);
@@ -75,6 +106,38 @@ function checkBaseline(ref) {
   return false;
 }
 
+function checkBaseDiff(ref) {
+  const displayRef = toPosix(ref);
+  const diffRange = `${baseRef}...HEAD`;
+
+  try {
+    const out = execFileSync(
+      'git',
+      ['diff', '--name-only', '--diff-filter=ACDMRTUXB', diffRange, '--', displayRef],
+      {
+        cwd: ROOT,
+        encoding: 'utf8',
+      },
+    );
+    const changed = out.split('\n').filter((line) => line.trim() !== '');
+    if (changed.length === 0) {
+      record(`base-diff:${displayRef}`, true, `base=${baseRef}`);
+      return true;
+    }
+    record(
+      `base-diff:${displayRef}`,
+      false,
+      `read-only reference changed against ${diffRange}:\n${changed.join(
+        '\n',
+      )}\n  remediate: remove reference-folder changes from the branch`,
+    );
+    return false;
+  } catch (error) {
+    record(`base-diff:${displayRef}`, false, `git diff ${diffRange} failed: ${error.message}`);
+    return false;
+  }
+}
+
 console.log('=== verify-reference.js ===');
 for (const ref of REFERENCE_PATHS) {
   const abs = path.join(ROOT, ref);
@@ -83,7 +146,9 @@ for (const ref of REFERENCE_PATHS) {
     continue;
   }
   checkGitClean(ref);
+  checkUntracked(ref);
   checkBaseline(ref);
+  checkBaseDiff(ref);
 }
 
 const pass = results.filter((result) => result.pass).length;

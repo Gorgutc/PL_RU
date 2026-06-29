@@ -192,8 +192,9 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
 - Launch checkbox rows keep a compact `16px` Blueprint indicator aligned to
   the same internal right inset as other controls and must not keep a
   pointer-click focus outline or shadow; keyboard focus remains visible on the
-  indicator. Footer action focus uses an inset ring so button borders are not
-  clipped by the panel edge.
+  indicator. Footer action buttons stay disabled placeholders with
+  `title="Действие будет подключено отдельной задачей"` until real behavior is
+  explicitly implemented, so they are not keyboard focus targets.
 - The center workspace is a Blueprint `Card` map surface inside a dynamic map
   container. The map area keeps a symmetric `10px` outer gutter, the Card keeps
   an `8px` inner inset before the MapLibre canvas, the outer container radius is
@@ -291,6 +292,10 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   the `#2970ff`/`$color-workspace-button-active` accent only when toggled on, with
   `aria-pressed`. Do not "restore" the animation toggle to the filled
   `PrimaryActionButton` — the resting-outlined look is intentional.
+- Unwired toolbar placeholders built with `PrimaryActionButton` or `ChipButton`
+  stay disabled by default and expose
+  `title="Действие будет подключено отдельной задачей"` until a real behavior is
+  added. `ToggleActionButton` remains the interactive rest→active exception.
 - Toolbar dropdowns reuse the shared `SelectControl` (same component as the side
   panels) in its `dense` 30px variant, so the per-tab toolbar height stays
   constant and the map stage never resizes on tab switches. The shared select's
@@ -342,7 +347,9 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   (`Загрузить свои данные` / `Скачать отчет` outlined `ChipButton`s). It reuses
   the frozen `ControlCard` / `ControlField` / `SwitchToggle` / `ChipButton`
   primitives (the same `#171d20` card surface) and `src/styles/_tokens.scss`;
-  no new card abstraction.
+  no new card abstraction. The data-management `ChipButton`s stay disabled
+  placeholders with `title="Действие будет подключено отдельной задачей"` until
+  import/export behavior is explicitly implemented.
 - Cloud-base legend gradient: the rainbow stop colors are sampled from the
   reference PNG and live only in `src/styles/_tokens.scss`
   (`$color-cloud-legend-*`), consumed through `$gradient-cloud-legend`. No inline
@@ -368,6 +375,10 @@ agents`, ownership / write zone, `Verification`, `Stop Rules`, and
   GitHub Actions — is forbidden; `verify-frozen.ts` (A11) guards both halves.
 - Reference manifest hashing lives in `scripts/lib/reference-manifest.mjs`;
   `scripts/sync-refs.mjs` and `scripts/verify-reference.js` should share it.
+  `scripts/verify-reference.js` also guards read-only references against the
+  current branch base diff (`REFERENCE_BASE_REF`, default `origin/main`) and
+  untracked reference files so `refs:sync` cannot silently bless
+  reference-folder edits.
 - Pa11y, `check:visual`, and the `verify-frozen.ts` runtime block launch that same
   bundled Chromium through `chromium.executablePath()` (with an optional
   `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` override for non-default install paths),

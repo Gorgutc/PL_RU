@@ -25,6 +25,11 @@ and `verify-frozen.ts`. Do not edit files when using this as a review skill.
   without visual drift.
 - Header profile and notification dropdowns keep their documented Blueprint
   Popover/Menu contract unless the current user request explicitly changes it.
+- Unwired `PrimaryActionButton` and `ChipButton` toolbar/data actions remain
+  disabled placeholders with
+  `title="Действие будет подключено отдельной задачей"` until real behavior is
+  explicitly implemented; `ToggleActionButton` is the interactive rest→active
+  exception.
 - Codex memory rules remain documented and repo mirror keeps
   `[features] memories = true`.
 - Mandatory PL_RU subagent orchestration and pixel-level visual QA rules remain
@@ -54,6 +59,9 @@ and `verify-frozen.ts`. Do not edit files when using this as a review skill.
   visual-artifact folders. Clean no-UI CI runs validate manifest shape and
   tracked `referencePath` artifacts without requiring ignored generated
   `actualPath`/`diffPath` files to pre-exist.
+- `scripts/verify-reference.js` guards read-only references against the current
+  branch base diff (`REFERENCE_BASE_REF`, default `origin/main`) so `refs:sync`
+  cannot silently bless committed reference-folder edits.
 - `verify-frozen.ts` keeps static guards for these decisions.
 
 ## Output

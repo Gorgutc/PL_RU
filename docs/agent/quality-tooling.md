@@ -33,7 +33,7 @@ before CI and before a draft PR is opened.
 
 ## Audit Policy
 
-`check:audit` runs `pnpm audit --prod --audit-level low` so low, moderate,
+`check:audit` runs `corepack pnpm audit --prod --audit-level low` so low, moderate,
 high, and critical production advisories all fail the local gate instead of
 passing silently.
 
@@ -42,7 +42,7 @@ does not yet resolve the advisory path. As of 2026-06-24, `next@16.2.9` still
 resolves `next -> postcss@8.4.31` and `next -> styled-jsx -> @babel/core@7.29.0`,
 so `package.json` pins `postcss@8.5.15` and `@babel/core@7.29.7` through
 `pnpm.overrides`. Revisit these overrides when the next Next.js patch is adopted
-or by 2026-07-24, whichever happens first; remove them once `pnpm audit --prod
+or by 2026-07-24, whichever happens first; remove them once `corepack pnpm audit --prod
 --audit-level low` stays clean without overrides.
 
 ## Command Groups
@@ -53,6 +53,9 @@ or by 2026-07-24, whichever happens first; remove them once `pnpm audit --prod
 - `quality:all`: full local ship gate, adding reference sync/verify and
   Lighthouse on top of `quality:deep`.
 - `codex:ship`: required before commit and push.
+- Nested quality scripts, Playwright/LHCI server launchers, and hooks use
+  `corepack pnpm ...` so the repo honors `packageManager: pnpm@9.15.0` even
+  when the caller's PATH contains another `pnpm.cmd`.
 
 Do not run broad auto-formatting as part of this PR. `format` and `lint:fix`
 remain explicit commands.

@@ -51,9 +51,12 @@ clicking selectors before the screenshot:
 }
 ```
 
-Workspace/map captures wait for the MapLibre canvas, attribution, and zoom
-controls before screenshotting. If the canvas is blank, the guard retries once
-and then fails without entering a loop. If expected `reports/visual-qa/`
+Workspace/map captures normally wait for the MapLibre canvas, attribution, and
+zoom controls before screenshotting. For table-tab workspace captures such as
+`kick`/`stats`, set `capture.requiresMap: false` because those tabs intentionally
+render `WorkspaceTableSurface` instead of `[data-testid="workspace-map"]`. If the
+canvas is blank when map readiness is required, the guard retries once and then
+fails without entering a loop. If expected `reports/visual-qa/`
 artifacts are absent, run `pnpm.cmd check:visual` once; if they are still absent
 or mismatched, return FAIL with paths and reason.
 

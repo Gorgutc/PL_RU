@@ -32,6 +32,8 @@ type SelectFieldConfig = {
   placeholder?: boolean;
 };
 
+const PLACEHOLDER_ACTION_TITLE = 'Действие будет подключено отдельной задачей';
+
 function SectionDivider() {
   return <div className={styles.divider} aria-hidden="true" />;
 }
@@ -220,11 +222,15 @@ function FieldGrid({ fields }: { fields: readonly SelectFieldConfig[] }) {
 function ActionButton({
   children,
   accent,
+  disabled = true,
   outlineAccent,
+  title = PLACEHOLDER_ACTION_TITLE,
 }: {
   children: ReactNode;
   accent?: boolean;
+  disabled?: boolean;
   outlineAccent?: boolean;
+  title?: string;
 }) {
   return (
     <Button
@@ -233,7 +239,9 @@ function ActionButton({
         accent && styles.actionButtonAccent,
         outlineAccent && styles.actionButtonOutlineAccent,
       )}
+      disabled={disabled}
       text={children}
+      title={title}
       type="button"
       variant="minimal"
     />

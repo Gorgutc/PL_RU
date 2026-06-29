@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "taskScope": "Iteration 1 (Маршруты/bar bottom panel): added the second map-provider control «Яндекс карты» (reused SelectControl with an optional iconSrc rendering the yandex.svg brand glyph instead of the chevron) beside «Контурность карты» in the «Настройки карты» card, matching the Figma эталон; the flexible «Высота по барометру» legend auto-compresses to absorb the wider card. Verified at 1920 with the rail collapsed (50px) and expanded (240px): no horizontal overflow; control widths 158/125px, gap 4px, card height 86px, glyph 16×16. The routes-rail-expanded baseline was refreshed and a routes-rail-collapsed baseline added, both at the two-control state. Iteration 2: tightened the shared filter-toggle (SwitchToggle) spacing to the Figma эталон across every filter list — 10px label (was 12px), 6px toggle↔label gap (was 8px), 28x16 indicator, 20px item height (was 30px), and a 4px dense row gap + 4px trailing pad (≈8px between toggles, was 16px); the filter ControlFields on bar/sat/kick/stats (FilterToggleCard) and the map tab (MapBottomPanel) are now dense. This frees width so «Высота по барометру» no longer over-compresses at 1920 with the rail expanded (267px vs 143px before). Refreshed the routes (x2) and map (x4: collapsed/expanded at 1920x1080 and 1920x768) baselines to the tightened state; top-control-map and telemetry baselines unchanged. Iteration 3 (Маршруты/bar «Работа с данными по карте» top-control card): sized the search + date inputs to the Figma эталон and stopped them stretching to fill the flexible card — search 256px / dates 180px each (rail collapsed) narrowing to 181px / 120px (rail expanded) via a scoped .dataWorkCard class with per-rail-state widths, the search and date group 16px apart (was the 24px card gap), date fields now date-only «24-04-2025» (the existing map-date-card pattern, no «| 00:00»). Refreshed the routes (x2) baselines; map/telemetry/top-control baselines unchanged. Iteration 4 (Маршруты/bar toolbar fill): the «Работа с данными по карте» card is no longer flexible — it hugs its content so its right edge sits 16px (card padding) from the last input; «Погодные параметры» became the flexible (rubber) card and absorbs the freed toolbar width, «Тип данных» stays right-anchored. Verified at 1920 collapsed + expanded (card edge exactly 16px from the last input, no overflow). Refreshed the routes (x2) baselines. Iteration 5 (bar toolbar — fill to эталон): «Погодные параметры» is no longer flexible so its right edge hugs its segmented tabs (16px card padding); «Погодные» and the bar «Тип данных» segmented tabs gained a 156px per-option min-width (scoped wideTabs prop) so short tabs widen to the эталон (Тип данных seg ≈ 485, Погодные ≈ 615) and the content-sized cards fill the toolbar with normal ~30px gaps instead of a 226px void; «Тип данных» stays right-anchored; map/tmi/sat/kick/stats segmented untouched. Verified at 1920 collapsed + expanded (edge 16px, Тип данных seg 484, no overflow). Refreshed the routes (x2) baselines.",
+  "taskScope": "Iteration 6 (monitor blockers fix): unwired `PrimaryActionButton` / `ChipButton` actions now render as disabled placeholders with `title=\"Действие будет подключено отдельной задачей\"`; visual evidence includes the existing map/routes/telemetry chrome plus 1920x1080 `kick`, `sat`, and `stats` side-panel cases covering the disabled footer placeholders and table/probing surfaces. Existing preserved evidence: Iteration 1 (Маршруты/bar bottom panel): added the second map-provider control «Яндекс карты» (reused SelectControl with an optional iconSrc rendering the yandex.svg brand glyph instead of the chevron) beside «Контурность карты» in the «Настройки карты» card, matching the Figma эталон; the flexible «Высота по барометру» legend auto-compresses to absorb the wider card. Verified at 1920 with the rail collapsed (50px) and expanded (240px): no horizontal overflow; control widths 158/125px, gap 4px, card height 86px, glyph 16×16. The routes-rail-expanded baseline was refreshed and a routes-rail-collapsed baseline added, both at the two-control state. Iteration 2: tightened the shared filter-toggle (SwitchToggle) spacing to the Figma эталон across every filter list — 10px label (was 12px), 6px toggle↔label gap (was 8px), 28x16 indicator, 20px item height (was 30px), and a 4px dense row gap + 4px trailing pad (≈8px between toggles, was 16px); the filter ControlFields on bar/sat/kick/stats (FilterToggleCard) and the map tab (MapBottomPanel) are now dense. This frees width so «Высота по барометру» no longer over-compresses at 1920 with the rail expanded (267px vs 143px before). Refreshed the routes (x2) and map (x4: collapsed/expanded at 1920x1080 and 1920x768) baselines to the tightened state; top-control-map and telemetry baselines unchanged. Iteration 3 (Маршруты/bar «Работа с данными по карте» top-control card): sized the search + date inputs to the Figma эталон and stopped them stretching to fill the flexible card — search 256px / dates 180px each (rail collapsed) narrowing to 181px / 120px (rail expanded) via a scoped .dataWorkCard class with per-rail-state widths, the search and date group 16px apart (was the 24px card gap), date fields now date-only «24-04-2025» (the existing map-date-card pattern, no «| 00:00»). Refreshed the routes (x2) baselines; map/telemetry/top-control baselines unchanged. Iteration 4 (Маршруты/bar toolbar fill): the «Работа с данными по карте» card is no longer flexible — it hugs its content so its right edge sits 16px (card padding) from the last input; «Погодные параметры» became the flexible (rubber) card and absorbs the freed toolbar width, «Тип данных» stays right-anchored. Verified at 1920 collapsed + expanded (card edge exactly 16px from the last input, no overflow). Refreshed the routes (x2) baselines. Iteration 5 (bar toolbar — fill to эталон): «Погодные параметры» is no longer flexible so its right edge hugs its segmented tabs (16px card padding); «Погодные» and the bar «Тип данных» segmented tabs gained a 156px per-option min-width (scoped wideTabs prop) so short tabs widen to the эталон (Тип данных seg ≈ 485, Погодные ≈ 615) and the content-sized cards fill the toolbar with normal ~30px gaps instead of a 226px void; «Тип данных» stays right-anchored; map/tmi/sat/kick/stats segmented untouched. Verified at 1920 collapsed + expanded (edge 16px, Тип данных seg 484, no overflow). Refreshed the routes (x2) baselines.",
   "references": [
     "Figma per-tab block exports: Desktop/Work/Верхние блоки управления/*_общий блок.png and *_code.md (design source for sizing/colors)",
     "Numeric spec: card #171d20 surface, #727677 1px outline, 2px radius, 16px padding, 30px controls, 24px #2970ff active segment",
@@ -10,6 +10,9 @@
     "tests/visual-qa/workspace-shell/routes-rail-expanded-1920x1080.reference.png",
     "tests/visual-qa/workspace-shell/routes-rail-1920x1080.reference.png",
     "tests/visual-qa/workspace-shell/telemetry-rail-expanded-1920x1080.reference.png",
+    "tests/visual-qa/workspace-shell/kick-panel-1920x1080.reference.png",
+    "tests/visual-qa/workspace-shell/sat-panel-1920x1080.reference.png",
+    "tests/visual-qa/workspace-shell/stats-panel-1920x1080.reference.png",
     "tests/visual-qa/workspace-shell/map-rail-1920x768.reference.png",
     "tests/visual-qa/workspace-shell/map-rail-expanded-1920x768.reference.png"
   ],
@@ -20,7 +23,10 @@
     "map rail expanded",
     "routes rail expanded",
     "routes rail collapsed",
-    "telemetry rail expanded"
+    "telemetry rail expanded",
+    "kick side panel disabled placeholders",
+    "sat side panel disabled placeholders",
+    "stats side panel disabled placeholders"
   ],
   "tolerance": {
     "pixelDelta": 32,
@@ -37,6 +43,7 @@
       "The map function block renders 11 + 8 + 4 + 9 Blueprint icon buttons + 2 layer toggles; every glyph SVG loads and every icon button keeps an aria-label (e2e).",
       "Map height/offset now account for the toolbar and the map-tab bottom panel; the frozen map gutter (10px), inner inset (8px), and radii (2px/4px) are unchanged (workspace-shell.spec.ts).",
       "The map-tab MapBottomPanel is a fixed 96px footer reusing the frozen ControlCard surface, with three sub-blocks (Фильтрация switches · Нижняя граница облаков rainbow gradient legend · Управление данными actions). The rainbow stops live only in _tokens.scss ($gradient-cloud-legend, sampled from the reference); it only reduces the map height, leaving the right-anchored stage contract unchanged.",
+      "Unwired `PrimaryActionButton` and `ChipButton` actions on top controls, side-panel footers, and bottom-panel data actions are disabled placeholders with `title=\"Действие будет подключено отдельной задачей\"`; the `kick`, `sat`, and `stats` side-panel cases cover the rendered disabled footer states at 1920x1080.",
       "Actual and diff artifacts stay under reports/visual-qa/.",
       "Per-tab bottom panels (bar/tmi/sat/kick/stats) reuse the frozen ControlCard/ControlField/SwitchToggle/ChipButton primitives; kick/stats render WorkspaceTableSurface (a dark table container mirroring the frozen map gutter/inset/2px-4px radii) instead of the map (A13 re-opened 2026-06-15), and the sat left panel is the OsiDus gallery. These new surfaces were verified against the эталон via the visual_qa_guardian subagent plus DOM/CSS metrics; committed pixel baselines stay limited to the map/routes/telemetry chrome to avoid bloating the repo with the heavy full-screen эталон PNGs."
     ]
@@ -158,6 +165,59 @@
               "selector": "[data-testid=\"left-rail-button-collapse\"]",
               "waitAfterMs": 700
             }
+          ]
+        }
+      },
+      {
+        "name": "workspace-shell-kick-panel-1920x1080",
+        "viewport": "1920x1080",
+        "state": "kick side panel disabled placeholders",
+        "referencePath": "tests/visual-qa/workspace-shell/kick-panel-1920x1080.reference.png",
+        "actualPath": "reports/visual-qa/workspace-shell/kick-panel-1920x1080.actual.png",
+        "diffPath": "reports/visual-qa/workspace-shell/kick-panel-1920x1080.diff.png",
+        "capture": {
+          "url": "/",
+          "selector": "[data-testid=\"workspace-shell\"]",
+          "requiresMap": false,
+          "viewport": { "width": 1920, "height": 1080 },
+          "actions": [
+            { "type": "click", "selector": "[data-testid=\"workspace-map\"]", "waitAfterMs": 1500 },
+            { "type": "click", "selector": "#praios-header-tab-kick", "waitAfterMs": 700 }
+          ]
+        }
+      },
+      {
+        "name": "workspace-shell-sat-panel-1920x1080",
+        "viewport": "1920x1080",
+        "state": "sat side panel disabled placeholders",
+        "referencePath": "tests/visual-qa/workspace-shell/sat-panel-1920x1080.reference.png",
+        "actualPath": "reports/visual-qa/workspace-shell/sat-panel-1920x1080.actual.png",
+        "diffPath": "reports/visual-qa/workspace-shell/sat-panel-1920x1080.diff.png",
+        "capture": {
+          "url": "/",
+          "selector": "[data-testid=\"workspace-shell\"]",
+          "viewport": { "width": 1920, "height": 1080 },
+          "actions": [
+            { "type": "click", "selector": "[data-testid=\"workspace-map\"]", "waitAfterMs": 1500 },
+            { "type": "click", "selector": "#praios-header-tab-sat", "waitAfterMs": 700 }
+          ]
+        }
+      },
+      {
+        "name": "workspace-shell-stats-panel-1920x1080",
+        "viewport": "1920x1080",
+        "state": "stats side panel disabled placeholders",
+        "referencePath": "tests/visual-qa/workspace-shell/stats-panel-1920x1080.reference.png",
+        "actualPath": "reports/visual-qa/workspace-shell/stats-panel-1920x1080.actual.png",
+        "diffPath": "reports/visual-qa/workspace-shell/stats-panel-1920x1080.diff.png",
+        "capture": {
+          "url": "/",
+          "selector": "[data-testid=\"workspace-shell\"]",
+          "requiresMap": false,
+          "viewport": { "width": 1920, "height": 1080 },
+          "actions": [
+            { "type": "click", "selector": "[data-testid=\"workspace-map\"]", "waitAfterMs": 1500 },
+            { "type": "click", "selector": "#praios-header-tab-stats", "waitAfterMs": 700 }
           ]
         }
       },
