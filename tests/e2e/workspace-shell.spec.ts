@@ -1117,31 +1117,25 @@ test.describe('PraiOS workspace shell', () => {
       Math.round(panelBox.x + panelBox.width),
     );
 
-    await fullWidthFooterButton.click();
-    await expect(fullWidthFooterButton).toHaveCSS('outline-style', 'none');
-    await expect(fullWidthFooterButton).toHaveCSS('box-shadow', 'none');
+    await expect(fullWidthFooterButton).toBeDisabled();
+    await expect(fullWidthFooterButton).toHaveAttribute(
+      'title',
+      'Действие будет подключено отдельной задачей',
+    );
   });
 
-  test('preserves keyboard focus visibility for launch checkbox and footer actions', async ({
-    page,
-  }) => {
+  test('preserves keyboard focus visibility for launch checkbox controls', async ({ page }) => {
     await openWorkspace(page);
     await page.getByRole('banner').locator('#praios-header-tab-kick').click();
 
     const panel = page.getByTestId('kick-side-panel');
     const firstCheckbox = panel.locator('.bp6-checkbox, .bp5-checkbox').first();
     const firstIndicator = firstCheckbox.locator('.bp6-control-indicator, .bp5-control-indicator');
-    const fullWidthFooterButton = panel.locator('footer button').last();
 
     await page.locator('body').click();
     await tabUntilFocused(page, firstCheckbox);
     await expect(firstIndicator).toHaveCSS('outline-style', 'solid');
     await expect(firstIndicator).toHaveCSS('box-shadow', 'none');
-
-    await page.locator('body').click();
-    await tabUntilFocused(page, fullWidthFooterButton);
-    await expect(fullWidthFooterButton).toHaveCSS('outline-style', 'none');
-    await expect(fullWidthFooterButton).not.toHaveCSS('box-shadow', 'none');
   });
 
   test('uses the shared native select dropdown contract for launch selection fields', async ({

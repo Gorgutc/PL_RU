@@ -469,6 +469,9 @@ async function testFrozenQualityToolingContract() {
   const syncRefs = await readFile(path.join(ROOT, 'scripts', 'sync-refs.mjs'), 'utf8');
   const verifyRefs = await readFile(path.join(ROOT, 'scripts', 'verify-reference.js'), 'utf8');
   const pa11yScript = await readFile(path.join(ROOT, 'scripts', 'run-pa11y.mjs'), 'utf8');
+  const lhciScript = await readFile(path.join(ROOT, 'scripts', 'run-lhci.mjs'), 'utf8');
+  const lighthouseConfig = await readFile(path.join(ROOT, 'lighthouserc.cjs'), 'utf8');
+  const lefthook = await readFile(path.join(ROOT, 'lefthook.yml'), 'utf8');
   const visualScript = await readFile(
     path.join(ROOT, 'scripts', 'check-visual-evidence.mjs'),
     'utf8',
@@ -487,14 +490,51 @@ async function testFrozenQualityToolingContract() {
   if (pkg.scripts?.['check:visual'] !== 'node scripts/check-visual-evidence.mjs') {
     failures.push('package.json check:visual drifted');
   }
-  if (pkg.scripts?.['check:audit'] !== 'pnpm audit --prod --audit-level low') {
+  if (pkg.scripts?.['check:audit'] !== 'corepack pnpm audit --prod --audit-level low') {
     failures.push('package.json check:audit must fail on low production advisories');
   }
-  if (!pkg.scripts?.['quality:deep']?.includes('pnpm check:visual')) {
-    failures.push('package.json quality:deep must include pnpm check:visual');
+  if (!pkg.scripts?.['quality:deep']?.includes('corepack pnpm run check:visual')) {
+    failures.push('package.json quality:deep must include corepack pnpm run check:visual');
   }
-  if (!pkg.scripts?.['quality:deep']?.includes('pnpm check:audit')) {
-    failures.push('package.json quality:deep must include pnpm check:audit');
+  if (!pkg.scripts?.['quality:deep']?.includes('corepack pnpm run check:audit')) {
+    failures.push('package.json quality:deep must include corepack pnpm run check:audit');
+  }
+  for (const scriptName of ['quality:fast', 'quality:deep', 'quality:all', 'codex:ship']) {
+    const script = pkg.scripts?.[scriptName] ?? '';
+    if (!script.includes('corepack pnpm')) {
+      failures.push(`package.json ${scriptName} must use package-manager-pinned corepack pnpm`);
+    }
+    if (/(^|&& )pnpm /.test(script)) {
+      failures.push(`package.json ${scriptName} must not use bare pnpm nested commands`);
+    }
+  }
+  if (!shared.includes("command: 'corepack pnpm dev'")) {
+    failures.push('playwright.shared.config.ts webServer must use corepack pnpm dev');
+  }
+  if (!visualScript.includes("command: 'corepack'") || !visualScript.includes("args: ['pnpm']")) {
+    failures.push('check-visual-evidence.mjs dev server must use corepack pnpm');
+  }
+  if (!lhciScript.includes('corepack pnpm exec lhci')) {
+    failures.push('run-lhci.mjs must use corepack pnpm exec lhci');
+  }
+  if (!lighthouseConfig.includes('corepack pnpm exec next start')) {
+    failures.push('lighthouserc.cjs must use corepack pnpm exec next start');
+  }
+  if (!lefthook.includes('corepack pnpm')) {
+    failures.push('lefthook.yml must use corepack pnpm');
+  }
+  if (
+    !verifyRefs.includes('REFERENCE_BASE_REF') ||
+    !verifyRefs.includes('origin/main') ||
+    !verifyRefs.includes('base-diff:') ||
+    !verifyRefs.includes('read-only reference changed against') ||
+    !verifyRefs.includes("'--others'") ||
+    !verifyRefs.includes('untracked reference files detected')
+  ) {
+    failures.push('verify-reference.js must guard read-only references against base diff');
+  }
+  if (!hasPhrase(frozen, 'untracked reference files so `refs:sync` cannot silently bless')) {
+    failures.push('docs/agent/frozen-decisions.md must document the reference base-diff guard');
   }
   if (!visualScript.includes("verifyArtifactFiles: 'references-only'")) {
     failures.push(
@@ -508,12 +548,17 @@ async function testFrozenQualityToolingContract() {
     failures.push('visual QA clean CI reference-only contract must stay documented');
   }
   if (
-    pkg.scripts?.['quality:all']?.includes('pnpm check:audit') &&
-    pkg.scripts?.['quality:deep']?.includes('pnpm check:audit')
+    pkg.scripts?.['quality:all']?.includes('check:audit') &&
+    pkg.scripts?.['quality:deep']?.includes('check:audit')
   ) {
     failures.push('package.json quality:all must not duplicate the quality:deep audit gate');
   }
-  if (!hasPhrase(qualityToolingDoc, '`check:audit` runs `pnpm audit --prod --audit-level low`')) {
+  if (
+    !hasPhrase(
+      qualityToolingDoc,
+      '`check:audit` runs `corepack pnpm audit --prod --audit-level low`',
+    )
+  ) {
     failures.push('docs/agent/quality-tooling.md must document the low-level audit gate');
   }
   if (
@@ -879,6 +924,12 @@ async function testAgentVisualQaContract() {
   if (!hasPhrase(frozenSkill, 'External orchestration references remain reference-only')) {
     missing.push('pl-ru-frozen-decisions external orchestration reference rule');
   }
+  if (!hasPhrase(frozenSkill, 'disabled placeholders with')) {
+    missing.push('pl-ru-frozen-decisions disabled placeholder action rule');
+  }
+  if (!hasPhrase(frozenSkill, 'current branch base diff')) {
+    missing.push('pl-ru-frozen-decisions reference base-diff rule');
+  }
   if (
     !hasPhrase(
       frozenSkill,
@@ -918,7 +969,7 @@ async function testAgentVisualQaContract() {
   if (pkg.scripts?.['check:visual'] !== 'node scripts/check-visual-evidence.mjs') {
     missing.push('package.json check:visual script');
   }
-  if (!pkg.scripts?.['quality:deep']?.includes('pnpm check:visual')) {
+  if (!pkg.scripts?.['quality:deep']?.includes('corepack pnpm run check:visual')) {
     missing.push('package.json quality:deep visual gate');
   }
   for (const snippet of [
@@ -1322,6 +1373,9 @@ async function testWorkspaceShellContract() {
       'Создание параметров для пуска',
       'Фильтры таблицы',
       'OsiDus',
+      'PLACEHOLDER_ACTION_TITLE',
+      'disabled={disabled}',
+      'title={title}',
     ]).map((snippet) => `TabSidePanel.tsx missing ${snippet}`),
     ...missingSnippets(tabSidePanelStyles, [
       '.checkbox.checkbox',
@@ -1373,7 +1427,8 @@ async function testWorkspaceShellContract() {
       'syncs tab-specific left panels with Header state',
       'aligns side-panel controls to the same right edge as footer actions',
       'keeps launch checkbox controls compact without pointer focus outlines',
-      'preserves keyboard focus visibility for launch checkbox and footer actions',
+      'preserves keyboard focus visibility for launch checkbox controls',
+      'Действие будет подключено отдельной задачей',
       'uses the shared native select dropdown contract for launch selection fields',
       'KICK_SELECT_IDS',
       'input[aria-autocomplete], input[list], datalist',
@@ -1449,7 +1504,7 @@ async function testWorkspaceShellContract() {
       'Launch checkbox rows keep a compact `16px` Blueprint indicator',
       'pointer-click focus outline or shadow',
       'keyboard focus remains visible',
-      'Footer action focus uses an inset ring',
+      'Footer action buttons stay disabled placeholders',
       'Header visual contract is not part of this shell contract',
     ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
   );
@@ -1525,6 +1580,11 @@ async function testTopControlBlocksContract() {
       );
     if (!controls.includes('toggleActionActive'))
       failures.push('controls.tsx ToggleActionButton must wire the active accent-fill class');
+    for (const snippet of ['PLACEHOLDER_ACTION_TITLE', 'disabled={disabled}', 'title={title}']) {
+      if (!controls.includes(snippet)) {
+        failures.push(`controls.tsx placeholder actions missing ${snippet}`);
+      }
+    }
     if (!controls.includes('styles.iconGroupWithTrailing'))
       failures.push('controls.tsx must position map layer toggles via iconGroupWithTrailing');
     if (!controls.includes('compactVisibleCount'))
@@ -1606,6 +1666,7 @@ async function testTopControlBlocksContract() {
         'internal horizontal scroll',
         '`dense` 30px',
         'rest→active',
+        'Unwired toolbar placeholders built with `PrimaryActionButton` or `ChipButton`',
         'ToggleActionButton',
       ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),
     );
@@ -1767,6 +1828,8 @@ async function testResponsiveAndBottomPanelContract() {
         'fixed-chrome + rubber map',
         '$workspace-content-max',
         'MapBottomPanel',
+        'The data-management `ChipButton`s stay disabled',
+        'placeholders with `title="Действие будет подключено отдельной задачей"`',
         '$gradient-cloud-legend',
         'full-bleed',
       ]).map((snippet) => `frozen-decisions.md missing ${snippet}`),

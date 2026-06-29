@@ -17,6 +17,9 @@ dependency-cruiser, and package scripts.
 - `pnpm quality:all`: full local gate, adding refs and Lighthouse on top of
   `quality:deep`.
 - `pnpm codex:ship`: required before commit and push.
+- Nested quality scripts, Playwright/LHCI server launchers, and hooks use
+  `corepack pnpm ...` so the repo honors `packageManager: pnpm@9.15.0` even
+  when the caller's PATH contains another `pnpm.cmd`.
 
 ## Rules
 

@@ -5,7 +5,7 @@ const remoteDebuggingPort = process.env.LHCI_REMOTE_DEBUGGING_PORT
 module.exports = {
   ci: {
     collect: {
-      startServerCommand: 'pnpm exec next start --port 3102',
+      startServerCommand: 'corepack pnpm exec next start --port 3102',
       startServerReadyPattern: 'Local:',
       url: ['http://localhost:3102/'],
       numberOfRuns: 3,

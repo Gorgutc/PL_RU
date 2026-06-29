@@ -24,6 +24,8 @@ import styles from './TabTopControls.module.scss';
  * presentational + local UI state only (no data backend) per the task brief.
  */
 
+const PLACEHOLDER_ACTION_TITLE = 'Действие будет подключено отдельной задачей';
+
 // Card section: the dark control-surface card that holds one or more titled fields.
 // `flexible` lets the card grow/shrink to fill the toolbar width (the per-tab
 // date/time card); `tightGroups` uses the 16px group gap (map function groups);
@@ -211,19 +213,25 @@ export function SwitchToggle({
 // "Создать анимацию…" control uses the outlined ToggleActionButton instead.
 export function PrimaryActionButton({
   children,
+  disabled = true,
   icon,
   ariaLabel,
+  title = PLACEHOLDER_ACTION_TITLE,
 }: {
   children: ReactNode;
+  disabled?: boolean;
   icon?: IconName;
   ariaLabel?: string;
+  title?: string;
 }) {
   return (
     <Button
       aria-label={ariaLabel}
       className={styles.primaryButton}
+      disabled={disabled}
       icon={icon ? <Icon icon={icon} size={16} /> : undefined}
       text={children}
+      title={title}
       type="button"
       variant="minimal"
     />
@@ -263,18 +271,23 @@ export function ToggleActionButton({
 // leading icon (map bottom-panel "Управление данными" actions).
 export function ChipButton({
   children,
+  disabled = true,
   icon,
   leadingIcon,
   leadingIconClassName,
+  title = PLACEHOLDER_ACTION_TITLE,
 }: {
   children: ReactNode;
+  disabled?: boolean;
   icon?: IconName;
   leadingIcon?: IconName;
   leadingIconClassName?: string;
+  title?: string;
 }) {
   return (
     <Button
       className={styles.chipButton}
+      disabled={disabled}
       icon={
         leadingIcon ? (
           <Icon className={leadingIconClassName} icon={leadingIcon} size={16} />
@@ -282,6 +295,7 @@ export function ChipButton({
       }
       endIcon={icon ? <Icon icon={icon} size={16} /> : undefined}
       text={children}
+      title={title}
       type="button"
       variant="minimal"
     />

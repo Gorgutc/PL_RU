@@ -3,15 +3,15 @@ pre-commit:
   commands:
     format:
       glob: '*.{ts,tsx,js,mjs,cjs,json,md,scss,yml,yaml}'
-      run: pnpm exec prettier --check {staged_files}
+      run: corepack pnpm exec prettier --check {staged_files}
     eslint:
       glob: '*.{ts,tsx,js,mjs,cjs}'
-      run: pnpm exec eslint {staged_files}
+      run: corepack pnpm exec eslint {staged_files}
     stylelint:
       glob: '*.scss'
-      run: pnpm exec stylelint {staged_files}
+      run: corepack pnpm exec stylelint {staged_files}
 
 pre-push:
   commands:
     quality-fast:
-      run: pnpm quality:fast
+      run: corepack pnpm run quality:fast

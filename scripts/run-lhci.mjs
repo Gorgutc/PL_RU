@@ -14,11 +14,11 @@ function getLhciCommand() {
   if (process.platform === 'win32') {
     return [
       'cmd.exe',
-      ['/d', '/s', '/c', 'pnpm.cmd exec lhci autorun --config=./lighthouserc.cjs'],
+      ['/d', '/s', '/c', 'corepack pnpm exec lhci autorun --config=./lighthouserc.cjs'],
     ];
   }
 
-  return ['pnpm', ['exec', 'lhci', 'autorun', '--config=./lighthouserc.cjs']];
+  return ['corepack', ['pnpm', 'exec', 'lhci', 'autorun', '--config=./lighthouserc.cjs']];
 }
 
 function getChromePath() {

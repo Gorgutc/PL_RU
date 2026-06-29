@@ -309,6 +309,7 @@ export function getCaptureReadinessSelectors(testCase) {
   const selector = testCase.capture?.selector;
 
   if (typeof selector !== 'string') return [];
+  if (testCase.capture?.requiresMap === false) return [];
   if (!selector.includes('workspace-shell') && !selector.includes('workspace-map')) return [];
 
   return [
@@ -652,20 +653,25 @@ async function waitForUrl(url, timeoutMs = 120_000) {
 }
 
 function getPnpmCommand() {
-  return process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
+  return {
+    command: 'corepack',
+    args: ['pnpm'],
+  };
 }
 
 function getDevServerCommand() {
+  const pnpmCommand = getPnpmCommand();
+
   if (process.platform === 'win32') {
     return {
       command: 'cmd.exe',
-      args: ['/d', '/s', '/c', `${getPnpmCommand()} dev`],
+      args: ['/d', '/s', '/c', `${pnpmCommand.command} ${pnpmCommand.args.join(' ')} dev`],
     };
   }
 
   return {
-    command: getPnpmCommand(),
-    args: ['dev'],
+    command: pnpmCommand.command,
+    args: [...pnpmCommand.args, 'dev'],
   };
 }
 
