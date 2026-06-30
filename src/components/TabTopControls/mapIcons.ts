@@ -4,8 +4,8 @@
  *
  * Glyphs are the user-supplied SVGs in `public/top-control-icons/` (mirrored from
  * the Google Drive "SVG" set). This is the map-tab equivalent of the left-rail
- * SVG manifest exception: production map control icons use these SVGs via <img>,
- * not Blueprint <Icon>.
+ * SVG manifest exception: production map control icons use these SVGs via
+ * DecorativeSvgImage, not Blueprint <Icon>.
  *
  * Glyph<->button assignments are mapped to the reference (the
  * "Верхние блоки управления" block slices): the "Слои карты" group has nine

@@ -7,7 +7,7 @@ Classify the prompt before acting:
 - Narrow code/UI change: inspect local pattern, then apply frontend rules.
 - Project-wide audit: use read-only orchestration before implementation.
 - Instruction/skill/hook change: run instruction drift and infra checks.
-- Final delivery: use `pl-ru-ship` and run `pnpm codex:ship`.
+- Final delivery: use `pl-ru-ship` and run `corepack pnpm run codex:ship`.
 
 Always raise the applicable PL_RU subagents before final delivery (spawn via the
 Agent tool using `.claude/agents/*`). UI changes require visual QA with

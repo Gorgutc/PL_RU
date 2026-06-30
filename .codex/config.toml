@@ -16,14 +16,14 @@ node = "24"
 [workflow]
 bootstrap_doc = "docs/agent/bootstrap.md"
 orchestration_doc = "docs/agent/orchestration.md"
-ship_command = "pnpm codex:ship"
-verify_command = "pnpm verify"
+ship_command = "corepack pnpm run codex:ship"
+verify_command = "corepack pnpm run verify"
 
 [quality]
-fast = "pnpm quality:fast"
-deep = "pnpm quality:deep"
-all = "pnpm quality:all"
-visual = "pnpm check:visual"
+fast = "corepack pnpm run quality:fast"
+deep = "corepack pnpm run quality:deep"
+all = "corepack pnpm run quality:all"
+visual = "corepack pnpm run check:visual"
 
 [limits]
 read_only_audit_agents = 10
