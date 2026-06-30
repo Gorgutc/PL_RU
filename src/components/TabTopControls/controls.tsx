@@ -12,6 +12,7 @@ import {
 } from '@blueprintjs/core';
 import type { IconName } from '@blueprintjs/icons';
 import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { DecorativeSvgImage } from '@/components/DecorativeSvgImage/DecorativeSvgImage';
 import { SelectControl } from '@/components/controls/SelectControl/SelectControl';
 import { cx } from '@/lib/cx';
 import { mapIconLabel, mapIconSrc, type MapIconGroup, type MapIconId } from './mapIcons';
@@ -304,7 +305,7 @@ export function ChipButton({
 
 // Square icon button (32x30 outline) with a custom SVG glyph from the manifest.
 // Uses the Blueprint Button primitive (the SVG-manifest exception only covers
-// the glyph rendered via <img>); presentational local pressed toggle.
+// the glyph rendered via DecorativeSvgImage); presentational local pressed toggle.
 function IconButton({ id }: { id: MapIconId }) {
   const label = mapIconLabel(id);
   const [pressed, setPressed] = useState(false);
@@ -318,13 +319,12 @@ function IconButton({ id }: { id: MapIconId }) {
       type="button"
       variant="minimal"
     >
-      <img
-        alt=""
-        aria-hidden="true"
+      <DecorativeSvgImage
         className={styles.iconGlyph}
-        data-icon-id={id}
-        draggable={false}
+        dataIconId={id}
+        height={16}
         src={mapIconSrc(id)}
+        width={16}
       />
     </Button>
   );
@@ -452,7 +452,13 @@ function OverflowIconMenuItem({ id }: { id: MapIconId }) {
       data-menu-icon-id={id}
       icon={
         <span className={styles.overflowMenuIcon}>
-          <img alt="" aria-hidden="true" data-icon-id={id} draggable={false} src={mapIconSrc(id)} />
+          <DecorativeSvgImage
+            className={styles.overflowMenuGlyph}
+            dataIconId={id}
+            height={16}
+            src={mapIconSrc(id)}
+            width={16}
+          />
         </span>
       }
       onClick={(event) => {

@@ -5,6 +5,7 @@ import { useState, type FocusEvent, type KeyboardEvent, type PointerEvent } from
 import { Button } from '@blueprintjs/core';
 import type { RailConfig, RailItem } from '@/components/AppNavigation/navigation';
 import { RAIL_ICON_ASSETS } from '@/components/AppNavigation/railIcons';
+import { DecorativeSvgImage } from '@/components/DecorativeSvgImage/DecorativeSvgImage';
 import type { WorkspaceMapTheme } from '@/components/WorkspaceMap/mapConfig';
 import { cx } from '@/lib/cx';
 import styles from './LeftRail.module.scss';
@@ -34,14 +35,13 @@ function RailIcon({ item }: { item: RailItem }) {
   const icon = RAIL_ICON_ASSETS[item.iconId];
 
   return (
-    <img
-      alt=""
-      aria-hidden="true"
+    <DecorativeSvgImage
       className={styles.icon}
-      data-icon-id={item.iconId}
-      data-testid="left-rail-icon"
-      draggable={false}
+      dataIconId={item.iconId}
+      dataTestId="left-rail-icon"
+      height={24}
       src={icon.src}
+      width={24}
     />
   );
 }

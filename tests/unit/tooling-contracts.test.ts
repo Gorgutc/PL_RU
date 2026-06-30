@@ -78,6 +78,45 @@ describe('quality tooling contracts', () => {
     expect(read('lighthouserc.cjs')).toContain('corepack pnpm exec next start');
   });
 
+  it('uses package-manager-pinned corepack pnpm in Codex runbook commands', () => {
+    const codexConfig = read('.codex/config.toml');
+    const codexPromptHook = read('.codex/hooks/user-prompt-submit.md');
+
+    for (const command of [
+      'corepack pnpm run codex:ship',
+      'corepack pnpm run verify',
+      'corepack pnpm run quality:fast',
+      'corepack pnpm run quality:deep',
+      'corepack pnpm run quality:all',
+      'corepack pnpm run check:visual',
+    ]) {
+      expect(codexConfig).toContain(command);
+    }
+    expect(codexConfig).not.toMatch(/=\s*"pnpm /);
+    expect(codexPromptHook).toContain('corepack pnpm run codex:ship');
+  });
+
+  it('keeps manifest SVG glyphs on next/image instead of raw img elements', () => {
+    for (const file of [
+      'src/components/LeftRail/LeftRail.tsx',
+      'src/components/TabTopControls/controls.tsx',
+      'src/components/controls/SelectControl/SelectControl.tsx',
+    ]) {
+      const source = read(file);
+
+      expect(source).toContain("from '@/components/DecorativeSvgImage/DecorativeSvgImage'");
+      expect(source).not.toContain('<img');
+    }
+  });
+
+  it('keeps Vitest Sass deprecation warning suppression explicit', () => {
+    const vitestConfig = read('vitest.config.ts');
+
+    expect(vitestConfig).toContain('preprocessorOptions');
+    expect(vitestConfig).toContain('silenceDeprecations');
+    expect(vitestConfig).toContain("'legacy-js-api'");
+  });
+
   it('fails reference verification when read-only references changed against the base ref', () => {
     const verifier = read('scripts/verify-reference.js');
 

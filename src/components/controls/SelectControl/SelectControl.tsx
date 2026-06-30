@@ -1,5 +1,6 @@
 // cspell:disable
 import { HTMLSelect, Icon } from '@blueprintjs/core';
+import { DecorativeSvgImage } from '@/components/DecorativeSvgImage/DecorativeSvgImage';
 import { cx } from '@/lib/cx';
 import styles from './SelectControl.module.scss';
 
@@ -16,8 +17,8 @@ import styles from './SelectControl.module.scss';
  *
  * `iconSrc` swaps the default chevron-down overlay for a brand/manifest SVG glyph
  * (e.g. the map-provider "Яндекс карты" control shows the Yandex glyph), rendered
- * via <img> like the map-icon manifest; the native select still drives the
- * dropdown behaviour and a11y underneath.
+ * via DecorativeSvgImage like the map-icon manifest; the native select still
+ * drives the dropdown behaviour and a11y underneath.
  */
 export function SelectControl({
   value,
@@ -58,11 +59,8 @@ export function SelectControl({
         options={options && options.length ? [...options] : [value]}
       />
       {iconSrc ? (
-        <img
-          alt=""
-          aria-hidden="true"
+        <DecorativeSvgImage
           className={styles.selectShellIcon}
-          draggable={false}
           height={16}
           src={iconSrc}
           width={16}

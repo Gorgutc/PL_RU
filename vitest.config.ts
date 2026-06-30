@@ -4,6 +4,13 @@ import path from 'node:path';
 
 export default defineConfig({
   plugins: [react()],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        silenceDeprecations: ['legacy-js-api'],
+      },
+    },
+  },
   test: {
     environment: 'happy-dom',
     globals: true,

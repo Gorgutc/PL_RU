@@ -447,6 +447,10 @@ async function testFrozenQualityToolingContract() {
   const verifyFrozen = await readFile(path.join(ROOT, 'verify-frozen.ts'), 'utf8');
   const ci = await readFile(path.join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8');
   const codexConfig = await readFile(path.join(ROOT, '.codex', 'config.toml'), 'utf8');
+  const codexPromptHook = await readFile(
+    path.join(ROOT, '.codex', 'hooks', 'user-prompt-submit.md'),
+    'utf8',
+  );
   const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
   const architecture = await readFile(path.join(ROOT, 'docs', 'agent', 'architecture.md'), 'utf8');
   const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
@@ -522,6 +526,24 @@ async function testFrozenQualityToolingContract() {
   }
   if (!lefthook.includes('corepack pnpm')) {
     failures.push('lefthook.yml must use corepack pnpm');
+  }
+  for (const command of [
+    'corepack pnpm run codex:ship',
+    'corepack pnpm run verify',
+    'corepack pnpm run quality:fast',
+    'corepack pnpm run quality:deep',
+    'corepack pnpm run quality:all',
+    'corepack pnpm run check:visual',
+  ]) {
+    if (!codexConfig.includes(command)) {
+      failures.push(`.codex/config.toml must include ${command}`);
+    }
+  }
+  if (/=\s*"pnpm /.test(codexConfig)) {
+    failures.push('.codex/config.toml must not use bare pnpm runbook commands');
+  }
+  if (!codexPromptHook.includes('corepack pnpm run codex:ship')) {
+    failures.push('.codex/hooks/user-prompt-submit.md must use corepack pnpm run codex:ship');
   }
   if (
     !verifyRefs.includes('REFERENCE_BASE_REF') ||
@@ -1316,8 +1338,9 @@ async function testWorkspaceShellContract() {
     ...missingSnippets(leftRail, [
       'Button',
       'RAIL_ICON_ASSETS',
+      'DecorativeSvgImage',
       'data-testid="left-rail"',
-      'data-testid="left-rail-icon"',
+      'dataTestId="left-rail-icon"',
       'data-testid={testId}',
       'data-icon-id={item.iconId}',
       'data-testid="left-rail-label"',
