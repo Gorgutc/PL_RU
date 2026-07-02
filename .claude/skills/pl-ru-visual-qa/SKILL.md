@@ -30,7 +30,7 @@ Use this for every UI/frontend change before delivery.
   config, `.git/`, or any tracked file. Playwright clears `test-results/`, so it
   is not durable handoff evidence.
 - If expected visual artifacts are absent in the working copy, run
-  `pnpm.cmd check:visual` once and inspect `reports/visual-qa/`. If artifacts are
+  `corepack pnpm run check:visual` once and inspect `reports/visual-qa/`. If artifacts are
   still absent or mismatch after that one run, return FAIL with paths and reason
   instead of entering a retry loop.
 - Workspace/map captures must wait for visible MapLibre canvas, attribution, and

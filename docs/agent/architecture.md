@@ -11,8 +11,6 @@ authority than `verify-frozen.ts`, the current user request, or `AGENTS.md`.
 - SCSS modules for component styles.
 - Shared SCSS tokens in `src/styles/_tokens.scss`.
 - Blueprint v6 from `@blueprintjs/core` and `@blueprintjs/icons`.
-- framer-motion is available for future UI motion but is not required by the
-  starter screen.
 - pnpm is the only package manager.
 - Node 24 LTS is the supported runtime.
 

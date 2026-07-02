@@ -452,12 +452,14 @@ async function testFrozenQualityToolingContract() {
     'utf8',
   );
   const agents = await readFile(path.join(ROOT, 'AGENTS.md'), 'utf8');
+  const claude = await readFile(path.join(ROOT, 'CLAUDE.md'), 'utf8');
   const architecture = await readFile(path.join(ROOT, 'docs', 'agent', 'architecture.md'), 'utf8');
   const frozen = await readFile(path.join(ROOT, 'docs', 'agent', 'frozen-decisions.md'), 'utf8');
   const verificationDoc = await readFile(
     path.join(ROOT, 'docs', 'agent', 'verification.md'),
     'utf8',
   );
+  const visualReadme = await readFile(path.join(ROOT, 'tests', 'visual-qa', 'README.md'), 'utf8');
   const qualityToolingDoc = await readFile(
     path.join(ROOT, 'docs', 'agent', 'quality-tooling.md'),
     'utf8',
@@ -466,6 +468,19 @@ async function testFrozenQualityToolingContract() {
     path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-frontend-rules', 'SKILL.md'),
     'utf8',
   );
+  const claudeFrontendSkill = await readFile(
+    path.join(ROOT, '.claude', 'skills', 'pl-ru-frontend-rules', 'SKILL.md'),
+    'utf8',
+  );
+  const visualSkill = await readFile(
+    path.join(ROOT, 'plugins', 'pl-ru-codex', 'skills', 'pl-ru-visual-qa', 'SKILL.md'),
+    'utf8',
+  );
+  const claudeVisualSkill = await readFile(
+    path.join(ROOT, '.claude', 'skills', 'pl-ru-visual-qa', 'SKILL.md'),
+    'utf8',
+  );
+  const knip = JSON.parse(await readFile(path.join(ROOT, 'knip.json'), 'utf8'));
   const jscpd = JSON.parse(await readFile(path.join(ROOT, '.jscpd.json'), 'utf8'));
   const shared = await readFile(path.join(ROOT, 'playwright.shared.config.ts'), 'utf8');
   const e2e = await readFile(path.join(ROOT, 'playwright.config.ts'), 'utf8');
@@ -544,6 +559,36 @@ async function testFrozenQualityToolingContract() {
   }
   if (!codexPromptHook.includes('corepack pnpm run codex:ship')) {
     failures.push('.codex/hooks/user-prompt-submit.md must use corepack pnpm run codex:ship');
+  }
+  for (const [label, text] of [
+    ['AGENTS.md', agents],
+    ['CLAUDE.md', claude],
+    ['docs/agent/verification.md', verificationDoc],
+    ['tests/visual-qa/README.md', visualReadme],
+    ['pl-ru-visual-qa', visualSkill],
+    ['.claude pl-ru-visual-qa', claudeVisualSkill],
+  ] as const) {
+    if (!text.includes('corepack pnpm run check:visual')) {
+      failures.push(`${label} must document corepack pnpm run check:visual`);
+    }
+    if (text.includes('pnpm.cmd check:visual')) {
+      failures.push(`${label} must not document pnpm.cmd check:visual`);
+    }
+  }
+  if (pkg.dependencies?.['framer-motion']) {
+    failures.push('package.json must not keep unused framer-motion in production dependencies');
+  }
+  if (knip.ignoreDependencies?.includes('framer-motion')) {
+    failures.push('knip.json must not mask unused framer-motion');
+  }
+  for (const [label, text] of [
+    ['docs/agent/architecture.md', architecture],
+    ['pl-ru-frontend-rules', frontendSkill],
+    ['.claude pl-ru-frontend-rules', claudeFrontendSkill],
+  ] as const) {
+    if (text.includes('framer-motion')) {
+      failures.push(`${label} must not list framer-motion as an active stack dependency`);
+    }
   }
   if (
     !verifyRefs.includes('REFERENCE_BASE_REF') ||
@@ -626,6 +671,7 @@ async function testFrozenQualityToolingContract() {
     ['docs/agent/architecture.md', architecture],
     ['docs/agent/frozen-decisions.md', frozen],
     ['pl-ru-frontend-rules', frontendSkill],
+    ['.claude pl-ru-frontend-rules', claudeFrontendSkill],
   ] as const) {
     if (!hasPhrase(text, 'Node 24 LTS')) failures.push(`${label} must document Node 24 LTS`);
   }

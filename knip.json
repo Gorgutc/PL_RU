@@ -17,5 +17,5 @@
     "*.config.{ts,js,mjs,cjs}",
     "verify-frozen.ts"
   ],
-  "ignoreDependencies": ["@eslint/eslintrc", "@eslint/js", "@lhci/cli", "framer-motion"]
+  "ignoreDependencies": ["@eslint/eslintrc", "@eslint/js", "@lhci/cli"]
 }

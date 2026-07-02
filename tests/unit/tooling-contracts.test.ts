@@ -96,6 +96,43 @@ describe('quality tooling contracts', () => {
     expect(codexPromptHook).toContain('corepack pnpm run codex:ship');
   });
 
+  it('keeps visual QA one-shot instructions on the package-manager-pinned command', () => {
+    const visualInstructionFiles = [
+      'AGENTS.md',
+      'CLAUDE.md',
+      path.join('docs', 'agent', 'verification.md'),
+      path.join('tests', 'visual-qa', 'README.md'),
+      path.join('plugins', 'pl-ru-codex', 'skills', 'pl-ru-visual-qa', 'SKILL.md'),
+      path.join('.claude', 'skills', 'pl-ru-visual-qa', 'SKILL.md'),
+    ];
+
+    for (const file of visualInstructionFiles) {
+      const source = read(file);
+
+      expect(source).toContain('corepack pnpm run check:visual');
+      expect(source).not.toContain('pnpm.cmd check:visual');
+    }
+  });
+
+  it('does not mask an unused production framer-motion dependency', () => {
+    const pkg = JSON.parse(read('package.json')) as {
+      dependencies?: Record<string, string>;
+    };
+    const knip = JSON.parse(read('knip.json')) as {
+      ignoreDependencies?: string[];
+    };
+
+    expect(pkg.dependencies).not.toHaveProperty('framer-motion');
+    expect(knip.ignoreDependencies ?? []).not.toContain('framer-motion');
+    for (const file of [
+      path.join('docs', 'agent', 'architecture.md'),
+      path.join('plugins', 'pl-ru-codex', 'skills', 'pl-ru-frontend-rules', 'SKILL.md'),
+      path.join('.claude', 'skills', 'pl-ru-frontend-rules', 'SKILL.md'),
+    ]) {
+      expect(read(file)).not.toContain('framer-motion');
+    }
+  });
+
   it('keeps manifest SVG glyphs on next/image instead of raw img elements', () => {
     for (const file of [
       'src/components/LeftRail/LeftRail.tsx',

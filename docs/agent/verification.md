@@ -98,7 +98,7 @@ screenshotting. If the canvas is blank, the guard retries capture once and then
 fails with the affected case name instead of retrying indefinitely.
 
 If a visual QA agent or local reviewer cannot find the expected
-`reports/visual-qa/` artifacts, run `pnpm.cmd check:visual` once. If artifacts
+`reports/visual-qa/` artifacts, run `corepack pnpm run check:visual` once. If artifacts
 are still absent or mismatch after that run, return FAIL with the missing paths
 and reason; do not loop.
 
