@@ -57,8 +57,8 @@ zoom controls before screenshotting. For table-tab workspace captures such as
 render `WorkspaceTableSurface` instead of `[data-testid="workspace-map"]`. If the
 canvas is blank when map readiness is required, the guard retries once and then
 fails without entering a loop. If expected `reports/visual-qa/`
-artifacts are absent, run `pnpm.cmd check:visual` once; if they are still absent
-or mismatched, return FAIL with paths and reason.
+artifacts are absent, run `corepack pnpm run check:visual` once; if they are
+still absent or mismatched, return FAIL with paths and reason.
 
 Do not commit downloaded Google Drive PNGs unless the current user request
 explicitly asks for that export and `DO_NOT_PUSH.md` allows it.

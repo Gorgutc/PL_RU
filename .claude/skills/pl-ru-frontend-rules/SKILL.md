@@ -21,7 +21,7 @@ Run `pnpm verify` whenever architecture rules may be affected. Run `pnpm codex:s
 
 ## Core Rules
 
-- Stack is Next.js 16, React 19, TypeScript strict, SCSS modules, Blueprint v6, framer-motion, pnpm, Node 24 LTS.
+- Stack is Next.js 16, React 19, TypeScript strict, SCSS modules, Blueprint v6, pnpm, Node 24 LTS.
 - Do not add Tailwind, CSS-in-JS, styled-components, npm lockfiles, yarn lockfiles, `localStorage`, or `sessionStorage` in `src/`.
 - Raw colors, spacing, and typography values belong in `src/styles/_tokens.scss`; component SCSS consumes them through `@use`.
 - Layout and component dimensions / spacing across the whole app should stay on

@@ -92,7 +92,9 @@ sizes, diff tolerance, and mismatched areas, paired with DOM/CSS metric
 assertions. Visual diff output stays in ignored `reports/visual-qa/`; tracked
 evidence is `tests/visual-qa/latest.json`. If a reference PNG is inaccessible,
 say so and block delivery unless the current user request accepts a metric-only
-fallback.
+fallback. If visual artifacts are missing, run
+`corepack pnpm run check:visual` once; if they are still missing or mismatched,
+return FAIL with the paths and reason instead of entering a retry loop.
 
 ## Frozen Rules
 
